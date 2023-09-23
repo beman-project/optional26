@@ -1,0 +1,99 @@
+%% Common header for WG21 proposals ? mainly taken from C++ standard draft source
+%%
+
+%%--------------------------------------------------
+%% basics
+% \documentclass[a4paper,11pt,oneside,openany,final,article]{memoir}
+
+\usepackage[american]
+           {babel}        % needed for iso dates
+\usepackage[iso,american]
+           {isodate}      % use iso format for dates
+\usepackage[final]
+           {listings}     % code listings
+\usepackage{longtable}    % auto-breaking tables
+\usepackage{ltcaption}    % fix captions for long tables
+\usepackage{relsize}      % provide relative font size changes
+\usepackage{textcomp}     % provide \text{l,r}angle
+\usepackage{underscore}   % remove special status of '_' in ordinary text
+\usepackage{parskip}      % handle non-indented paragraphs "properly"
+\usepackage{array}        % new column definitions for tables
+\usepackage[normalem]{ulem}
+\usepackage{enumitem}
+\usepackage{color}        % define colors for strikeouts and underlines
+\usepackage{amsmath}      % additional math symbols
+\usepackage{mathrsfs}     % mathscr font
+\usepackage[final]{microtype}
+\usepackage[splitindex,original]{imakeidx}
+\usepackage{multicol}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+% \usepackage[pdftex,
+%             bookmarks=true,
+%             bookmarksnumbered=true,
+%             pdfpagelabels=true,
+%             pdfpagemode=UseOutlines,
+%             pdfstartview=FitH,
+%             linktocpage=true,
+%             colorlinks=true,
+%             plainpages=false,
+%             allcolors={blue},
+%             allbordercolors={white}
+%             ]{hyperref}
+
+% \usepackage[pdftex,
+%   pdfauthor={Steve Downey},
+%   pdftitle={dXXXpX},
+%   pdfkeywords={},
+%   pdfsubject={},
+%   pdfcreator={Emacs 28.1.50 (Org mode 9.5.2)},
+%   pdflang={English}]{hyperref}
+
+\usepackage{memhfixc}     % fix interactions between hyperref and memoir
+\usepackage{expl3}
+\usepackage{xparse}
+\usepackage{xstring}
+
+\usepackage{url}  % urls in ref.bib
+\usepackage{tabularx}  % don't use the C++ standard's fancy tables, they come with captions!
+
+\special{pdf:minorversion 5} %set minorversion
+\special{pdf:compresslevel 9} %set minorversion
+\special{pdf:objcompresslevel 9} %set minorversion
+
+% \pdfminorversion=5
+% \pdfcompresslevel=9
+% \pdfobjcompresslevel=2
+
+\renewcommand\RSsmallest{5.5pt}  % smallest font size for relsize
+
+\input{stdtex/layout}
+\input{stdtex/styles}
+\input{stdtex/macros}
+\input{stdtex/tables}
+\input{stdtex/paper_macros}
+
+% %% --------------------------------------------------
+% %% fix interaction between hyperref and other
+% %% commands
+% \pdfstringdefDisableCommands{\def\smaller#1{#1}}
+% \pdfstringdefDisableCommands{\def\textbf#1{#1}}
+% \pdfstringdefDisableCommands{\def\raisebox#1{}}
+% \pdfstringdefDisableCommands{\def\hspace#1{}}
+
+
+
+%%--------------------------------------------------
+%% add special hyphenation rules
+\hyphenation{tem-plate ex-am-ple in-put-it-er-a-tor name-space name-spaces non-zero}
+
+%%--------------------------------------------------
+%% turn off all ligatures inside \texttt
+\DisableLigatures{encoding = T1, family = tt*}
+
+%% --------------------------------------------------
+%% configuration
+\input{stdtex/config}

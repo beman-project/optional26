@@ -1,0 +1,9 @@
+[submodule "papers/wg21"]
+	path = papers/wg21
+	url = https://github.com/mpark/wg21.git
+[submodule "extern/googletest"]
+	path = extern/googletest
+	url = https://github.com/google/googletest.git
+[submodule "docker-inf/docker-cxx-dev"]
+	path = docker-inf/docker-cxx-dev
+	url = git@github.com:steve-downey/docker-cxx-dev.git

@@ -1,0 +1,16 @@
+---
+version: '3.7'
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+        - .:/home/luser/src/$PROJECT
+        - cmake.bld:/home/luser/src/cmake.bld/
+
+    working_dir: /home/luser/src/$PROJECT
+volumes:
+  cmake.bld:
+    external: true
+  build:

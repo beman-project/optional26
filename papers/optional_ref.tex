@@ -1,0 +1,95 @@
+\documentclass[a4paper,10pt,oneside,openany,final,article]{memoir}
+\input{common}
+\settocdepth{chapter}
+\usepackage{minted}
+\usepackage{fontspec}
+\setromanfont{Source Serif Pro}
+\setsansfont{Source Sans Pro}
+\setmonofont{Source Code Pro}
+\usepackage{draftwatermark}
+\SetWatermarkText{\textsc{DRAFT}}
+\SetWatermarkColor[gray]{0.9}
+
+\begin{document}
+\title{std::optional<T&>}
+\author{
+Steve Downey \small(\href{mailto:sdowney@gmail.com}{sdowney@gmail.com}) \\
+}
+\date{} %unused. Type date explicitly below.
+\maketitle
+
+\begin{flushright}
+\begin{tabular}{ll}
+  Document \#: & D0000R0 \\
+  Date: & \today \\
+  Project: & Programming Language C++ \\
+  Audience: & LEWG
+\end{tabular}
+\end{flushright}
+
+\begin{abstract}
+  An optional over a reference, and an expected with the same behavior.
+\end{abstract}
+
+\tableofcontents*
+
+
+\chapter{Before / After Table}
+\begin{tabular}{ lr }
+\begin{minipage}[t]{0.45\columnwidth}
+  \begin{minted}[fontsize=\scriptsize]{c++}
+    std::shared_ptr<Cat> cat = find_cat("Fido");
+    // or
+    std::map<std::string, Cat>::iterator = find_cat("Fido");
+    // or
+    Cat* cat = find_cat("Fido");
+
+
+\end{minted}
+\end{minipage}
+&
+\begin{minipage}[t]{0.45\columnwidth}
+\begin{minted}[fontsize=\scriptsize]{c++}
+
+  std::optional<Cat&> cat = find_cat("Fido");
+
+\end{minted}
+\end{minipage}
+
+\end{tabular}
+
+\chapter{Motivation}
+
+Optionals holding references are common other than in the standard libary's implementation. The research in \cite{P1683} shows conclusively that rebind semantics are the only safe semantic as assign through on engaged is too bug-prone. Implementations that attempt assign-through are abandoned. The standard library should follow existing practice and supply an optional<T&> that rebinds on assignment.
+
+\chapter{Proposal}
+
+
+
+\chapter{Wording}
+
+
+\begin{wording}
+
+Modify 22.5 Optional Objects
+
+
+\end{wording}
+
+\chapter{Impact on the standard}
+
+A pure library extension, affecting no other parts of the library or language.
+
+The proposed changes are relative to the current working draft~\cite{N4910}.
+
+\chapter*{Document history}
+
+\begin{itemize}
+\item \textbf{Initial Version}
+
+\renewcommand{\bibname}{References}
+\bibliographystyle{abstract}
+\bibliography{wg21,mybiblio}
+
+
+\end{document}
