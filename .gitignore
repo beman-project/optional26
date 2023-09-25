@@ -17,3 +17,9 @@ compile_commands.json
 /papers/*.toc
 /papers/*.idx
 /papers/*.xtr
+/papers/.deps/
+/papers/_minted-view-maybe.work/
+/papers/.venv.work/
+/papers/_minted-optional_ref/
+/papers/_minted-optional_ref_wording/
+/.cache/

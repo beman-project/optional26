@@ -22,7 +22,8 @@ An optional over a reference.
 ```c++
 std::shared_ptr<Cat> cat = find_cat("Fido");
 // or
-std::map<std::string, Cat>::iterator = find_cat("Fido");
+std::map<std::string, Cat>::iterator cat
+    = find_cat("Fido");
 // or
 Cat* cat = find_cat("Fido");
 ```

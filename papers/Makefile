@@ -21,9 +21,9 @@ create-venv:
 	rm -rf $(VENV)
 	make $(VENV)
 
-%.pdf : %.tex wg21.bib | $(VENV)
+wording : optional_ref_wording.tex wg21.bib | $(VENV)
 	mkdir -p $(DEPS_DIR)
-	$(SOURCE_VENV) latexmk -shell-escape -pdflua -use-make -deps -deps-out=$(DEPS_DIR)/$@.d -MP $<
+	$(SOURCE_VENV) latexmk -shell-escape -pdflua -use-make -deps -deps-out=$(DEPS_DIR)/$@.d -MP optional_ref_wording.tex
 
 wg21.bib:
 	curl https://wg21.link/index.bib > wg21.bib
@@ -31,8 +31,11 @@ wg21.bib:
 .PHONY: clean
 clean:
 	latexmk -c
+	@$(MAKE) -f wg21/Makefile clean
 
 # Include dependencies
 $(foreach file,$(TARGET),$(eval -include $(DEPS_DIR)/$(file).d))
 
-include wg21/Makefile
+%: force
+	@$(MAKE) -f wg21/Makefile $@
+force: ;

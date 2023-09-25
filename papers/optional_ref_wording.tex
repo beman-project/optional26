@@ -11,7 +11,7 @@
 \SetWatermarkColor[gray]{0.9}
 
 \begin{document}
-\title{std::optional<T&>}
+\title{std::optional<T\&>}
 \author{
 Steve Downey \small(\href{mailto:sdowney@gmail.com}{sdowney@gmail.com}) \\
 }
@@ -40,7 +40,8 @@ Steve Downey \small(\href{mailto:sdowney@gmail.com}{sdowney@gmail.com}) \\
   \begin{minted}[fontsize=\scriptsize]{c++}
     std::shared_ptr<Cat> cat = find_cat("Fido");
     // or
-    std::map<std::string, Cat>::iterator = find_cat("Fido");
+    std::map<std::string, Cat>::iterator cat
+        = find_cat("Fido");
     // or
     Cat* cat = find_cat("Fido");
 
@@ -60,7 +61,7 @@ Steve Downey \small(\href{mailto:sdowney@gmail.com}{sdowney@gmail.com}) \\
 
 \chapter{Motivation}
 
-Optionals holding references are common other than in the standard libary's implementation. The research in \cite{P1683} shows conclusively that rebind semantics are the only safe semantic as assign through on engaged is too bug-prone. Implementations that attempt assign-through are abandoned. The standard library should follow existing practice and supply an optional<T&> that rebinds on assignment.
+Optionals holding references are common other than in the standard libary's implementation. The research in \cite{P1683R0} shows conclusively that rebind semantics are the only safe semantic as assign through on engaged is too bug-prone. Implementations that attempt assign-through are abandoned. The standard library should follow existing practice and supply an \tcode{optional<T\&>} that rebinds on assignment.
 
 \chapter{Proposal}
 
@@ -80,12 +81,13 @@ Modify 22.5 Optional Objects
 
 A pure library extension, affecting no other parts of the library or language.
 
-The proposed changes are relative to the current working draft~\cite{N4910}.
+The proposed changes are relative to the current working draft \cite{N4910}.
 
 \chapter*{Document history}
 
 \begin{itemize}
 \item \textbf{Initial Version}
+\end{itemize}
 
 \renewcommand{\bibname}{References}
 \bibliographystyle{abstract}
