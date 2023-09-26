@@ -4,7 +4,7 @@ set(CMAKE_C_COMPILER clang-17)
 set(CMAKE_CXX_COMPILER clang++-17)
 
 set(CMAKE_CXX_FLAGS
-  "-std=c++20 \
+  "-std=gnu++23 \
    -Wall -Wextra \
    -stdlib=libstdc++ "
 CACHE STRING "CXX_FLAGS" FORCE)
