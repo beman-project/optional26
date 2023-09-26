@@ -992,42 +992,78 @@ template <typename T, typename U>
 using optional_ge_t = optional_relop_t<decltype(std::declval<const T&>() >=
                                                 std::declval<const U&>())>;
 
+template <typename T, typename U>
+concept optional_eq_rel = requires(const T& t, const U& u) {
+    { t == u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_ne_rel = requires(const T& t, const U& u) {
+    { t != u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_lt_rel = requires(const T& t, const U& u) {
+    { t < u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_gt_rel = requires(const T& t, const U& u) {
+    { t > u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_le_rel = requires(const T& t, const U& u) {
+    { t <= u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_ge_rel = requires(const T& t, const U& u) {
+    { t >= u } -> std::convertible_to<bool>;
+};
+
 // Comparisons between optional values.
 template <typename T, typename U>
-constexpr auto operator==(const optional<T>& lhs, const optional<U>& rhs)
-    -> optional_eq_t<T, U> {
+constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs)
+    requires optional_eq_rel<T, U>
+{
     return static_cast<bool>(lhs) == static_cast<bool>(rhs) &&
            (!lhs || *lhs == *rhs);
 }
 
 template <typename T, typename U>
-constexpr auto operator!=(const optional<T>& lhs, const optional<U>& rhs)
-    -> optional_ne_t<T, U> {
+constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs)
+    requires optional_ne_rel<T, U>
+{
     return static_cast<bool>(lhs) != static_cast<bool>(rhs) ||
            (static_cast<bool>(lhs) && *lhs != *rhs);
 }
 
 template <typename T, typename U>
-constexpr auto operator<(const optional<T>& lhs, const optional<U>& rhs)
-    -> optional_lt_t<T, U> {
+constexpr bool operator<(const optional<T>& lhs, const optional<U>& rhs)
+    requires optional_lt_rel<T, U>
+{
     return static_cast<bool>(rhs) && (!lhs || *lhs < *rhs);
 }
 
 template <typename T, typename U>
-constexpr auto operator>(const optional<T>& lhs, const optional<U>& rhs)
-    -> optional_gt_t<T, U> {
+constexpr bool operator>(const optional<T>& lhs, const optional<U>& rhs)
+    requires optional_gt_rel<T, U>
+{
     return static_cast<bool>(lhs) && (!rhs || *lhs > *rhs);
 }
 
 template <typename T, typename U>
-constexpr auto operator<=(const optional<T>& lhs, const optional<U>& rhs)
-    -> optional_le_t<T, U> {
+constexpr bool operator<=(const optional<T>& lhs, const optional<U>& rhs)
+    requires optional_le_rel<T, U>
+{
     return !lhs || (static_cast<bool>(rhs) && *lhs <= *rhs);
 }
 
 template <typename T, typename U>
-constexpr auto operator>=(const optional<T>& lhs, const optional<U>& rhs)
-    -> optional_ge_t<T, U> {
+constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs)
+    requires optional_ge_rel<T, U>
+{
     return !rhs || (static_cast<bool>(lhs) && *lhs >= *rhs);
 }
 
@@ -1051,74 +1087,86 @@ constexpr std::strong_ordering operator<=>(const optional<T>& x,
 
 // Comparisons with value type.
 template <typename T, typename U>
-constexpr auto operator==(const optional<T>& lhs, const U& rhs)
-    -> optional_eq_t<T, U> {
+constexpr bool operator==(const optional<T>& lhs, const U& rhs)
+    requires optional_eq_rel<T, U>
+{
     return lhs && *lhs == rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator==(const U& lhs, const optional<T>& rhs)
-    -> optional_eq_t<U, T> {
+constexpr bool operator==(const U& lhs, const optional<T>& rhs)
+    requires optional_eq_rel<U, T>
+{
     return rhs && lhs == *rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator!=(const optional<T>& lhs, const U& rhs)
-    -> optional_ne_t<T, U> {
+constexpr bool operator!=(const optional<T>& lhs, const U& rhs)
+    requires optional_ne_rel<T, U>
+{
     return !lhs || *lhs != rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator!=(const U& lhs, const optional<T>& rhs)
-    -> optional_ne_t<U, T> {
+constexpr bool operator!=(const U& lhs, const optional<T>& rhs)
+    requires optional_ne_rel<U, T>
+{
     return !rhs || lhs != *rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator<(const optional<T>& lhs, const U& rhs)
-    -> optional_lt_t<T, U> {
+constexpr bool operator<(const optional<T>& lhs, const U& rhs)
+    requires optional_lt_rel<T, U>
+{
     return !lhs || *lhs < rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator<(const U& lhs, const optional<T>& rhs)
-    -> optional_lt_t<U, T> {
+constexpr bool operator<(const U& lhs, const optional<T>& rhs)
+    requires optional_lt_rel<U, T>
+{
     return rhs && lhs < *rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator>(const optional<T>& lhs, const U& rhs)
-    -> optional_gt_t<T, U> {
+constexpr bool operator>(const optional<T>& lhs, const U& rhs)
+    requires optional_gt_rel<T, U>
+{
     return lhs && *lhs > rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator>(const U& lhs, const optional<T>& rhs)
-    -> optional_gt_t<U, T> {
+constexpr bool operator>(const U& lhs, const optional<T>& rhs)
+    requires optional_gt_rel<U, T>
+{
     return !rhs || lhs > *rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator<=(const optional<T>& lhs, const U& rhs)
-    -> optional_le_t<T, U> {
+constexpr bool operator<=(const optional<T>& lhs, const U& rhs)
+    requires optional_le_rel<T, U>
+{
     return !lhs || *lhs <= rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator<=(const U& lhs, const optional<T>& rhs)
-    -> optional_le_t<U, T> {
+constexpr bool operator<=(const U& lhs, const optional<T>& rhs)
+    requires optional_le_rel<U, T>
+{
     return rhs && lhs <= *rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator>=(const optional<T>& lhs, const U& rhs)
-    -> optional_ge_t<T, U> {
+constexpr bool operator>=(const optional<T>& lhs, const U& rhs)
+    requires optional_ge_rel<T, U>
+{
     return lhs && *lhs >= rhs;
 }
 
 template <typename T, typename U>
-constexpr auto operator>=(const U& lhs, const optional<T>& rhs)
-    -> optional_ge_t<U, T> {
+constexpr bool operator>=(const U& lhs, const optional<T>& rhs)
+    requires optional_ge_rel<U, T>
+{
     return !rhs || lhs >= *rhs;
 }
 
