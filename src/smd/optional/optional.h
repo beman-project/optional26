@@ -14,8 +14,7 @@ namespace std {
     class optional;
 
   template<class T>
-    concept is-derived-from-optional = requires(const T& t) {       //
-exposition only
+    concept is-derived-from-optional = requires(const T& t) {       // exposition only
       []<class U>(const optional<U>&){ }(t);
     };
 
@@ -44,27 +43,27 @@ exposition only
       operator<=>(const optional<T>&, const optional<U>&);
 
   // [optional.nullops], comparison with nullopt
-  template<class T> constexpr bool operator==(const optional<T>&, nullopt_t)
-noexcept; template<class T> constexpr strong_ordering operator<=>(const
-optional<T>&, nullopt_t) noexcept;
+  template<class T> constexpr bool operator==(const optional<T>&, nullopt_t) noexcept;
+  template<class T>
+    constexpr strong_ordering operator<=>(const optional<T>&, nullopt_t) noexcept;
 
   // [optional.comp.with.t], comparison with T
-  template<class T, class U> constexpr bool operator==(const optional<T>&,
-const U&); template<class T, class U> constexpr bool operator==(const T&, const
-optional<U>&); template<class T, class U> constexpr bool operator!=(const
-optional<T>&, const U&); template<class T, class U> constexpr bool
-operator!=(const T&, const optional<U>&); template<class T, class U> constexpr
-bool operator<(const optional<T>&, const U&); template<class T, class U>
-constexpr bool operator<(const T&, const optional<U>&); template<class T, class
-U> constexpr bool operator>(const optional<T>&, const U&); template<class T,
-class U> constexpr bool operator>(const T&, const optional<U>&); template<class
-T, class U> constexpr bool operator<=(const optional<T>&, const U&);
-  template<class T, class U> constexpr bool operator<=(const T&, const
-optional<U>&); template<class T, class U> constexpr bool operator>=(const
-optional<T>&, const U&); template<class T, class U> constexpr bool
-operator>=(const T&, const optional<U>&); template<class T, class U> requires
-(!is-derived-from-optional<U>) && three_way_comparable_with<T, U> constexpr
-compare_three_way_result_t<T, U> operator<=>(const optional<T>&, const U&);
+  template<class T, class U> constexpr bool operator==(const optional<T>&, const U&);
+  template<class T, class U> constexpr bool operator==(const T&, const optional<U>&);
+  template<class T, class U> constexpr bool operator!=(const optional<T>&, const U&);
+  template<class T, class U> constexpr bool operator!=(const T&, const optional<U>&);
+  template<class T, class U> constexpr bool operator<(const optional<T>&, const U&);
+  template<class T, class U> constexpr bool operator<(const T&, const optional<U>&);
+  template<class T, class U> constexpr bool operator>(const optional<T>&, const U&);
+  template<class T, class U> constexpr bool operator>(const T&, const optional<U>&);
+  template<class T, class U> constexpr bool operator<=(const optional<T>&, const U&);
+  template<class T, class U> constexpr bool operator<=(const T&, const optional<U>&);
+  template<class T, class U> constexpr bool operator>=(const optional<T>&, const U&);
+  template<class T, class U> constexpr bool operator>=(const T&, const optional<U>&);
+  template<class T, class U>
+      requires (!is-derived-from-optional<U>) && three_way_comparable_with<T, U>
+    constexpr compare_three_way_result_t<T, U>
+      operator<=>(const optional<T>&, const U&);
 
   // [optional.specalg], specialized algorithms
   template<class T>
@@ -75,8 +74,7 @@ compare_three_way_result_t<T, U> operator<=>(const optional<T>&, const U&);
   template<class T, class... Args>
     constexpr optional<T> make_optional(Args&&... args);
   template<class T, class U, class... Args>
-    constexpr optional<T> make_optional(initializer_list<U> il, Args&&...
-args);
+    constexpr optional<T> make_optional(initializer_list<U> il, Args&&... args);
 
   // [optional.hash], hash support
   template<class T> struct hash;
@@ -121,8 +119,7 @@ namespace std {
     template<class U> constexpr optional& operator=(const optional<U>&);
     template<class U> constexpr optional& operator=(optional<U>&&);
     template<class... Args> constexpr T& emplace(Args&&...);
-    template<class U, class... Args> constexpr T& emplace(initializer_list<U>,
-Args&&...);
+    template<class U, class... Args> constexpr T& emplace(initializer_list<U>, Args&&...);
 
     // [optional.swap], swap
     constexpr void swap(optional&) noexcept(see below);
@@ -165,7 +162,6 @@ Args&&...);
   template<class T>
     optional(T) -> optional<T>;
 }
-
 */
 
 #include <compare>
