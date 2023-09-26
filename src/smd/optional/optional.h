@@ -1177,11 +1177,10 @@ operator<=>(const optional<T>& x, const U& v) {
     return bool(x) ? *x <=> v : std::strong_ordering::less;
 }
 
-template <class T,
-          std::enable_if_t<std::is_move_constructible<T>::value>* = nullptr,
-          std::enable_if_t<std::is_swappable<T>::value>*          = nullptr>
-void swap(optional<T>& lhs,
-          optional<T>& rhs) noexcept(noexcept(lhs.swap(rhs))) {
+template <class T>
+void swap(optional<T>& lhs, optional<T>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+    requires std::is_move_constructible_v<T> && std::is_swappable_v<T>
+{
     return lhs.swap(rhs);
 }
 
@@ -1189,9 +1188,10 @@ namespace detail {
 template <class Opt,
           class F,
           class Ret = decltype(std::invoke(std::declval<F>(),
-                                           *std::declval<Opt>())),
-          std::enable_if<!std::is_void<Ret>::value>* = nullptr>
-constexpr auto optional_map_impl(Opt&& opt, F&& f) {
+                                           *std::declval<Opt>()))>
+constexpr auto optional_map_impl(Opt&& opt, F&& f)
+    requires(!std::is_void_v<Ret>)
+{
     return opt.has_value()
                ? std::invoke(std::forward<F>(f), *std::forward<Opt>(opt))
                : optional<Ret>(nullopt);
@@ -1200,9 +1200,8 @@ constexpr auto optional_map_impl(Opt&& opt, F&& f) {
 template <class Opt,
           class F,
           class Ret = decltype(std::invoke(std::declval<F>(),
-                                           *std::declval<Opt>())),
-          std::enable_if<std::is_void<Ret>::value>* = nullptr>
-auto optional_map_impl(Opt&& opt, F&& f) {
+                                           *std::declval<Opt>()))>
+auto optional_map_impl(Opt&& opt, F&& f) requires std::is_void_v<Ret> {
     if (opt.has_value()) {
         std::invoke(std::forward<F>(f), *std::forward<Opt>(opt));
         return make_optional(monostate{});
