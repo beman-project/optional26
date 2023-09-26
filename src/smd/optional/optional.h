@@ -306,13 +306,6 @@ struct optional_operations_base : optional_storage_base<T> {
     constexpr const T&& get() const&& { return std::move(this->m_value); }
 };
 
-#define TL_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T) \
-    std::is_trivially_copy_constructible<T>::value
-#define TL_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T) \
-    std::is_trivially_copy_assignable<T>::value
-#define TL_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T) \
-    std::is_trivially_destructible<T>::value
-
 // This class manages conditionally having a trivial copy constructor
 // This specialization is for when T is trivially copy constructible
 template <class T, bool = std::is_trivially_copy_constructible<T>::value>
