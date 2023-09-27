@@ -199,11 +199,6 @@ template <class T>
     requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional;
 
-template <typename T>
-inline constexpr bool is_optional_v = false;
-template <typename T>
-inline constexpr bool is_optional_v<optional<T>> = true;
-
 template <class T>
 concept is_derived_from_optional = requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
 
@@ -544,26 +539,26 @@ class optional : private detail::optional_move_assign_base<T>,
 
   public:
     template <class F>
-    constexpr auto and_then(F&& f) & {
+    constexpr auto and_then(F&& f) &
+    requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
+    {
         using result = std::invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<result>::value, "F must return an optional");
-
         return this->has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
     }
 
     template <class F>
-    constexpr auto and_then(F&& f) && {
+    constexpr auto and_then(F&& f) &&
+    requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&&>>>::value
+    {
         using result = std::invoke_result_t<F, T&&>;
-        static_assert(detail::is_optional<result>::value, "F must return an optional");
-
         return this->has_value() ? std::invoke(std::forward<F>(f), std::move(**this)) : result(nullopt);
     }
 
     template <class F>
-    constexpr auto and_then(F&& f) const& {
+    constexpr auto and_then(F&& f) const&
+    requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
+    {
         using result = std::invoke_result_t<F, const T&>;
-        static_assert(detail::is_optional<result>::value, "F must return an optional");
-
         return this->has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
     }
 
