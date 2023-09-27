@@ -872,27 +872,6 @@ class optional : private detail::optional_move_assign_base<T>,
     }
 };
 
-template <typename T>
-using optional_relop_t = std::enable_if_t<std::is_convertible<T, bool>::value, bool>;
-
-template <typename T, typename U>
-using optional_eq_t = optional_relop_t<decltype(std::declval<const T&>() == std::declval<const U&>())>;
-
-template <typename T, typename U>
-using optional_ne_t = optional_relop_t<decltype(std::declval<const T&>() != std::declval<const U&>())>;
-
-template <typename T, typename U>
-using optional_lt_t = optional_relop_t<decltype(std::declval<const T&>() < std::declval<const U&>())>;
-
-template <typename T, typename U>
-using optional_gt_t = optional_relop_t<decltype(std::declval<const T&>() > std::declval<const U&>())>;
-
-template <typename T, typename U>
-using optional_le_t = optional_relop_t<decltype(std::declval<const T&>() <= std::declval<const U&>())>;
-
-template <typename T, typename U>
-using optional_ge_t = optional_relop_t<decltype(std::declval<const T&>() >= std::declval<const U&>())>;
-
 template <typename T, typename U>
 concept optional_eq_rel = requires(const T& t, const U& u) {
     { t == u } -> std::convertible_to<bool>;
