@@ -684,19 +684,17 @@ class optional : private detail::optional_move_assign_base<T>,
 
     /// Constructs the stored value in-place using the given arguments.
     template <class... Args>
-    constexpr explicit optional(
-        std::enable_if_t<std::is_constructible<T, Args...>::value, in_place_t>,
-        Args&&... args)
+    constexpr explicit optional(in_place_t, Args&&... args)
+        requires std::is_constructible_v<T, Args...>
         : base(in_place, std::forward<Args>(args)...) {}
 
     template <class U, class... Args>
-    constexpr explicit optional(
-        std::enable_if_t<std::is_constructible<T,
-                                               std::initializer_list<U>&,
-                                               Args&&...>::value,
-                         in_place_t>,
-        std::initializer_list<U> il,
-        Args&&... args) {
+    constexpr explicit optional(in_place_t,
+                                std::initializer_list<U> il,
+                                Args&&... args)
+        requires std::
+            is_constructible_v<T, std::initializer_list<U>&, Args&&...>
+    {
         this->construct(il, std::forward<Args>(args)...);
     }
 
