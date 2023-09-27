@@ -170,18 +170,6 @@ namespace std {
 
 namespace smd::optional {
 
-template <class T>
-class optional;
-
-template <typename T>
-inline constexpr bool is_optional_v = false;
-template <typename T>
-inline constexpr bool is_optional_v<optional<T>> = true;
-
-template <class T>
-concept is_derived_from_optional =
-    requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
-
 class monostate {};
 
 struct nullopt_t {
@@ -206,6 +194,20 @@ class bad_optional_access : public std::exception {
     bad_optional_access() = default;
     const char* what() const noexcept { return "Optional has no value"; }
 };
+
+template <class T>
+    requires(!std::is_same_v<T, in_place_t>) &&
+            (!std::is_same_v<std::decay_t<T>, nullopt_t>)
+class optional;
+
+template <typename T>
+inline constexpr bool is_optional_v = false;
+template <typename T>
+inline constexpr bool is_optional_v<optional<T>> = true;
+
+template <class T>
+concept is_derived_from_optional =
+    requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
 
 namespace detail {
 
@@ -583,15 +585,12 @@ concept enable_assign_from_other =
     !std::is_assignable_v<T_&, const optional<U_>&&>;
 
 template <class T>
+    requires(!std::is_same_v<T, in_place_t>) &&
+                (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional : private detail::optional_move_assign_base<T>,
                  private detail::optional_delete_ctor_base<T>,
                  private detail::optional_delete_assign_base<T> {
     using base = detail::optional_move_assign_base<T>;
-
-    static_assert(!std::is_same<T, in_place_t>::value,
-                  "instantiation of optional with in_place_t is ill-formed");
-    static_assert(!std::is_same<std::decay_t<T>, nullopt_t>::value,
-                  "instantiation of optional with nullopt_t is ill-formed");
 
   public:
     template <class F>
@@ -1158,7 +1157,8 @@ constexpr bool operator>=(const U& lhs, const optional<T>& rhs)
 }
 
 template <typename T, typename U>
-    requires(!is_optional_v<U>) && std::three_way_comparable_with<T, U>
+    requires(!is_derived_from_optional<U>) &&
+            std::three_way_comparable_with<T, U>
 constexpr std::compare_three_way_result_t<T, U>
 operator<=>(const optional<T>& x, const U& v) {
     return bool(x) ? *x <=> v : std::strong_ordering::less;
@@ -1188,7 +1188,9 @@ template <class Opt,
           class F,
           class Ret = decltype(std::invoke(std::declval<F>(),
                                            *std::declval<Opt>()))>
-auto optional_map_impl(Opt&& opt, F&& f) requires std::is_void_v<Ret> {
+auto optional_map_impl(Opt&& opt, F&& f)
+    requires std::is_void_v<Ret>
+{
     if (opt.has_value()) {
         std::invoke(std::forward<F>(f), *std::forward<Opt>(opt));
         return make_optional(monostate{});
