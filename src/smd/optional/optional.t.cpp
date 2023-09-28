@@ -62,24 +62,24 @@ TEST(OptionalTest, Constructors2) {
     smd::optional::optional<int> o9 = std::move(o7);
     EXPECT_TRUE(*o9 == 42);
 
-    // {
-    //     smd::optional::optional<int&> o;
-    //     EXPECT_TRUE(!o);
+    {
+        smd::optional::optional<int&> o;
+        EXPECT_TRUE(!o);
 
-    //     smd::optional::optional<int&> oo = o;
-    //     EXPECT_TRUE(!oo);
-    // }
+        smd::optional::optional<int&> oo = o;
+        EXPECT_TRUE(!oo);
+    }
 
-    // {
-    //     auto                                    i = 42;
-    //     smd::optional::optional<int&> o = i;
-    //     EXPECT_TRUE(o);
-    //     EXPECT_TRUE(*o == 42);
+    {
+        auto                                    i = 42;
+        smd::optional::optional<int&> o = i;
+        EXPECT_TRUE(o);
+        EXPECT_TRUE(*o == 42);
 
-    //     smd::optional::optional<int&> oo = o;
-    //     EXPECT_TRUE(oo);
-    //     EXPECT_TRUE(*oo == 42);
-    // }
+        smd::optional::optional<int&> oo = o;
+        EXPECT_TRUE(oo);
+        EXPECT_TRUE(*oo == 42);
+    }
 
     std::vector<base> v;
     v.emplace_back();
@@ -331,12 +331,14 @@ TEST(OptionalTest, MakeOptional) {
     EXPECT_TRUE(std::get<0>(o5->t) == 2);
     EXPECT_TRUE(std::get<1>(o5->t) == 3);
 
-    // auto i  = 42;
-    // auto o6 = smd::optional::make_optional<int&>(i);
-    // EXPECT_TRUE(
-    //     (std::is_same<decltype(o6), smd::optional::optional<int&>>::value));
-    // EXPECT_TRUE(o6);
-    // EXPECT_TRUE(*o6 == 42);
+    auto i  = 42;
+    auto o6 = smd::optional::make_optional<int&>(i);
+    static_assert(std::is_same<decltype(o6), smd::optional::optional<int&>>::value);
+
+    EXPECT_TRUE(
+        (std::is_same<decltype(o6), smd::optional::optional<int&>>::value));
+    EXPECT_TRUE(o6);
+    EXPECT_TRUE(*o6 == 42);
 }
 
 TEST(OptionalTest, Nullopt) {

@@ -216,9 +216,17 @@ using is_optional = is_optional_impl<std::decay_t<T>>;
 template <typename T>
 constexpr optional<std::decay_t<T>>
 make_optional(T&& __t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
-    requires std::is_constructible_v<std::decay_t<T>, T>
+    requires std::is_constructible_v<std::decay_t<T>, T> && (!std::is_reference_v<T>)
 {
     return optional<std::decay_t<T>>{std::forward<T>(__t)};
+}
+
+template <typename T>
+constexpr optional<std::decay_t<T>&>
+make_optional(T&& __t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
+    requires std::is_constructible_v<std::decay_t<T>, T> && (std::is_reference_v<T>)
+{
+    return optional<std::decay_t<T>&>{std::forward<T>(__t)};
 }
 
 template <typename T, typename... _Args>
@@ -877,5 +885,249 @@ auto optional_map_impl(Opt&& opt, F&& f)
 }
 } // namespace detail
 
+/****************/
+/* optional<T&> */
+/****************/
+
+template <class T>
+class optional<T&> {
+  public:
+    using value_type = T&;
+
+    // [optional.ctor], constructors
+    //    constexpr optional() noexcept;
+    //    constexpr optional(nullopt_t) noexcept;
+    //    constexpr optional(const optional&);
+    //    constexpr optional(optional&&) noexcept(/* see below */);
+    //    template<class U = T>
+    //      constexpr explicit(/* see below */ ) optional(U&&);
+
+    // [optional.dtor], destructor
+    //    constexpr ~optional();
+
+    // [optional.assign], assignment
+    //    constexpr optional& operator=(nullopt_t) noexcept;
+    //    constexpr optional& operator=(const optional&);
+    //    constexpr optional& operator=(optional&&) noexcept(/* see below */);
+    //    template <class U = T>
+    //    constexpr optional& operator=(U&&);
+    //    template <class U>
+    //    constexpr optional& operator=(const optional<U>&);
+    //    template <class U>
+    //    constexpr optional& operator=(optional<U>&&);
+
+    // [optional.swap], swap
+    //    constexpr void swap(optional&) noexcept(/* see below */);
+
+    // [optional.observe], observers
+    //    constexpr const T*  operator->() const noexcept;
+    //    constexpr T*        operator->() noexcept;
+    //  constexpr const T&  operator*() const& noexcept;
+    //  constexpr T&        operator*() & noexcept;
+    // constexpr T&&       operator*() && noexcept;
+    // constexpr const T&& operator*() const&& noexcept;
+    // constexpr explicit  operator bool() const noexcept;
+    // constexpr bool      has_value() const noexcept;
+    // constexpr const T&  value() const&;
+    // constexpr T&        value() &;
+    // constexpr T&&       value() &&;
+    // constexpr const T&& value() const&&;
+    // template <class U>
+    // constexpr T value_or(U&&) const&;
+    // template <class U>
+    // constexpr T value_or(U&&) &&;
+
+    // [optional.monadic], monadic operations
+    // template <class F>
+    // constexpr auto and_then(F&& f) &;
+    // template <class F>
+    // constexpr auto and_then(F&& f) &&;
+    // template <class F>
+    // constexpr auto and_then(F&& f) const&;
+    // template <class F>
+    // constexpr auto and_then(F&& f) const&&;
+    // template <class F>
+    // constexpr auto transform(F&& f) &;
+    // template <class F>
+    // constexpr auto transform(F&& f) &&;
+    // template <class F>
+    // constexpr auto transform(F&& f) const&;
+    // template <class F>
+    // constexpr auto transform(F&& f) const&&;
+    // template <class F>
+    // constexpr optional or_else(F&& f) &&;
+    // template <class F>
+    // constexpr optional or_else(F&& f) const&;
+
+    // [optional.mod], modifiers
+    // constexpr void reset() noexcept;
+
+  private:
+    T* value_; // exposition only
+
+  public:
+    constexpr optional() noexcept : value_(nullptr) {}
+
+    constexpr optional(nullopt_t) noexcept : value_(nullptr) {}
+
+    constexpr optional(const optional& rhs) noexcept = default;
+    constexpr optional(optional&& rhs)               = default;
+
+    template <class U = T>
+        requires(!detail::is_optional<std::decay_t<U>>::value)
+    constexpr optional(U&& u) noexcept : value_(std::addressof(u)) {
+        static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
+    }
+
+    template <class U>
+    constexpr explicit optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
+
+    ~optional() = default;
+
+    optional& operator=(nullopt_t) noexcept {
+        value_ = nullptr;
+        return *this;
+    }
+
+    optional& operator=(const optional& rhs) = default;
+
+    template <class U = T>
+        requires(!detail::is_optional<std::decay_t<U>>::value)
+    optional& operator=(U&& u) {
+        static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
+        value_ = std::addressof(u);
+        return *this;
+    }
+
+    template <class U>
+    optional& operator=(const optional<U>& rhs) noexcept {
+        value_ = std::addressof(rhs.value());
+        return *this;
+    }
+
+    template <class U = T>
+        requires(!detail::is_optional<std::decay_t<U>>::value)
+    optional& emplace(U&& u) noexcept {
+        return *this = std::forward<U>(u);
+    }
+
+    void swap(optional& rhs) noexcept { std::swap(value_, rhs.value_); }
+
+    constexpr const T* operator->() const noexcept { return value_; }
+    constexpr T*       operator->() noexcept { return value_; }
+
+    constexpr const T&  operator*() const& noexcept { return *value_; }
+    constexpr T&        operator*() & noexcept { return *value_; }
+    constexpr T&&       operator*() && noexcept { return *value_; }
+    constexpr const T&& operator*() const&& noexcept { return *value_; }
+
+    constexpr explicit operator bool() const noexcept { return value_ != nullptr; }
+    constexpr bool     has_value() const noexcept { return value_ != nullptr; }
+
+    constexpr const T& value() const& {
+        if (has_value())
+            return *value_;
+        throw bad_optional_access();
+    }
+    constexpr T& value() & {
+        if (has_value())
+            return *value_;
+        throw bad_optional_access();
+    }
+    constexpr T&& value() && {
+        if (has_value())
+            return *value_;
+        throw bad_optional_access();
+    }
+    constexpr const T&& value() const&& {
+        if (has_value())
+            return *value_;
+        throw bad_optional_access();
+    }
+
+    template <class U>
+    constexpr T value_or(U&& u) const& {
+        static_assert(std::is_copy_constructible<T>::value && std::is_convertible<U&&, T>::value,
+                      "T must be copy constructible and convertible from U");
+        return has_value() ? **this : static_cast<T>(std::forward<U>(u));
+    }
+
+    template <class U>
+    constexpr T value_or(U&& u) && {
+        static_assert(std::is_move_constructible<T>::value && std::is_convertible<U&&, T>::value,
+                      "T must be move constructible and convertible from U");
+        return has_value() ? **this : static_cast<T>(std::forward<U>(u));
+    }
+
+    template <class F>
+    constexpr auto and_then(F&& f) & {
+        using result = std::invoke_result_t<F, T&>;
+        static_assert(detail::is_optional<result>::value, "F must return an optional");
+
+        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+    }
+
+    template <class F>
+    constexpr auto and_then(F&& f) && {
+        using result = std::invoke_result_t<F, T&>;
+        static_assert(detail::is_optional<result>::value, "F must return an optional");
+
+        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+    }
+
+    template <class F>
+    constexpr auto and_then(F&& f) const& {
+        using result = std::invoke_result_t<F, const T&>;
+        static_assert(detail::is_optional<result>::value, "F must return an optional");
+
+        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+    }
+
+    template <class F>
+    constexpr auto and_then(F&& f) const&& {
+        using result = std::invoke_result_t<F, const T&>;
+        static_assert(detail::is_optional<result>::value, "F must return an optional");
+
+        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+    }
+
+    template <class F>
+    constexpr auto transform(F&& f) & {
+        return detail::optional_map_impl(*this, std::forward<F>(f));
+    }
+
+    template <class F>
+    constexpr auto transform(F&& f) && {
+        return detail::optional_map_impl(std::move(*this), std::forward<F>(f));
+    }
+
+    template <class F>
+    constexpr auto transform(F&& f) const& {
+        return detail::optional_map_impl(*this, std::forward<F>(f));
+    }
+
+    template <class F>
+    constexpr auto transform(F&& f) const&& {
+        return detail::optional_map_impl(std::move(*this), std::forward<F>(f));
+    }
+    template <class F>
+    constexpr optional or_else(F&& f) && {
+        if (*this) {
+            return std::move(*this);
+        } else {
+            return std::forward<F>(f)();
+        }
+    }
+    template <class F>
+    constexpr optional or_else(F&& f) const& {
+        if (*this) {
+            return *this;
+        } else {
+            return std::forward<F>(f)();
+        }
+    }
+
+    void reset() noexcept { value_ = nullptr; }
+};
 } // namespace smd::optional
 #endif
