@@ -35,7 +35,9 @@ add_executable(optional_test "")
 target_sources(
   optional_test
   PRIVATE
-  optional.t.cpp)
+  optional.t.cpp
+  optional_ref.t.cpp
+)
 
 target_link_libraries(optional_test optional)
 target_link_libraries(optional_test gtest)

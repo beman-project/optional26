@@ -976,6 +976,7 @@ class optional<T&> {
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>::value)
     constexpr optional(U&& u) noexcept : value_(std::addressof(u)) {
+        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
     }
 
@@ -994,6 +995,7 @@ class optional<T&> {
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>::value)
     optional& operator=(U&& u) {
+        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
         value_ = std::addressof(u);
         return *this;
@@ -1001,6 +1003,7 @@ class optional<T&> {
 
     template <class U>
     optional& operator=(const optional<U>& rhs) noexcept {
+        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         value_ = std::addressof(rhs.value());
         return *this;
     }
