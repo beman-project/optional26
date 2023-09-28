@@ -291,7 +291,7 @@ class optional {
 
     void hard_reset() noexcept {
         get().~T();
-        this->engaged = false;
+        engaged = false;
     }
     constexpr T&        get() & { return value_; }
     constexpr const T&  get() const& { return value_; }
@@ -480,7 +480,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
     {
         using result = std::invoke_result_t<F, T&>;
-        return this->has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
     }
 
     template <class F>
@@ -488,7 +488,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&&>>>::value
     {
         using result = std::invoke_result_t<F, T&&>;
-        return this->has_value() ? std::invoke(std::forward<F>(f), std::move(**this)) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), std::move(**this)) : result(nullopt);
     }
 
     template <class F>
@@ -496,7 +496,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
     {
         using result = std::invoke_result_t<F, const T&>;
-        return this->has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
     }
 
     template <class F>
@@ -504,7 +504,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
     {
         using result = std::invoke_result_t<F, const T&>;
-        return this->has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
     }
 
     /// Carries out some operation on the stored object if there is one.
@@ -531,7 +531,7 @@ class optional {
     /// Calls `f` if the optional is empty
     template <class F>
     constexpr optional<T> or_else(F&& f) & {
-        if (this->has_value())
+        if (has_value())
             return *this;
 
         std::forward<F>(f)();
@@ -540,7 +540,7 @@ class optional {
 
     template <class F>
     optional<T> or_else(F&& f) && {
-        if (this->has_value())
+        if (has_value())
             return std::move(*this);
 
         std::forward<F>(f)();
@@ -556,7 +556,7 @@ class optional {
         if (has_value()) {
             value_ = std::forward<U>(u);
         } else {
-            this->construct(std::forward<U>(u));
+            construct(std::forward<U>(u));
         }
 
         return *this;
@@ -574,7 +574,7 @@ class optional {
             if (rhs.has_value()) {
                 value_ = *rhs;
             } else {
-                this->hard_reset();
+                hard_reset();
             }
         }
 
@@ -595,9 +595,9 @@ class optional {
     {
         if (has_value()) {
             if (rhs.has_value()) {
-                this->value_ = std::move(*rhs);
+                value_ = std::move(*rhs);
             } else {
-                this->hard_reset();
+                hard_reset();
             }
         }
 
@@ -648,7 +648,7 @@ class optional {
             new (std::addressof(value_)) T(std::move(rhs.value_));
             rhs.value_.T::~T();
         }
-        swap(this->engaged, rhs.engaged);
+        swap(engaged, rhs.engaged);
     }
 
     /// Returns a pointer to the stored value
