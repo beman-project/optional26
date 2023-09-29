@@ -488,7 +488,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&&>>>::value
     {
         using result = std::invoke_result_t<F, T&&>;
-        return has_value() ? std::invoke(std::forward<F>(f), std::move(value())) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
     }
 
     template <class F>
