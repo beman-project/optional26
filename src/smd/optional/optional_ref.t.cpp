@@ -16,6 +16,18 @@ struct no_default {
     no_default& operator=(no_default&&)      = default;
     no_default(empty){};
 };
+
+struct base {
+  int i_;
+  base() : i_(0) {}
+  base(int i) : i_(i) {}
+};
+
+struct derived : public base {
+  int j_;
+  derived() : base(0), j_(0) {}
+  derived(int i, int j) : base(i), j_(j) {}
+};
 } // namespace
 
 TEST(OptionalRefTest, Constructors) {
@@ -46,7 +58,22 @@ TEST(OptionalRefTest, Constructors) {
 
     smd::optional::optional<no_default&> nd3 = nd;
     (void)nd3;
+
+    smd::optional::optional<int&> ie;
+    smd::optional::optional<int&> i4 = ie;
+    EXPECT_FALSE(i4);
+
+    base b{1};
+    derived d(1, 2);
+    smd::optional::optional<base&> b1 = b;
+    smd::optional::optional<base&> b2 = d;
+
+    smd::optional::optional<derived&> d2 = d;
+    smd::optional::optional<base&> b3{d2};
+
+
 }
+
 
 TEST(OptionalRefTest, Assignment) {
     smd::optional::optional<int&> i1;
@@ -61,6 +88,11 @@ TEST(OptionalRefTest, Assignment) {
     // i1 = d;  // ill-formed by mandate
     smd::optional::optional<double&> d1 = d;
     // i1 = d1; // ill-formed by mandate
+    smd::optional::optional<int&> i2 = i1;
+    EXPECT_TRUE(i2);
+    EXPECT_TRUE(*i2 = 7);
+
+
 }
 
 TEST(OptionalRefTest, RelationalOps) {

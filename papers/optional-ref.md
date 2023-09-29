@@ -55,7 +55,7 @@ if (c) {
 o.transform([&](auto c&){
     c = Cat("Fynn", color::orange);
     });
-````
+```
 :::
 
 # Motivation
@@ -71,11 +71,18 @@ There are well motivated suggestions that perhaps instead of an optional<T&> the
 
 The design is straightforward. The optional<T&> holds a pointer to the underlying object of type T, or nullptr if the optional is disengaged. The implementation is simple, especially with C++20 and up techniques, using concept constraints. As the held pointer is a primitive regular type with reference semantics, many operations can be defaulted and are noexcept by nature. See https://github.com/steve-downey/optional_ref and https://github.com/steve-downey/optional_ref/blob/main/src/smd/optional/optional.h for a reference implementation. The optional<T&> implementation is less than 200 lines of code, much of it the monadic functions with identical textual implementations with different signatures and different overloads being called.
 
+# Shallow vs Deep `const`
+There is some implementation divergence in optionals about deep const for optional<T&>. That is, can the referred to int be modified through a const optional<int&>. Does operator->() returns an int* or a const int*, and does operator*() return an int& or a const int&. I believe it is overall more defensible if the const is shallow as it would be for a `struct ref {int * p;}` where the constness of the struct ref does not affect if the p pointer can be written through. This is consistent with the rebinding behavior being proposed.
+
+Where deeper constness is desired, optional<const T&> would prevent non const access to the underlying object.
+
+
 # Wording
 Modify 22.5 Optional Objects
 
 add
-```txt
+
+```cpp
 Class template optional[optional.optional_ref]
 General[optional.optional_ref.general]
 
@@ -88,10 +95,12 @@ namespace std {
     [optional_ref.ctor], constructors
          constexpr optional() noexcept;
          constexpr optional(nullopt_t) noexcept;
-         constexpr optional(const optional&);
-         constexpr optional(optional&&) noexcept(/* see below */);
+         constexpr optional(const optional&) noexcept;
+         constexpr optional(optional&&) noexcept;
          template<class U = T>
-           constexpr explicit(/* see below */ ) optional(U&&);
+           constexpr optional(U&&);
+         template <class U>
+           constexpr explicit optional(const optional<U>& rhs) noexcept;
 
       [optional_ref.dtor], destructor
          constexpr ~optional();
@@ -111,22 +120,15 @@ namespace std {
          constexpr void swap(optional&) noexcept(/* see below */);
 
       [optional_ref.observe], observers
-         constexpr const T*  operator->() const noexcept;
-         constexpr T*        operator->() noexcept;
-         constexpr const T&  operator*() const& noexcept;
-         constexpr T&        operator*() & noexcept;
-         constexpr T&&       operator*() && noexcept;
-         constexpr const T&& operator*() const&& noexcept;
+         constexpr T*        operator->() const noexcept;
+         constexpr T&        operator*() const& noexcept;
+         constexpr T&&       operator*() const&& noexcept;
          constexpr explicit  operator bool() const noexcept;
          constexpr bool      has_value() const noexcept;
-         constexpr const T&  value() const&;
-         constexpr T&        value() &;
-         constexpr T&&       value() &&;
-         constexpr const T&& value() const&&;
+         constexpr T&        value() const&;
+         constexpr T&& value() const&&;
          template <class U>
            constexpr T value_or(U&&) const&;
-         template <class U>
-           constexpr T value_or(U&&) &&;
 
       [optional_ref.monadic], monadic operations
          template <class F>
@@ -152,20 +154,75 @@ namespace std {
 
       [optional_ref.mod], modifiers
          constexpr void reset() noexcept;
+  private:
+    T *val;         // exposition only
 ```
 
 Constructors[optional\_ref.ctor]
 
+```cpp
 constexpr optional() noexcept;
 
 constexpr optional(nullopt\_t) noexcept;
+```
 
-Postconditions: *this does not contain a value.
+[1]{.pnum} *Postconditions*: `*this` does not contain a value.
 
-Remarks: No contained value is initialized. For every object type T these constructors are constexpr constructors ([dcl.constexpr]).
+[2]{.pnum} *Remarks*: No contained value is initialized. For every object type `T` these constructors are `constexpr` constructors ([dcl.constexpr]).
 
+```cpp
 constexpr optional(const optional& rhs);
+```
 
-Effects: If rhs contains a value, direct-non-list-initializes the contained value with *rhs.
+[3]{.pnum} *Effects*: Initializes `val` with the value of `rhs.val`
 
-Postconditions: rhs.has\_value() == this->has_value().
+[4]{.pnum} *Postconditions*: `rhs.has_value() == this->has_value()`.
+
+[5]{.pnum} *Remarks*: The constructor is trivial.
+
+```cpp
+constexpr optional(optional&&) noexcept;
+```
+
+[3]{.pnum} *Effects*: Initializes `val` with the value of `rhs.val`
+
+[4]{.pnum} *Postconditions*: `rhs.has_value() == this->has_value()`.
+
+[5]{.pnum} *Remarks*: The constructor is trivial.
+
+```cpp
+         template<class U = T>
+           constexpr optional(U&&);
+```
+[3]{.pnum} *Constraints*:
+
+[3.1]{.pnum}    -- `!is-optional<decay_t<U>>::value is true`
+
+[3]{.pnum} *Mandates*:
+[3.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
+[3.1]{.pnum}    -- `std::is_lvalue_reference<U>::value`
+
+[3]{.pnum} *Effects*: Initializes `val` with the address of u
+
+[4]{.pnum} *Postconditions*: `this->has_value() == true`.
+
+```cpp
+         template <class U>
+           constexpr explicit optional(const optional<U>& rhs) noexcept;
+```
+[3]{.pnum} *Constraints*:
+
+[3.1]{.pnum}    -- `!is-optional<decay_t<U>>::value is true`
+
+[3]{.pnum} *Mandates*:
+[3.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
+[3.1]{.pnum}    -- `std::is_lvalue_reference<U>::value`
+
+[3]{.pnum} *Effects*:
+
+
+Destructor      [optional_ref.dtor]
+```cpp
+         constexpr ~optional();
+```
+[5]{.pnum} *Remarks*: The destructor is trivial.
