@@ -21,7 +21,7 @@ jobs:
 
           - name: "clang17"
             pkg: "clang-17 clang-tidy-17 g++-13 libc++-17-dev  libc++1-17 libc++abi-17-dev libc++abi1-17 libunwind-17-dev"
-            toolchain: clang-16
+            toolchain: clang-17
             os: ubuntu-22.04
 
 
@@ -43,6 +43,7 @@ jobs:
         if: contains(matrix.pkg, 'clang')
         run: |
           sudo apt-add-repository --no-update --yes "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main"
+          sudo apt-add-repository --no-update --yes "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
 
       - name: Configure APT
