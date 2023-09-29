@@ -320,7 +320,7 @@ class optional {
 
     constexpr optional(nullopt_t) noexcept {}
 
-    optional(const optional& rhs)
+    constexpr optional(const optional& rhs)
         requires std::is_copy_constructible_v<T> && (!std::is_trivially_copy_constructible_v<T>)
     {
         if (rhs.has_value()) {
@@ -329,11 +329,11 @@ class optional {
         }
     }
 
-    optional(const optional&)
+    constexpr optional(const optional&)
         requires std::is_copy_constructible_v<T> && std::is_trivially_copy_constructible_v<T>
     = default;
 
-    optional(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
+    constexpr optional(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
         requires std::is_move_constructible_v<T> && (!std::is_trivially_move_constructible_v<T>)
     {
         if (rhs.has_value()) {
@@ -342,7 +342,7 @@ class optional {
         }
     }
 
-    optional(optional&&)
+    constexpr optional(optional&&)
         requires std::is_move_constructible_v<T> && std::is_trivially_move_constructible_v<T>
     = default;
 
