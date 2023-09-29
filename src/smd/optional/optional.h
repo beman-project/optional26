@@ -290,13 +290,9 @@ class optional {
     }
 
     void hard_reset() noexcept {
-        get().~T();
+        value_.~T();
         engaged = false;
     }
-    constexpr T&        get() & { return value_; }
-    constexpr const T&  get() const& { return value_; }
-    constexpr T&&       get() && { return std::move(value_); }
-    constexpr const T&& get() const&& { return std::move(value_); }
 
   public:
     constexpr optional() noexcept
