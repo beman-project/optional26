@@ -310,7 +310,7 @@ class optional {
     ~optional()
         requires(!std::is_trivially_destructible_v<T>)
     {
-        if (engaged)
+        if (has_value())
             value_.~T();
     }
 
@@ -320,11 +320,11 @@ class optional {
 
     constexpr optional(nullopt_t) noexcept {}
 
-    optional(const optional& that)
+    optional(const optional& rhs)
         requires std::is_copy_constructible_v<T> && (!std::is_trivially_copy_constructible_v<T>)
     {
-        if (that.engaged) {
-            ::new (&value_) T(that.value_);
+        if (rhs.has_value()) {
+            ::new (&value_) T(rhs.value_);
             engaged = true;
         }
     }
@@ -333,11 +333,11 @@ class optional {
         requires std::is_copy_constructible_v<T> && std::is_trivially_copy_constructible_v<T>
     = default;
 
-    optional(optional&& that) noexcept(std::is_nothrow_move_constructible_v<T>)
+    optional(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
         requires std::is_move_constructible_v<T> && (!std::is_trivially_move_constructible_v<T>)
     {
-        if (that.engaged) {
-            ::new (&value_) T(std::move(that.value_));
+        if (rhs.has_value()) {
+            ::new (&value_) T(std::move(rhs.value_));
             engaged = true;
         }
     }
@@ -406,16 +406,16 @@ class optional {
         }
     }
 
-    optional& operator=(const optional& that)
+    optional& operator=(const optional& rhs)
         requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
                  (!std::is_trivially_copy_assignable_v<T>)
     {
-        if (!that.engaged)
+        if (!rhs.has_value())
             reset();
-        else if (engaged)
-            value_ = that.value_;
+        else if (has_value())
+            value_ = rhs.value_;
         else
-            ::new (&value_) T(that.value_);
+            ::new (&value_) T(rhs.value_);
         return *this;
     }
 
@@ -424,16 +424,16 @@ class optional {
                      std::is_trivially_copy_constructible_v<T> && std::is_trivially_copy_assignable_v<T>
     = default;
 
-    optional& operator=(optional&& that) noexcept(std::is_nothrow_move_constructible_v<T>)
+    optional& operator=(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
                  (!std::is_trivially_move_assignable_v<T>)
     {
-        if (!that.engaged)
+        if (!rhs.has_value())
             reset();
-        else if (engaged)
-            value_ = std::move(that.value_);
+        else if (has_value())
+            value_ = std::move(rhs.value_);
         else
-            ::new (&value_) T(std::move(that.value_));
+            ::new (&value_) T(std::move(rhs.value_));
         return *this;
     }
 
@@ -465,14 +465,14 @@ class optional {
     constexpr T value_or(U&& u) const&
         requires std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>
     {
-        return has_value() ? **this : static_cast<T>(std::forward<U>(u));
+        return has_value() ? value() : static_cast<T>(std::forward<U>(u));
     }
 
     template <class U>
     constexpr T value_or(U&& u) &&
         requires std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>
     {
-        return has_value() ? std::move(**this) : static_cast<T>(std::forward<U>(u));
+        return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
     }
 
     template <class F>
@@ -480,7 +480,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
     {
         using result = std::invoke_result_t<F, T&>;
-        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
     }
 
     template <class F>
@@ -488,7 +488,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&&>>>::value
     {
         using result = std::invoke_result_t<F, T&&>;
-        return has_value() ? std::invoke(std::forward<F>(f), std::move(**this)) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), std::move(value())) : result(nullopt);
     }
 
     template <class F>
@@ -496,7 +496,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
     {
         using result = std::invoke_result_t<F, const T&>;
-        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
     }
 
     template <class F>
@@ -504,7 +504,7 @@ class optional {
         requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
     {
         using result = std::invoke_result_t<F, const T&>;
-        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
     }
 
     /// Carries out some operation on the stored object if there is one.
@@ -639,7 +639,7 @@ class optional {
         using std::swap;
         if (has_value()) {
             if (rhs.has_value()) {
-                swap(**this, *rhs);
+                swap(value(), *rhs);
             } else {
                 new (std::addressof(rhs.value_)) T(std::move(value_));
                 value_.T::~T();
@@ -670,7 +670,7 @@ class optional {
 
     void reset() noexcept {
         if constexpr (!std::is_trivially_destructible_v<T>) {
-            if (engaged)
+            if (has_value())
                 value_.~T();
         }
         engaged = false;
@@ -1052,14 +1052,14 @@ class optional<T&> {
     constexpr T value_or(U&& u) const& {
         static_assert(std::is_copy_constructible<T>::value && std::is_convertible<U&&, T>::value,
                       "T must be copy constructible and convertible from U");
-        return has_value() ? **this : static_cast<T>(std::forward<U>(u));
+        return has_value() ? value() : static_cast<T>(std::forward<U>(u));
     }
 
     template <class U>
     constexpr T value_or(U&& u) && {
         static_assert(std::is_move_constructible<T>::value && std::is_convertible<U&&, T>::value,
                       "T must be move constructible and convertible from U");
-        return has_value() ? **this : static_cast<T>(std::forward<U>(u));
+        return has_value() ? value() : static_cast<T>(std::forward<U>(u));
     }
 
     template <class F>
@@ -1067,7 +1067,7 @@ class optional<T&> {
         using result = std::invoke_result_t<F, T&>;
         static_assert(detail::is_optional<result>::value, "F must return an optional");
 
-        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
     }
 
     template <class F>
@@ -1075,7 +1075,7 @@ class optional<T&> {
         using result = std::invoke_result_t<F, T&>;
         static_assert(detail::is_optional<result>::value, "F must return an optional");
 
-        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
     }
 
     template <class F>
@@ -1083,7 +1083,7 @@ class optional<T&> {
         using result = std::invoke_result_t<F, const T&>;
         static_assert(detail::is_optional<result>::value, "F must return an optional");
 
-        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
     }
 
     template <class F>
@@ -1091,7 +1091,7 @@ class optional<T&> {
         using result = std::invoke_result_t<F, const T&>;
         static_assert(detail::is_optional<result>::value, "F must return an optional");
 
-        return has_value() ? std::invoke(std::forward<F>(f), **this) : result(nullopt);
+        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
     }
 
     template <class F>
