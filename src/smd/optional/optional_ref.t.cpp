@@ -62,3 +62,160 @@ TEST(OptionalRefTest, Assignment) {
     smd::optional::optional<double&> d1 = d;
     // i1 = d1; // ill-formed by mandate
 }
+
+TEST(OptionalRefTest, RelationalOps) {
+    int                           i1 = 4;
+    int                           i2 = 42;
+    smd::optional::optional<int&> o1{i1};
+    smd::optional::optional<int&> o2{i2};
+    smd::optional::optional<int&> o3{};
+
+    //  SECTION("self simple")
+    {
+        EXPECT_TRUE(!(o1 == o2));
+        EXPECT_TRUE(o1 == o1);
+        EXPECT_TRUE(o1 != o2);
+        EXPECT_TRUE(!(o1 != o1));
+        EXPECT_TRUE(o1 < o2);
+        EXPECT_TRUE(!(o1 < o1));
+        EXPECT_TRUE(!(o1 > o2));
+        EXPECT_TRUE(!(o1 > o1));
+        EXPECT_TRUE(o1 <= o2);
+        EXPECT_TRUE(o1 <= o1);
+        EXPECT_TRUE(!(o1 >= o2));
+        EXPECT_TRUE(o1 >= o1);
+    }
+    //  SECTION("nullopt simple")
+    {
+        EXPECT_TRUE(!(o1 == smd::optional::nullopt));
+        EXPECT_TRUE(!(smd::optional::nullopt == o1));
+        EXPECT_TRUE(o1 != smd::optional::nullopt);
+        EXPECT_TRUE(smd::optional::nullopt != o1);
+        EXPECT_TRUE(!(o1 < smd::optional::nullopt));
+        EXPECT_TRUE(smd::optional::nullopt < o1);
+        EXPECT_TRUE(o1 > smd::optional::nullopt);
+        EXPECT_TRUE(!(smd::optional::nullopt > o1));
+        EXPECT_TRUE(!(o1 <= smd::optional::nullopt));
+        EXPECT_TRUE(smd::optional::nullopt <= o1);
+        EXPECT_TRUE(o1 >= smd::optional::nullopt);
+        EXPECT_TRUE(!(smd::optional::nullopt >= o1));
+
+        EXPECT_TRUE(o3 == smd::optional::nullopt);
+        EXPECT_TRUE(smd::optional::nullopt == o3);
+        EXPECT_TRUE(!(o3 != smd::optional::nullopt));
+        EXPECT_TRUE(!(smd::optional::nullopt != o3));
+        EXPECT_TRUE(!(o3 < smd::optional::nullopt));
+        EXPECT_TRUE(!(smd::optional::nullopt < o3));
+        EXPECT_TRUE(!(o3 > smd::optional::nullopt));
+        EXPECT_TRUE(!(smd::optional::nullopt > o3));
+        EXPECT_TRUE(o3 <= smd::optional::nullopt);
+        EXPECT_TRUE(smd::optional::nullopt <= o3);
+        EXPECT_TRUE(o3 >= smd::optional::nullopt);
+        EXPECT_TRUE(smd::optional::nullopt >= o3);
+    }
+    //  SECTION("with T simple")
+    {
+        EXPECT_TRUE(!(o1 == 1));
+        EXPECT_TRUE(!(1 == o1));
+        EXPECT_TRUE(o1 != 1);
+        EXPECT_TRUE(1 != o1);
+        EXPECT_TRUE(!(o1 < 1));
+        EXPECT_TRUE(1 < o1);
+        EXPECT_TRUE(o1 > 1);
+        EXPECT_TRUE(!(1 > o1));
+        EXPECT_TRUE(!(o1 <= 1));
+        EXPECT_TRUE(1 <= o1);
+        EXPECT_TRUE(o1 >= 1);
+        EXPECT_TRUE(!(1 >= o1));
+
+        EXPECT_TRUE(o1 == 4);
+        EXPECT_TRUE(4 == o1);
+        EXPECT_TRUE(!(o1 != 4));
+        EXPECT_TRUE(!(4 != o1));
+        EXPECT_TRUE(!(o1 < 4));
+        EXPECT_TRUE(!(4 < o1));
+        EXPECT_TRUE(!(o1 > 4));
+        EXPECT_TRUE(!(4 > o1));
+        EXPECT_TRUE(o1 <= 4);
+        EXPECT_TRUE(4 <= o1);
+        EXPECT_TRUE(o1 >= 4);
+        EXPECT_TRUE(4 >= o1);
+    }
+    std::string                           s4 = "hello";
+    std::string                           s5 = "xyz";
+    smd::optional::optional<std::string&> o4{s4};
+    smd::optional::optional<std::string&> o5{s5};
+
+    //  SECTION("self complex")
+    {
+        EXPECT_TRUE(!(o4 == o5));
+        EXPECT_TRUE(o4 == o4);
+        EXPECT_TRUE(o4 != o5);
+        EXPECT_TRUE(!(o4 != o4));
+        EXPECT_TRUE(o4 < o5);
+        EXPECT_TRUE(!(o4 < o4));
+        EXPECT_TRUE(!(o4 > o5));
+        EXPECT_TRUE(!(o4 > o4));
+        EXPECT_TRUE(o4 <= o5);
+        EXPECT_TRUE(o4 <= o4);
+        EXPECT_TRUE(!(o4 >= o5));
+        EXPECT_TRUE(o4 >= o4);
+    }
+    //  SECTION("nullopt complex")
+    {
+        EXPECT_TRUE(!(o4 == smd::optional::nullopt));
+        EXPECT_TRUE(!(smd::optional::nullopt == o4));
+        EXPECT_TRUE(o4 != smd::optional::nullopt);
+        EXPECT_TRUE(smd::optional::nullopt != o4);
+        EXPECT_TRUE(!(o4 < smd::optional::nullopt));
+        EXPECT_TRUE(smd::optional::nullopt < o4);
+        EXPECT_TRUE(o4 > smd::optional::nullopt);
+        EXPECT_TRUE(!(smd::optional::nullopt > o4));
+        EXPECT_TRUE(!(o4 <= smd::optional::nullopt));
+        EXPECT_TRUE(smd::optional::nullopt <= o4);
+        EXPECT_TRUE(o4 >= smd::optional::nullopt);
+        EXPECT_TRUE(!(smd::optional::nullopt >= o4));
+
+        EXPECT_TRUE(o3 == smd::optional::nullopt);
+        EXPECT_TRUE(smd::optional::nullopt == o3);
+        EXPECT_TRUE(!(o3 != smd::optional::nullopt));
+        EXPECT_TRUE(!(smd::optional::nullopt != o3));
+        EXPECT_TRUE(!(o3 < smd::optional::nullopt));
+        EXPECT_TRUE(!(smd::optional::nullopt < o3));
+        EXPECT_TRUE(!(o3 > smd::optional::nullopt));
+        EXPECT_TRUE(!(smd::optional::nullopt > o3));
+        EXPECT_TRUE(o3 <= smd::optional::nullopt);
+        EXPECT_TRUE(smd::optional::nullopt <= o3);
+        EXPECT_TRUE(o3 >= smd::optional::nullopt);
+        EXPECT_TRUE(smd::optional::nullopt >= o3);
+    }
+
+    //  SECTION("with T complex")
+    {
+        EXPECT_TRUE(!(o4 == "a"));
+        EXPECT_TRUE(!("a" == o4));
+        EXPECT_TRUE(o4 != "a");
+        EXPECT_TRUE("a" != o4);
+        EXPECT_TRUE(!(o4 < "a"));
+        EXPECT_TRUE("a" < o4);
+        EXPECT_TRUE(o4 > "a");
+        EXPECT_TRUE(!("a" > o4));
+        EXPECT_TRUE(!(o4 <= "a"));
+        EXPECT_TRUE("a" <= o4);
+        EXPECT_TRUE(o4 >= "a");
+        EXPECT_TRUE(!("a" >= o4));
+
+        EXPECT_TRUE(o4 == "hello");
+        EXPECT_TRUE("hello" == o4);
+        EXPECT_TRUE(!(o4 != "hello"));
+        EXPECT_TRUE(!("hello" != o4));
+        EXPECT_TRUE(!(o4 < "hello"));
+        EXPECT_TRUE(!("hello" < o4));
+        EXPECT_TRUE(!(o4 > "hello"));
+        EXPECT_TRUE(!("hello" > o4));
+        EXPECT_TRUE(o4 <= "hello");
+        EXPECT_TRUE("hello" <= o4);
+        EXPECT_TRUE(o4 >= "hello");
+        EXPECT_TRUE("hello" >= o4);
+    }
+}
