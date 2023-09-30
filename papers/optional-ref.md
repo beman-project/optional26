@@ -3,7 +3,7 @@ title: std::optional<T&>
 document: D2988R0
 date: today
 audience:
-  - None
+  - LEWG
 author:
   - name: Steve Downey
     email: <sdowney@gmail.com>, <sdowney2@bloomberg.net>
@@ -15,6 +15,8 @@ toc: false
 An optional over a reference such that the post condition on assignment is independent of the engaged state, always producing a rebound reference, and assigning a U to a T is disallowed by static_assert if a bind a U can not be bound to a T&.
 
 # Comparison table
+
+<!-- these examples need better motivation or context. I had a hard time trying to figure out what is said here -->
 
 ::: cmptable
 
@@ -59,7 +61,8 @@ o.transform([&](auto c&){
 :::
 
 # Motivation
-Optionals holding references are common other than in the standard libary's implementation.  The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semanics proposed here.
+Optionals holding references are common other than in the standard libary's implementation. The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semanics proposed here. 
+One standard library implementation already provides an implementation of `std::optional<T&>` but disables its use, because the standard forbids it.
 
 The research in JeanHeyd Meneide's _References for Standard Library Vocabulary Types - an optional case study._ [@P1683R0] shows conclusively that rebind semantics are the only safe semantic as assign through on engaged is too bug-prone. Implementations that attempt assign-through are abandoned. The standard library should follow existing practice and supply an `optional<T&>` that rebinds on assignment.
 
@@ -70,6 +73,8 @@ There are well motivated suggestions that perhaps instead of an `optional<T&>` t
 That from `std::tuple<Args...>` we can't guarantee that `std::variant<Args...>` is valid is a problem, and one that reflection can't solve. A language sum type could, but we need agreement on the semantics.
 
 The sematics of a variant with a reference are as if it holds the address of the referent when refering to that referent. All other sematics are worse. Not being albe to express a variant<T&> is inconsistent, hostile, and strictly worse than disallowing it.
+
+In freestanding environments or for safety-critical libraries, an optional type over references is important to implement containers, that otherwise as the standard library either would cause undefined behavior when accessing an non-available element, throw an exception, or silently create the element. Returning a plain pointer for such an optional reference, as the core guidelines suggest, is a non-type-safe solution and doesn't protect in any way from accessing an non-existing element by a nullptr dereference. In addition, the monadic APIs of std::optional makes is especially attractive by streamlining client code receiving such an optional reference, in contrast to a pointer that requires an explicit nullptr check and de-reference.
 
 # Design
 
