@@ -71,6 +71,8 @@ There are well motivated suggestions that perhaps instead of an optional<T&> the
 
 The design is straightforward. The optional<T&> holds a pointer to the underlying object of type T, or nullptr if the optional is disengaged. The implementation is simple, especially with C++20 and up techniques, using concept constraints. As the held pointer is a primitive regular type with reference semantics, many operations can be defaulted and are noexcept by nature. See https://github.com/steve-downey/optional_ref and https://github.com/steve-downey/optional_ref/blob/main/src/smd/optional/optional.h for a reference implementation. The optional<T&> implementation is less than 200 lines of code, much of it the monadic functions with identical textual implementations with different signatures and different overloads being called.
 
+In place construction is not supported as it would just be a way of providing immediate life-time issues.
+
 # Shallow vs Deep `const`
 There is some implementation divergence in optionals about deep const for optional<T&>. That is, can the referred to int be modified through a const optional<int&>. Does operator->() returns an int* or a const int*, and does operator*() return an int& or a const int&. I believe it is overall more defensible if the const is shallow as it would be for a `struct ref {int * p;}` where the constness of the struct ref does not affect if the p pointer can be written through. This is consistent with the rebinding behavior being proposed.
 
