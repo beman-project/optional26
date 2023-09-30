@@ -562,11 +562,6 @@ TEST(OptionalTest, SwapNullIntializedWithValue) {
 }
 
 TEST(OptionalTest, Emplace) {
-  std::pair<std::pair<int, int>, std::pair<double, double>> p;
-  union {
-    struct empty {} _;
-    std::pair<std::pair<int, int>, std::pair<double, double>> val;
-  } u;
     smd::optional::optional<
         std::pair<std::pair<int, int>, std::pair<double, double>>>
         i;
