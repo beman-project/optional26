@@ -896,7 +896,9 @@ class optional<T&> {
     //    constexpr optional(const optional&);
     //    constexpr optional(optional&&) noexcept(/* see below */);
     //    template<class U = T>
-    //      constexpr explicit(/* see below */ ) optional(U&&);
+    //      constexpr optional(U&&);
+    //    template <class U>
+    //       constexpr explicit optional(const optional<U>& rhs) noexcept;
 
     // [optional.dtor], destructor
     //    constexpr ~optional();
@@ -916,22 +918,17 @@ class optional<T&> {
     //    constexpr void swap(optional&) noexcept(/* see below */);
 
     // [optional.observe], observers
-    //    constexpr const T*  operator->() const noexcept;
-    //    constexpr T*        operator->() noexcept;
-    //  constexpr const T&  operator*() const& noexcept;
-    //  constexpr T&        operator*() & noexcept;
-    // constexpr T&&       operator*() && noexcept;
-    // constexpr const T&& operator*() const&& noexcept;
-    // constexpr explicit  operator bool() const noexcept;
-    // constexpr bool      has_value() const noexcept;
-    // constexpr const T&  value() const&;
-    // constexpr T&        value() &;
-    // constexpr T&&       value() &&;
-    // constexpr const T&& value() const&&;
-    // template <class U>
-    // constexpr T value_or(U&&) const&;
-    // template <class U>
-    // constexpr T value_or(U&&) &&;
+    //    constexpr T*  operator->() const noexcept;
+    //    constexpr T&  operator*() const& noexcept;
+    //    constexpr T&& operator*() const&& noexcept;
+    //    constexpr explicit  operator bool() const noexcept;
+    //    constexpr bool      has_value() const noexcept;
+    //    constexpr T&  value() const&;
+    //    constexpr T&& value() const&&;
+    //    template <class U>
+    //      constexpr T value_or(U&&) const&;
+    //    template <class U>
+    //      constexpr T value_or(U&&) &&;
 
     // [optional.monadic], monadic operations
     // template <class F>
@@ -1012,28 +1009,15 @@ class optional<T&> {
 
     void swap(optional& rhs) noexcept { std::swap(value_, rhs.value_); }
 
-    constexpr const T* operator->() const noexcept { return value_; }
-    constexpr T*       operator->() noexcept { return value_; }
+    constexpr T* operator->() const noexcept { return value_; }
 
-    constexpr const T&  operator*() const& noexcept { return *value_; }
-    constexpr T&        operator*() & noexcept { return *value_; }
-    constexpr T&&       operator*() && noexcept { return *value_; }
-    constexpr const T&& operator*() const&& noexcept { return *value_; }
+    constexpr T&  operator*() const& noexcept { return *value_; }
+    constexpr T&& operator*() const&& noexcept { return *value_; }
 
     constexpr explicit operator bool() const noexcept { return value_ != nullptr; }
     constexpr bool     has_value() const noexcept { return value_ != nullptr; }
 
-    constexpr const T& value() const& {
-        if (has_value())
-            return *value_;
-        throw bad_optional_access();
-    }
-    constexpr T& value() & {
-        if (has_value())
-            return *value_;
-        throw bad_optional_access();
-    }
-    constexpr T&& value() && {
+    constexpr T& value() const& {
         if (has_value())
             return *value_;
         throw bad_optional_access();
