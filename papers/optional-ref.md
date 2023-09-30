@@ -61,7 +61,8 @@ o.transform([&](auto c&){
 :::
 
 # Motivation
-Optionals holding references are common other than in the standard libary's implementation (or even in one of the big open sources standard libraries).  The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semanics proposed here.
+Optionals holding references are common other than in the standard libary's implementation. The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semanics proposed here. 
+One standard library implementation already provides an implementation of `std::optional<T&>` but disables its use, because the standard forbids it.
 
 The research in [@P1683R0] shows conclusively that rebind semantics are the only safe semantic as assign through on engaged is too bug-prone. Implementations that attempt assign-through are abandoned. The standard library should follow existing practice and supply an optional<T&> that rebinds on assignment.
 
