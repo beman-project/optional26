@@ -277,11 +277,11 @@ TEST(OptionalRefTest, Triviality) {
             T& operator=(T&&) { return *this; };
             ~T() {}
         };
-        EXPECT_TRUE(!std::is_trivially_copy_constructible<smd::optional::optional<T&>>::value);
-        EXPECT_TRUE(!std::is_trivially_copy_assignable<smd::optional::optional<T&>>::value);
-        EXPECT_TRUE(!std::is_trivially_move_constructible<smd::optional::optional<T&>>::value);
-        EXPECT_TRUE(!std::is_trivially_move_assignable<smd::optional::optional<T&>>::value);
-        EXPECT_TRUE(!std::is_trivially_destructible<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_trivially_copy_constructible<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_trivially_copy_assignable<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_trivially_move_constructible<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_trivially_move_assignable<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_trivially_destructible<smd::optional::optional<T&>>::value);
     }
 }
 
@@ -314,10 +314,10 @@ TEST(OptionalRefTest, Deletion) {
             T& operator=(const T&) = delete;
             T& operator=(T&&)      = delete;
         };
-        EXPECT_TRUE(!std::is_copy_constructible<smd::optional::optional<T&>>::value);
-        EXPECT_TRUE(!std::is_copy_assignable<smd::optional::optional<T&>>::value);
-        EXPECT_TRUE(!std::is_move_constructible<smd::optional::optional<T&>>::value);
-        EXPECT_TRUE(!std::is_move_assignable<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_copy_constructible<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_copy_assignable<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_move_constructible<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_move_assignable<smd::optional::optional<T&>>::value);
     }
 
     {
@@ -327,8 +327,8 @@ TEST(OptionalRefTest, Deletion) {
             T& operator=(const T&) = delete;
             T& operator=(T&&)      = default;
         };
-        EXPECT_TRUE(!std::is_copy_constructible<smd::optional::optional<T&>>::value);
-        EXPECT_TRUE(!std::is_copy_assignable<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_copy_constructible<smd::optional::optional<T&>>::value);
+        EXPECT_TRUE(std::is_copy_assignable<smd::optional::optional<T&>>::value);
         EXPECT_TRUE(std::is_move_constructible<smd::optional::optional<T&>>::value);
         EXPECT_TRUE(std::is_move_assignable<smd::optional::optional<T&>>::value);
     }
@@ -422,10 +422,13 @@ TEST(OptionalRefTest, Observers) {
     EXPECT_TRUE(o2.value_or(42) == 42);
     EXPECT_TRUE(o3.value() == 42);
     auto success = std::is_same<decltype(o1.value()), int&>::value;
+    static_assert(std::is_same<decltype(o1.value()), int&>::value);
     EXPECT_TRUE(success);
-    success = std::is_same<decltype(o3.value()), const int&>::value;
+    success = std::is_same<decltype(o3.value()), int&>::value;
+    static_assert(std::is_same<decltype(o3.value()), int&>::value);
     EXPECT_TRUE(success);
     success = std::is_same<decltype(std::move(o1).value()), int&&>::value;
+    static_assert(std::is_same<decltype(std::move(o1).value()), int&&>::value);
     EXPECT_TRUE(success);
 }
 
