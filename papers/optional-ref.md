@@ -212,7 +212,9 @@ constexpr optional(optional&&) noexcept;
 [3.1]{.pnum}    -- `!is-optional<decay_t<U>>::value is true`
 
 [3]{.pnum} *Mandates*:
+
 [3.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
+
 [3.1]{.pnum}    -- `std::is_lvalue_reference<U>::value`
 
 [3]{.pnum} *Effects*: Initializes `val` with the address of u
@@ -230,6 +232,7 @@ constexpr optional(optional&&) noexcept;
 [3]{.pnum} *Mandates*:
 
 [3.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
+
 [3.1]{.pnum}    -- `std::is_lvalue_reference<U>::value`
 
 [3]{.pnum} *Effects*:

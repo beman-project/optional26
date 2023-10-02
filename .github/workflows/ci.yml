@@ -13,6 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        include:
           - name: "clang17"
             pkg: "clang-17 clang-tidy-17 g++-13 libc++-17-dev  libc++1-17 libc++abi-17-dev libc++abi1-17 libunwind-17-dev"
             toolchain: clang-17
