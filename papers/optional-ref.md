@@ -66,6 +66,8 @@ One standard library implementation already provides an implementation of `std::
 
 The research in JeanHeyd Meneide's _References for Standard Library Vocabulary Types - an optional case study._ [@P1683R0] shows conclusively that rebind semantics are the only safe semantic as assign through on engaged is too bug-prone. Implementations that attempt assign-through are abandoned. The standard library should follow existing practice and supply an `optional<T&>` that rebinds on assignment.
 
+Additional background reading on `optional<T&>` can be found in JeanHeyd Meneide's article _To Bind and Loose a Reference_ [@REFBIND].
+
 There is a principled reason not to provide a partial specialization over `T&` as the sematics are in some ways subtly different than the primary template. Assignment may have side-effects not present in the primary, which has pure value semantics. However, I argue this is misleading, as reference semantics often has side-effects. The proposed semantic is similar to what an `optional<std::reference_wrapper<T>>` provides, with much greater usability.
 
 There are well motivated suggestions that perhaps instead of an `optional<T&>` there should be an `optional_ref<T>` that is an independent primary template. This proposal rejects that. We need a policy over all sum types as to how reference semantics should work, as optional is a variant over T and monostate. That the library sum type can not express the same range of types as the product type, tuple, is an increasing problem as we add more types logically equivalent to a variant. The template types `optional` and `expected` should behave as extensions of `variant<T, monostate>` and `variant<T, E>`, or we lose the ability to reason about generic types.
@@ -241,3 +243,16 @@ Destructor      [optional_ref.dtor]
          constexpr ~optional();
 ```
 [5]{.pnum} *Remarks*: The destructor is trivial.
+
+
+
+---
+references:
+  - id: REFBIND
+    citation-label: BindRef
+    title: "To Bind and Loose a Reference"
+    author:
+      - family: Meneide
+        given: JeanHeyd
+    URL: https://thephd.dev/to-bind-and-loose-a-reference-optional
+---
