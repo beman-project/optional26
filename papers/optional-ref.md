@@ -61,10 +61,12 @@ o.transform([&](auto c&){
 :::
 
 # Motivation
-Optionals holding references are common other than in the standard libary's implementation. The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semanics proposed here. 
+Optionals holding references are common other than in the standard libary's implementation. The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semanics proposed here.
 One standard library implementation already provides an implementation of `std::optional<T&>` but disables its use, because the standard forbids it.
 
 The research in JeanHeyd Meneide's _References for Standard Library Vocabulary Types - an optional case study._ [@P1683R0] shows conclusively that rebind semantics are the only safe semantic as assign through on engaged is too bug-prone. Implementations that attempt assign-through are abandoned. The standard library should follow existing practice and supply an `optional<T&>` that rebinds on assignment.
+
+Additional background reading on `optional<T&>` can be found in JeanHeyd Meneide's article _To Bind and Loose a Reference_ [@REFBIND].
 
 There is a principled reason not to provide a partial specialization over `T&` as the sematics are in some ways subtly different than the primary template. Assignment may have side-effects not present in the primary, which has pure value semantics. However, I argue this is misleading, as reference semantics often has side-effects. The proposed semantic is similar to what an `optional<std::reference_wrapper<T>>` provides, with much greater usability.
 
@@ -226,6 +228,7 @@ constexpr optional(optional&&) noexcept;
 [3.1]{.pnum}    -- `!is-optional<decay_t<U>>::value is true`
 
 [3]{.pnum} *Mandates*:
+
 [3.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
 [3.1]{.pnum}    -- `std::is_lvalue_reference<U>::value`
 
@@ -237,3 +240,16 @@ Destructor      [optional_ref.dtor]
          constexpr ~optional();
 ```
 [5]{.pnum} *Remarks*: The destructor is trivial.
+
+
+
+---
+references:
+  - id: REFBIND
+    citation-label: BindRef
+    title: "To Bind and Loose a Reference"
+    author:
+      - family: Meneide
+        given: JeanHeyd
+    URL: https://thephd.dev/to-bind-and-loose-a-reference-optional
+---
