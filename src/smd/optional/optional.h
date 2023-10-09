@@ -1022,6 +1022,7 @@ class optional<T&> {
             return *value_;
         throw bad_optional_access();
     }
+
     constexpr T&& value() const&& {
         if (has_value())
             return *value_;
@@ -1093,6 +1094,7 @@ class optional<T&> {
     constexpr auto transform(F&& f) const&& {
         return detail::optional_map_impl(std::move(*this), std::forward<F>(f));
     }
+
     template <class F>
     constexpr optional or_else(F&& f) && {
         if (*this) {
@@ -1101,6 +1103,7 @@ class optional<T&> {
             return std::forward<F>(f)();
         }
     }
+
     template <class F>
     constexpr optional or_else(F&& f) const& {
         if (*this) {
