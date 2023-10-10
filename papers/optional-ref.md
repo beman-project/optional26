@@ -22,6 +22,7 @@ An optional over a reference such that the post condition on assignment is indep
 
 ### Before
 ```c++
+// Various pointers instead of optional<T&>
 std::shared_ptr<Cat> cat = find_cat("Fido");
 // or
 std::map<std::string, Cat>::iterator cat
@@ -40,6 +41,7 @@ std::optional<Cat&> cat = find_cat("Fido");
 
 ### Before
 ```c++
+//Mutable optional
 std::optional<Cat*> c = find_cat("Fido");
 if (c) {
     if (*c) {
@@ -53,7 +55,9 @@ std::optional<Cat&> c = find_cat("Fido");
 if (c) {
     *c = Cat("Fynn", color::orange);
 }
+
 //or
+
 o.transform([&](auto c&){
     c = Cat("Fynn", color::orange);
     });
