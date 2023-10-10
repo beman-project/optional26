@@ -7,6 +7,8 @@ audience:
 author:
   - name: Steve Downey
     email: <sdowney@gmail.com>, <sdowney2@bloomberg.net>
+  - name: Peter Sommerlad
+    email: <peter.cpp@sommerlad.ch>
 
 toc: false
 ---
@@ -18,24 +20,73 @@ An optional over a reference such that the post condition on assignment is indep
 
 <!-- these examples need better motivation or context. I had a hard time trying to figure out what is said here -->
 
+Here we first look at three possible alternative design options for an object retrieval function that might fail to find a corresponding object in a container.
+
+## Using a raw pointer result for an element search function
+
+This is the convention the C++ core guidelines suggest, to use a raw pointer for representing optional non-owning references.
+However, there is a user-required check against `nullptr`, no type safety meaning no safety against mis-interpreting such a raw pointer, for example by using pointer arithmetic on it.
+
 ::: cmptable
 
 ### Before
 ```c++
-// Various pointers instead of optional<T&>
-std::shared_ptr<Cat> cat = find_cat("Fido");
-// or
-std::map<std::string, Cat>::iterator cat
-    = find_cat("Fido");
-// or
 Cat* cat = find_cat("Fido");
+if (cat!=nullptr) { return doit(*cat); } 
 ```
 ### After
 ```c++
 std::optional<Cat&> cat = find_cat("Fido");
+return cat.and_then(doit);
 ```
 
 :::
+
+## returning result of an element search function via a (smart) pointer
+
+The disadvantage here is that `std::experimental::observer_ptr<T>` is both non-standard and not well named, therefore this example uses `shared_ptr` that would have the advantage of avoiding dangling through potential lifetime extension.
+However, on the downside is still the explicit checks against the `nullptr` on the client side, failing so risks undefined behavior.
+
+::: cmptable
+
+### Before
+```c++
+// use a smart pointer instead of optional<T&>
+std::shared_ptr<Cat> cat = find_cat("Fido");
+if (cat != nullptr) {...
+```
+### After
+```c++
+std::optional<Cat&> cat = find_cat("Fido");
+cat.and_then([](Cat& thecat){...
+```
+
+:::
+
+## returning result of an element search function via an iterator
+
+This might be the obvious choice, for example, for associative containers, especially since their iterator stability guarantees.
+However, returning such an iterator will leak the underlying container type as well necessarily requires one to know the sentinel of the container to check for the not-found case.
+
+::: cmptable
+
+### Before
+```c++
+std::map<std::string, Cat>::iterator cat
+    = find_cat("Fido");
+if (cat != theunderlyingmap.end()){ ...
+```
+### After
+```c++
+std::optional<Cat&> cat = find_cat("Fido");
+cat.and_then([](Cat& thecat){...
+```
+
+:::
+
+## Using an `optional<T*>` as a substitute for `optional<T&>`
+
+This approach adds another level of indirection and requries to checks to take a definite action.
 
 ::: cmptable
 
@@ -45,7 +96,7 @@ std::optional<Cat&> cat = find_cat("Fido");
 std::optional<Cat*> c = find_cat("Fido");
 if (c) {
     if (*c) {
-        *c = Cat("Fynn", color::orange);
+        *c.value() = Cat("Fynn", color::orange);
     }
 }
 ```
@@ -58,11 +109,36 @@ if (c) {
 
 //or
 
-o.transform([&](auto c&){
+o.transform([](Cat& c){
     c = Cat("Fynn", color::orange);
     });
 ```
 :::
+
+## Using `optional<reference_wrapper<T>>`
+
+While `reference_wrapper<T>` implicitly coverts to `T&` in many practical situation, especially in generic code, such an implicit conversion is not triggered, thus requiring `o.value().get()` train wrecks, to access the wrapped reference, when the optional is engaged. In addition it lacks the possible optimization of the internal representation of `optional<T&>`. 
+
+::: cmptable
+
+### Before
+```c++
+// use a smart pointer instead of optional<T&>
+std::optional<std::reference_wrapper<Cat>> cat = find_cat("Fido");
+if (cat) {
+    cat.value().get() =  Cat("Fynn", color::orange);
+...
+```
+### After
+```c++
+std::optional<Cat&> cat = find_cat("Fido");
+cat.and_then([](Cat& thecat){
+    thecat = Cat("Fynn", color::orange);
+...
+```
+
+:::
+
 
 # Motivation
 Optionals holding references are common other than in the standard libary's implementation. The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semanics proposed here.
