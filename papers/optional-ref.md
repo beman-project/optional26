@@ -1,6 +1,6 @@
 ---
 title: std::optional<T&>
-document: D2988R0
+document: P2988R0
 date: today
 audience:
   - LEWG
