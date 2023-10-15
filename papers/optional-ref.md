@@ -14,12 +14,12 @@ toc: false
 ---
 
 # Abstract
-We propose to fix a hole left intentional from `std::optional`:
+We propose to fix a hole intentionally left in `std::optional`:
 An optional over a reference such that the post condition on assignment is independent of the engaged state, always producing a rebound reference, and assigning a `U` to a `T` is disallowed by `static_assert` if a `U` can not be bound to a `T&`.
 
 # Comparison table
 
-There are many situations where an optional holding a reference can come handy. 
+There are many situations where an optional holding a reference can come in handy.
 Here we first look at three possible alternative design options for an object retrieval function that might fail to find a corresponding object in a container.
 Then there are two more examples showing the inferiority of potential workarounds to the missing `std::optional<T&>`.
 
@@ -87,7 +87,7 @@ cat.and_then([](Cat& thecat){...
 
 ## Using an `optional<T*>` as a substitute for `optional<T&>`
 
-This approach adds another level of indirection and requires to checks to take a definite action.
+This approach adds another level of indirection and requires two checks to take a definite action.
 
 ::: cmptable
 
@@ -142,7 +142,7 @@ cat.and_then([](Cat& thecat){
 
 
 # Motivation
-Optionals holding references are common in other than in the standard libary's implementation. The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semantics proposed here.
+Other than the standard library's implementation of optional, optionals holding references are common. The desire for such a feature is well understood, and many optional types in commonly used libraries provide it, with the semantics proposed here.
 One standard library implementation already provides an implementation of `std::optional<T&>` but disables its use, because the standard forbids it.
 
 The research in JeanHeyd Meneide's _References for Standard Library Vocabulary Types - an optional case study._ [@P1683R0] shows conclusively that rebind semantics are the only safe semantic as assign through on engaged is too bug-prone. Implementations that attempt assign-through are abandoned. The standard library should follow existing practice and supply an `optional<T&>` that rebinds on assignment.
@@ -159,7 +159,7 @@ That we can't guarantee from `std::tuple<Args...>` (product type) that `std::var
 
 The semantics of a variant with a reference are as if it holds the address of the referent when referring to that referent. All other semantics are worse. Not being able to express a variant<T&> is inconsistent, hostile, and strictly worse than disallowing it.
 
-Thus, we expect future papers to propose `std::expected<T&,E>` and `std::variant` with the ability to hold references. 
+Thus, we expect future papers to propose `std::expected<T&,E>` and `std::variant` with the ability to hold references.
 The latter can be used as an iteration type over `std::tuple` elements.
 
 
