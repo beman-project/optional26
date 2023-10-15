@@ -12,7 +12,7 @@ toc: false
 ---
 
 # Abstract
-An optional over a reference such that the post condition on assignment is independent of the engaged state, always producing a rebound reference, and assigning a U to a T is disallowed by static_assert if a bind a U can not be bound to a T&.
+An optional over a reference such that the post condition on assignment is independent of the engaged state, always producing a rebound reference, and assigning a `U` to a `T` is disallowed by `static_assert` if a bind a `U` can not be bound to a `T&`.
 
 # Comparison table
 
@@ -80,11 +80,11 @@ That from `std::tuple<Args...>` we can't guarantee that `std::variant<Args...>` 
 
 The sematics of a variant with a reference are as if it holds the address of the referent when refering to that referent. All other sematics are worse. Not being albe to express a variant<T&> is inconsistent, hostile, and strictly worse than disallowing it.
 
-In freestanding environments or for safety-critical libraries, an optional type over references is important to implement containers, that otherwise as the standard library either would cause undefined behavior when accessing an non-available element, throw an exception, or silently create the element. Returning a plain pointer for such an optional reference, as the core guidelines suggest, is a non-type-safe solution and doesn't protect in any way from accessing an non-existing element by a nullptr dereference. In addition, the monadic APIs of std::optional makes is especially attractive by streamlining client code receiving such an optional reference, in contrast to a pointer that requires an explicit nullptr check and de-reference.
+In freestanding environments or for safety-critical libraries, an optional type over references is important to implement containers, that otherwise as the standard library either would cause undefined behavior when accessing an non-available element, throw an exception, or silently create the element. Returning a plain pointer for such an optional reference, as the core guidelines suggest, is a non-type-safe solution and doesn't protect in any way from accessing an non-existing element by a `nullptr` dereference. In addition, the monadic APIs of `std::optional` makes is especially attractive by streamlining client code receiving such an optional reference, in contrast to a pointer that requires an explicit nullptr check and de-reference.
 
 # Design
 
-The design is straightforward. The optional<T&> holds a pointer to the underlying object of type T, or nullptr if the optional is disengaged. The implementation is simple, especially with C++20 and up techniques, using concept constraints. As the held pointer is a primitive regular type with reference semantics, many operations can be defaulted and are noexcept by nature. See https://github.com/steve-downey/optional_ref and https://github.com/steve-downey/optional_ref/blob/main/src/smd/optional/optional.h for a reference implementation. The optional<T&> implementation is less than 200 lines of code, much of it the monadic functions with identical textual implementations with different signatures and different overloads being called.
+The design is straightforward. The `optional<T&>` holds a pointer to the underlying object of type `T`, or `nullptr` if the optional is disengaged. The implementation is simple, especially with C++20 and up techniques, using concept constraints. As the held pointer is a primitive regular type with reference semantics, many operations can be defaulted and are `noexcept` by nature. See https://github.com/steve-downey/optional_ref and https://github.com/steve-downey/optional_ref/blob/main/src/smd/optional/optional.h for a reference implementation. The `optional<T&>` implementation is less than 200 lines of code, much of it the monadic functions with identical textual implementations with different signatures and different overloads being called.
 
 In place construction is not supported as it would just be a way of providing immediate life-time issues.
 
@@ -219,7 +219,7 @@ constexpr optional(optional&&) noexcept;
 
 [3.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
 
-[3.1]{.pnum}    -- `std::is_lvalue_reference<U>::value`
+[3.1]{.pnum}    -- `std::is_lvalue_reference_v<U>`
 
 [3]{.pnum} *Effects*: Initializes `val` with the address of u
 
