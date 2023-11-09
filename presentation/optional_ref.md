@@ -165,7 +165,7 @@ missing in std<br/>
 
 N3406 says it at all:
 
-> These entities [optional references] are surprising to many people because they do not appear to add any more functionality than pointers do.
+> These entities [optional refs] are surprising to many people because they do not appear to add any more functionality than pointers do.
 
 I say:
 
@@ -177,3 +177,6 @@ I say:
 * monadic API makes usage superior to `T*`
 
 :::
+
+# [P2988](https://wg21.link/P2988)
+
