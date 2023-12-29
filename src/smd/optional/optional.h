@@ -1023,7 +1023,19 @@ class optional<T&> {
         throw bad_optional_access();
     }
 
-    constexpr T&& value() const&& {
+    constexpr T& value() & {
+        if (has_value())
+            return *value_;
+        throw bad_optional_access();
+    }
+
+    constexpr T&& value() && {
+        if (has_value())
+            return *value_;
+        throw bad_optional_access();
+    }
+
+    constexpr const T&& value() const&& {
         if (has_value())
             return *value_;
         throw bad_optional_access();

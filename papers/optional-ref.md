@@ -181,17 +181,16 @@ Modify 22.5 Optional Objects
 
 add
 
-```cpp
-Class template optional[optional.optional_ref]
-General[optional.optional_ref.general]
+## Class template optional         [optional.optional_ref]
+### General                         [optional.optional_ref.general]
+``` C++
 
-namespace std {
 namespace std {
   template<class T>
   class optional<T&> {
   public:
     using value_type = T;
-    [optional_ref.ctor], constructors
+    // [optional_ref.ctor], constructors
          constexpr optional() noexcept;
          constexpr optional(nullopt_t) noexcept;
          constexpr optional(const optional&) noexcept;
@@ -201,10 +200,10 @@ namespace std {
          template <class U>
            constexpr explicit optional(const optional<U>& rhs) noexcept;
 
-      [optional_ref.dtor], destructor
+      // [optional_ref.dtor], destructor
          constexpr ~optional();
 
-      [optional_ref.assign], assignment
+      // [optional_ref.assign], assignment
          constexpr optional& operator=(nullopt_t) noexcept;
          constexpr optional& operator=(const optional&);
          constexpr optional& operator=(optional&&) noexcept(/* see below */);
@@ -215,54 +214,47 @@ namespace std {
          template <class U>
            constexpr optional& operator=(optional<U>&&);
 
-      [optional_ref.swap], swap
+      // [optional_ref.swap], swap
          constexpr void swap(optional&) noexcept(/* see below */);
 
-      [optional_ref.observe], observers
+      // [optional_ref.observe], observers
          constexpr T*        operator->() const noexcept;
          constexpr T&        operator*() const& noexcept;
          constexpr T&&       operator*() const&& noexcept;
          constexpr explicit  operator bool() const noexcept;
          constexpr bool      has_value() const noexcept;
-         constexpr T&        value() const&;
-         constexpr T&& value() const&&;
-         template <class U>
-           constexpr T value_or(U&&) const&;
+         constexpr const T& value() const &;                    // freestanding-deleted
+         constexpr T& value() &;                                // freestanding-deleted
+         constexpr T&& value() &&;                              // freestanding-deleted
+         constexpr const T&& value() const &&;                  // freestanding-deleted
+         template <class U>  constexpr T value_or(U&&) const&;
+         template <class U>  constexpr T value_or(U&&) &&;
 
-      [optional_ref.monadic], monadic operations
-         template <class F>
-           constexpr auto and_then(F&& f) &;
-         template <class F>
-           constexpr auto and_then(F&& f) &&;
-         template <class F>
-           constexpr auto and_then(F&& f) const&;
-         template <class F>
-           constexpr auto and_then(F&& f) const&&;
-         template <class F>
-           constexpr auto transform(F&& f) &;
-         template <class F>
-           constexpr auto transform(F&& f) &&;
-         template <class F>
-           constexpr auto transform(F&& f) const&;
-         template <class F>
-           constexpr auto transform(F&& f) const&&;
-         template <class F>
-           constexpr optional or_else(F&& f) &&;
-         template <class F>
-           constexpr optional or_else(F&& f) const&;
+      // [optional_ref.monadic], monadic operations
+         template <class F> constexpr auto and_then(F&& f) &;
+         template <class F> constexpr auto and_then(F&& f) &&;
+         template <class F> constexpr auto and_then(F&& f) const&;
+         template <class F> constexpr auto and_then(F&& f) const&&;
+         template <class F> constexpr auto transform(F&& f) &;
+         template <class F> constexpr auto transform(F&& f) &&;
+         template <class F> constexpr auto transform(F&& f) const&;
+         template <class F> constexpr auto transform(F&& f) const&&;
+         template <class F> constexpr optional or_else(F&& f) &&;
+         template <class F> constexpr optional or_else(F&& f) const&;
 
-      [optional_ref.mod], modifiers
+      // [optional_ref.mod], modifiers
          constexpr void reset() noexcept;
   private:
     T *val;         // exposition only
+};
 ```
 
-Constructors[optional\_ref.ctor]
+#### Constructors                          [optional\_ref.ctor]
 
 ```cpp
 constexpr optional() noexcept;
 
-constexpr optional(nullopt\_t) noexcept;
+constexpr optional(nullopt_t) noexcept;
 ```
 
 [1]{.pnum} *Postconditions*: `*this` does not contain a value.
@@ -290,45 +282,45 @@ constexpr optional(optional&&) noexcept;
 [5]{.pnum} *Remarks*: The constructor is trivial.
 
 ```cpp
-         template<class U = T>
-           constexpr optional(U&&);
+template<class U = T>
+  constexpr optional(U&&);
 ```
-[3]{.pnum} *Constraints*:
+[6]{.pnum} *Constraints*:
 
-[3.1]{.pnum}    -- `!is-optional<decay_t<U>>::value is true`
+[6.1]{.pnum}    `!is-optional<decay_t<U>>::value is true`
 
-[3]{.pnum} *Mandates*:
+[7]{.pnum} *Mandates*:
 
-[3.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
+[7.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
 
-[3.1]{.pnum}    -- `std::is_lvalue_reference_v<U>`
+[7.1]{.pnum}    -- `std::is_lvalue_reference_v<U>`
 
-[3]{.pnum} *Effects*: Initializes `val` with the address of u
+[8]{.pnum} *Effects*: Initializes `val` with the address of u
 
-[4]{.pnum} *Postconditions*: `this->has_value() == true`.
+[9]{.pnum} *Postconditions*: `this->has_value() == true`.
 
 ```cpp
-         template <class U>
-           constexpr explicit optional(const optional<U>& rhs) noexcept;
+template <class U>
+  constexpr explicit optional(const optional<U>& rhs) noexcept;
 ```
-[3]{.pnum} *Constraints*:
+[10]{.pnum} *Constraints*:
 
-[3.1]{.pnum}    -- `!is-optional<decay_t<U>>::value is true`
+[10.1]{.pnum}    `!is-optional<decay_t<U>>::value is true`
 
-[3]{.pnum} *Mandates*:
+[11]{.pnum} *Mandates*:
 
-[3.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
+[11.1]{.pnum}    -- `std::is_constructible_v<std::add_lvalue_reference_t<T>, U>`;
 
-[3.1]{.pnum}    -- `std::is_lvalue_reference<U>::value`
+[11.1]{.pnum}    -- `std::is_lvalue_reference<U>::value`
 
-[3]{.pnum} *Effects*:
+[12]{.pnum} *Effects*:
 
 
-Destructor      [optional_ref.dtor]
+#### Destructor      [optional_ref.dtor]
 ```cpp
-         constexpr ~optional();
+constexpr ~optional();
 ```
-[5]{.pnum} *Remarks*: The destructor is trivial.
+[13]{.pnum} *Remarks*: The destructor is trivial.
 
 
 
