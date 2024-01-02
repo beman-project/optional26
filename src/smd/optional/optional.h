@@ -959,12 +959,14 @@ class optional<T&> {
     T* value_; // exposition only
 
   public:
+  //  \rSec3[optional.ctor]{Constructors}
+
     constexpr optional() noexcept : value_(nullptr) {}
 
     constexpr optional(nullopt_t) noexcept : value_(nullptr) {}
 
     constexpr optional(const optional& rhs) noexcept = default;
-    constexpr optional(optional&& rhs)               = default;
+    constexpr optional(optional&& rhs) noexcept      = default;
 
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>::value)
@@ -976,14 +978,19 @@ class optional<T&> {
     template <class U>
     constexpr explicit optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
 
+  //  \rSec3[optional.dtor]{Destructor}
+
     ~optional() = default;
+
+  // \rSec3[optional.assign]{Assignment}
 
     optional& operator=(nullopt_t) noexcept {
         value_ = nullptr;
         return *this;
     }
 
-    optional& operator=(const optional& rhs) = default;
+    optional& operator=(const optional& rhs) noexcept = default;
+    optional& operator=(optional&& rhs) noexcept = default;
 
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>::value)
@@ -1007,8 +1014,11 @@ class optional<T&> {
         return *this = std::forward<U>(u);
     }
 
+    //   \rSec3[optional.swap]{Swap}
+
     void swap(optional& rhs) noexcept { std::swap(value_, rhs.value_); }
 
+    // \rSec3[optional.observe]{Observers}
     constexpr T* operator->() const noexcept { return value_; }
 
     constexpr T&  operator*() const& noexcept { return *value_; }
@@ -1043,17 +1053,19 @@ class optional<T&> {
 
     template <class U>
     constexpr T value_or(U&& u) const& {
-        static_assert(std::is_copy_constructible<T>::value && std::is_convertible<U&&, T>::value,
+        static_assert(std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>,
                       "T must be copy constructible and convertible from U");
         return has_value() ? value() : static_cast<T>(std::forward<U>(u));
     }
 
     template <class U>
     constexpr T value_or(U&& u) && {
-        static_assert(std::is_move_constructible<T>::value && std::is_convertible<U&&, T>::value,
+        static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>,
                       "T must be move constructible and convertible from U");
         return has_value() ? value() : static_cast<T>(std::forward<U>(u));
     }
+
+    //   \rSec3[optional.monadic]{Monadic operations}
 
     template <class F>
     constexpr auto and_then(F&& f) & {

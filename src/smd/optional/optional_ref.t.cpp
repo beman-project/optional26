@@ -70,6 +70,9 @@ TEST(OptionalRefTest, Constructors) {
 
     smd::optional::optional<derived&> d2 = d;
     smd::optional::optional<base&>    b3{d2};
+
+    smd::optional::optional<derived&> empty;
+    smd::optional::optional<base&> fromEmpty(empty);
 }
 
 TEST(OptionalRefTest, Assignment) {
@@ -88,6 +91,15 @@ TEST(OptionalRefTest, Assignment) {
     smd::optional::optional<int&> i2 = i1;
     EXPECT_TRUE(i2);
     EXPECT_TRUE(*i2 = 7);
+
+    smd::optional::optional<int&> empty;
+    EXPECT_FALSE(empty);
+    i2 = empty;
+    EXPECT_FALSE(i2);
+    int eight = 8;
+    empty.emplace(eight);
+    EXPECT_TRUE(empty);
+    EXPECT_EQ(empty, 8);
 }
 
 TEST(OptionalRefTest, RelationalOps) {

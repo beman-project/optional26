@@ -23,7 +23,7 @@ create-venv:
 
 wording : optional_ref_wording.tex wg21.bib | $(VENV)
 	mkdir -p $(DEPS_DIR)
-	$(SOURCE_VENV) latexmk -shell-escape -pdflua -use-make -deps -deps-out=$(DEPS_DIR)/$@.d -MP optional_ref_wording.tex
+	$(SOURCE_VENV) latexmk -f -shell-escape -pdflua -use-make -deps -deps-out=$(DEPS_DIR)/$@.d -MP optional_ref_wording.tex
 
 wg21.bib:
 	curl https://wg21.link/index.bib > wg21.bib
