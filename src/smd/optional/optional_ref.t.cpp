@@ -436,12 +436,70 @@ TEST(OptionalRefTest, Observers) {
     auto success = std::is_same<decltype(o1.value()), int&>::value;
     static_assert(std::is_same<decltype(o1.value()), int&>::value);
     EXPECT_TRUE(success);
+    success = std::is_same<decltype(o2.value()), int&>::value;
+    static_assert(std::is_same<decltype(o2.value()), int&>::value);
+    EXPECT_TRUE(success);
     success = std::is_same<decltype(o3.value()), int&>::value;
     static_assert(std::is_same<decltype(o3.value()), int&>::value);
     EXPECT_TRUE(success);
-    success = std::is_same<decltype(std::move(o1).value()), int&&>::value;
-    static_assert(std::is_same<decltype(std::move(o1).value()), int&&>::value);
+    success = std::is_same<decltype(std::move(o1).value()), int&>::value;
+    static_assert(std::is_same<decltype(std::move(o1).value()), int&>::value);
     EXPECT_TRUE(success);
+
+    success = std::is_same<decltype(*o1), int&>::value;
+    static_assert(std::is_same<decltype(*o1), int&>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(*o2), int&>::value;
+    static_assert(std::is_same<decltype(*o2), int&>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(*o3), int&>::value;
+    static_assert(std::is_same<decltype(*o3), int&>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(*std::move(o1)), int&>::value;
+    static_assert(std::is_same<decltype(*std::move(o1)), int&>::value);
+    EXPECT_TRUE(success);
+
+    success = std::is_same<decltype(o1.operator->()), int*>::value;
+    static_assert(std::is_same<decltype(o1.operator->()), int*>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(o2.operator->()), int*>::value;
+    static_assert(std::is_same<decltype(o2.operator->()), int*>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(o3.operator->()), int*>::value;
+    static_assert(std::is_same<decltype(o3.operator->()), int*>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(std::move(o1).operator->()), int*>::value;
+    static_assert(std::is_same<decltype(std::move(o1).operator->()), int*>::value);
+    EXPECT_TRUE(success);
+
+    struct int_box {int i_;};
+    int_box i1{3};
+    smd::optional::optional<int_box&>       ob1  = i1;
+    smd::optional::optional<int_box&>       ob2;
+    const smd::optional::optional<int_box&> ob3 = i1;
+    success = std::is_same<decltype(ob1->i_), int>::value;
+    static_assert(std::is_same<decltype(ob1->i_), int>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(ob2->i_), int>::value;
+    static_assert(std::is_same<decltype(ob2->i_), int>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(ob3->i_), int>::value;
+    static_assert(std::is_same<decltype(ob3->i_), int>::value);
+    EXPECT_TRUE(success);
+    success = std::is_same<decltype(std::move(ob1)->i_), int>::value;
+    static_assert(std::is_same<decltype(std::move(ob1)->i_), int>::value);
+    EXPECT_TRUE(success);
+
+}
+
+TEST(OptionalRefTest, MoveCheck) {
+    int x = 0;
+    int& y =  std::move(smd::optional::optional<int&>(x)).value();
+    EXPECT_EQ(&y, &x);
+
+    int& z =  *std::move(smd::optional::optional<int&>(x));
+    EXPECT_EQ(&z, &x);
+
 }
 
 TEST(OptionalRefTest, SwapValue) {

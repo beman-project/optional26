@@ -1021,31 +1021,12 @@ class optional<T&> {
     // \rSec3[optional.observe]{Observers}
     constexpr T* operator->() const noexcept { return value_; }
 
-    constexpr T&  operator*() const& noexcept { return *value_; }
-    constexpr T&& operator*() const&& noexcept { return *value_; }
+    constexpr T&  operator*() const noexcept { return *value_; }
 
     constexpr explicit operator bool() const noexcept { return value_ != nullptr; }
     constexpr bool     has_value() const noexcept { return value_ != nullptr; }
 
-    constexpr T& value() const& {
-        if (has_value())
-            return *value_;
-        throw bad_optional_access();
-    }
-
-    constexpr T& value() & {
-        if (has_value())
-            return *value_;
-        throw bad_optional_access();
-    }
-
-    constexpr T&& value() && {
-        if (has_value())
-            return *value_;
-        throw bad_optional_access();
-    }
-
-    constexpr const T&& value() const&& {
+    constexpr T& value() const {
         if (has_value())
             return *value_;
         throw bad_optional_access();
@@ -1100,8 +1081,8 @@ class optional<T&> {
     }
 
     template <class F>
-    constexpr auto transform(F&& f) & {
-        return detail::optional_map_impl(*this, std::forward<F>(f));
+    constexpr auto transform(F&& f) const -> optional<std::invoke_result_t<F, T&>> {
+      return detail::optional_map_impl(*this, std::forward<F>(f));
     }
 
     template <class F>
