@@ -472,75 +472,94 @@ class optional {
     }
 
     template <class F>
-    constexpr auto and_then(F&& f) &
-        requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
-    {
-        using result = std::invoke_result_t<F, T&>;
-        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
+    constexpr auto and_then(F&& f) & {
+        using U = std::invoke_result_t<F, T&>;
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        if (has_value()) {
+            return std::invoke(std::forward<F>(f), value_);
+        } else {
+            return std::remove_cvref_t<U>();
+        }
     }
 
     template <class F>
-    constexpr auto and_then(F&& f) &&
-        requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&&>>>::value
-    {
-        using result = std::invoke_result_t<F, T&&>;
-        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
+    constexpr auto and_then(F&& f) && {
+        using U = std::invoke_result_t<F, T&&>;
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        if (has_value()) {
+            return std::invoke(std::forward<F>(f), std::move(value_));
+        } else {
+            return std::remove_cvref_t<U>();
+        }
     }
 
     template <class F>
-    constexpr auto and_then(F&& f) const&
-        requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
-    {
-        using result = std::invoke_result_t<F, const T&>;
-        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
+    constexpr auto and_then(F&& f) const& {
+        using U = std::invoke_result_t<F, const T&>;
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        if (has_value()) {
+            return std::invoke(std::forward<F>(f), value_);
+        } else {
+            return std::remove_cvref_t<U>();
+        }
     }
 
     template <class F>
-    constexpr auto and_then(F&& f) const&&
-        requires detail::is_optional<std::remove_cvref_t<std::invoke_result_t<F, T&>>>::value
-    {
-        using result = std::invoke_result_t<F, const T&>;
-        return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
+    constexpr auto and_then(F&& f) const&& {
+        using U = std::invoke_result_t<F, const T&&>;
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        if (has_value()) {
+            return std::invoke(std::forward<F>(f), std::move(value_));
+        } else {
+            return std::remove_cvref_t<U>();
+        }
     }
 
     /// Carries out some operation on the stored object if there is one.
     template <class F>
     constexpr auto transform(F&& f) & {
-        return optional_map_impl(*this, std::forward<F>(f));
+    using U = std::invoke_result_t<F, T&>;
+    return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)}
+                    : optional<U>{};
     }
 
     template <class F>
     constexpr auto transform(F&& f) && {
-        return optional_map_impl(std::move(*this), std::forward<F>(f));
-    }
+    using U = std::invoke_result_t<F, T&&>;
+    return (has_value()) ?optional<U>{std::invoke(std::forward<F>(f),
+                                                std::move(value_))}
+                    : optional<U>{};
+}
 
     template <class F>
     constexpr auto transform(F&& f) const& {
-        return optional_map_impl(*this, std::forward<F>(f));
+    using U = std::invoke_result_t<F, const T&>;
+    return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)}
+                    : optional<U>{};
     }
 
     template <class F>
     constexpr auto transform(F&& f) const&& {
-        return optional_map_impl(std::move(*this), std::forward<F>(f));
+    using U = std::invoke_result_t<F, const T&>;
+    return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)}
+                    : optional<U>{};
     }
 
     /// Calls `f` if the optional is empty
     template <class F>
     constexpr optional<T> or_else(F&& f) & {
         if (has_value())
-            return *this;
+          return value_;
 
-        std::forward<F>(f)();
-        return nullopt;
+        return std::forward<F>(f)();
     }
 
     template <class F>
     optional<T> or_else(F&& f) && {
         if (has_value())
-            return std::move(*this);
+            return std::move(value_);
 
-        std::forward<F>(f)();
-        return nullopt;
+        return std::forward<F>(f)();
     }
 
     /// Assigns the stored value from `u`, destroying the old value if there
@@ -959,7 +978,7 @@ class optional<T&> {
     T* value_; // exposition only
 
   public:
-  //  \rSec3[optional.ctor]{Constructors}
+    //  \rSec3[optional.ctor]{Constructors}
 
     constexpr optional() noexcept : value_(nullptr) {}
 
@@ -978,11 +997,11 @@ class optional<T&> {
     template <class U>
     constexpr explicit optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
 
-  //  \rSec3[optional.dtor]{Destructor}
+    //  \rSec3[optional.dtor]{Destructor}
 
     ~optional() = default;
 
-  // \rSec3[optional.assign]{Assignment}
+    // \rSec3[optional.assign]{Assignment}
 
     optional& operator=(nullopt_t) noexcept {
         value_ = nullptr;
@@ -990,7 +1009,7 @@ class optional<T&> {
     }
 
     optional& operator=(const optional& rhs) noexcept = default;
-    optional& operator=(optional&& rhs) noexcept = default;
+    optional& operator=(optional&& rhs) noexcept      = default;
 
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>::value)
@@ -1021,7 +1040,7 @@ class optional<T&> {
     // \rSec3[optional.observe]{Observers}
     constexpr T* operator->() const noexcept { return value_; }
 
-    constexpr T&  operator*() const noexcept { return *value_; }
+    constexpr T& operator*() const noexcept { return *value_; }
 
     constexpr explicit operator bool() const noexcept { return value_ != nullptr; }
     constexpr bool     has_value() const noexcept { return value_ != nullptr; }
@@ -1082,7 +1101,7 @@ class optional<T&> {
 
     template <class F>
     constexpr auto transform(F&& f) const -> optional<std::invoke_result_t<F, T&>> {
-      return detail::optional_map_impl(*this, std::forward<F>(f));
+        return detail::optional_map_impl(*this, std::forward<F>(f));
     }
 
     template <class F>
