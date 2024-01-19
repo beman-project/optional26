@@ -4,8 +4,6 @@ project(stl-concepts VERSION 0.0.0 LANGUAGES CXX)
 
 enable_testing()
 
-set(CMAKE_CXX_STANDARD 20)
-
 set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
 add_subdirectory(extern)
