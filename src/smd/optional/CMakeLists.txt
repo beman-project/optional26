@@ -38,6 +38,7 @@ target_sources(
   optional.t.cpp
   optional_ref.t.cpp
   optional_monadic.t.cpp
+  optional_ref_monadic.t.cpp
 )
 
 target_link_libraries(optional_test optional)
