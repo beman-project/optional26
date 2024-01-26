@@ -369,7 +369,7 @@ TEST(OptionalRefTest, MakeOptional) {
     auto o1 = smd::optional::make_optional<int&>(var);
     auto o2 = smd::optional::optional<int&>(var);
 
-    constexpr bool is_same = std::is_same<decltype(o1), smd::optional::optional<int&>>::value;
+    constexpr bool is_same = std::is_same<decltype(o1), smd::optional::optional<int>>::value;
     EXPECT_TRUE(is_same);
     EXPECT_TRUE(o1 == o2);
 
@@ -396,9 +396,9 @@ TEST(OptionalRefTest, MakeOptional) {
 
     auto i  = 42;
     auto o6 = smd::optional::make_optional<int&>(i);
-    static_assert(std::is_same<decltype(o6), smd::optional::optional<int&>>::value);
+    static_assert(std::is_same_v<decltype(o6), smd::optional::optional<int>>);
 
-    EXPECT_TRUE((std::is_same<decltype(o6), smd::optional::optional<int&>>::value));
+    EXPECT_TRUE((std::is_same_v<decltype(o6), smd::optional::optional<int>>));
     EXPECT_TRUE(o6);
     EXPECT_TRUE(*o6 == 42);
 }
