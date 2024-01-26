@@ -216,17 +216,9 @@ using is_optional = is_optional_impl<std::decay_t<T>>;
 template <typename T>
 constexpr optional<std::decay_t<T>>
 make_optional(T&& __t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
-    requires std::is_constructible_v<std::decay_t<T>, T> && (!std::is_reference_v<T>)
+    requires std::is_constructible_v<std::decay_t<T>, T>
 {
     return optional<std::decay_t<T>>{std::forward<T>(__t)};
-}
-
-template <typename T>
-constexpr optional<std::decay_t<T>&>
-make_optional(T&& __t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
-    requires std::is_constructible_v<std::decay_t<T>, T> && (std::is_reference_v<T>)
-{
-    return optional<std::decay_t<T>&>{std::forward<T>(__t)};
 }
 
 template <typename T, typename... _Args>
