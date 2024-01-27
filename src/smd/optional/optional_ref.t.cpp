@@ -69,10 +69,12 @@ TEST(OptionalRefTest, Constructors) {
     smd::optional::optional<base&> b2 = d;
 
     smd::optional::optional<derived&> d2 = d;
-    smd::optional::optional<base&>    b3{d2};
+    smd::optional::optional<base&>    b3 = d2;
+    smd::optional::optional<base&>    b4{d2};
 
     smd::optional::optional<derived&> empty;
     smd::optional::optional<base&> fromEmpty(empty);
+    smd::optional::optional<base&> fromEmpty2 = empty;
 }
 
 TEST(OptionalRefTest, Assignment) {
