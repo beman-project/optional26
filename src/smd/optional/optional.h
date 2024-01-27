@@ -347,18 +347,18 @@ class optional {
 
     /// Constructs the stored value with `u`.
     template <class U = T>
-    constexpr optional(U&& u)
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u)
         requires enable_forward_value<T, U> && std::is_convertible_v<U&&, T>
         : optional(in_place, std::forward<U>(u)) {}
 
     template <class U = T>
-    constexpr explicit optional(U&& u)
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u)
         requires enable_forward_value<T, U> && (!std::is_convertible_v<U &&, T>)
         : optional(in_place, std::forward<U>(u)) {}
 
     /// Converting copy constructor.
     template <class U>
-    optional(const optional<U>& rhs)
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs)
         requires enable_from_other<T, U, const U&> && std::is_convertible_v<const U&, T>
     {
         if (rhs.has_value()) {
@@ -367,7 +367,7 @@ class optional {
     }
 
     template <class U>
-    explicit optional(const optional<U>& rhs)
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs)
         requires enable_from_other<T, U, const U&> && (!std::is_convertible_v<const U&, T>)
     {
         if (rhs.has_value()) {
@@ -377,7 +377,7 @@ class optional {
 
     /// Converting move constructor.
     template <class U>
-    optional(optional<U>&& rhs)
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(optional<U>&& rhs)
         requires enable_from_other<T, U, U&&> && std::is_convertible_v<U&&, T>
     {
         if (rhs.has_value()) {
@@ -386,7 +386,7 @@ class optional {
     }
 
     template <class U>
-    explicit optional(optional<U>&& rhs)
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(optional<U>&& rhs)
         requires enable_from_other<T, U, U&&> && (!std::is_convertible_v<U &&, T>)
     {
         if (rhs.has_value()) {
@@ -976,13 +976,13 @@ class optional<T&> {
 
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>::value)
-    constexpr optional(U&& u) noexcept : value_(std::addressof(u)) {
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u) noexcept : value_(std::addressof(u)) {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
     }
 
     template <class U>
-    constexpr explicit optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
 
     //  \rSec3[optional.dtor]{Destructor}
 

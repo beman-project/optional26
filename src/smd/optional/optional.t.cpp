@@ -8,6 +8,26 @@ TEST(OptionalTest, TestGTest) { ASSERT_EQ(1, 1); }
 
 namespace {
 struct empty {};
+struct no_default {
+    no_default()                             = delete;
+    no_default(const no_default&)            = default;
+    no_default(no_default&&)                 = default;
+    no_default& operator=(const no_default&) = default;
+    no_default& operator=(no_default&&)      = default;
+    no_default(empty){};
+};
+
+struct base {
+    int i_;
+    base() : i_(0) {}
+    base(int i) : i_(i) {}
+};
+
+struct derived : public base {
+    int j_;
+    derived() : base(0), j_(0) {}
+    derived(int i, int j) : base(i), j_(j) {}
+};
 } // namespace
 
 TEST(OptionalTest, Constructors) {
@@ -26,13 +46,6 @@ TEST(OptionalTest, Constructors) {
     (void)e3;
 }
 
-namespace {
-struct base {
-    base()      = default;
-    base(base&) = delete;
-    base(base&&){};
-};
-} // namespace
 
 TEST(OptionalTest, Constructors2) {
     smd::optional::optional<int> o1;
@@ -85,6 +98,21 @@ TEST(OptionalTest, Constructors2) {
     v.emplace_back();
     smd::optional::optional<std::vector<base>> ov = std::move(v);
     EXPECT_TRUE(ov->size() == 1);
+}
+
+TEST(OptionalTest, Constructors3) {
+    smd::optional::optional<int> ie;
+    smd::optional::optional<int> i4 = ie;
+    EXPECT_FALSE(i4);
+
+    base                           b{1};
+    derived                        d(1, 2);
+    smd::optional::optional<base> b1{b};
+    smd::optional::optional<base> b2{d};
+
+    smd::optional::optional<derived> d2{d};
+    smd::optional::optional<base>    b3 = d2;
+    smd::optional::optional<base>    b4{d2};
 }
 
 namespace {
