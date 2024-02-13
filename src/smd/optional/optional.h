@@ -1039,17 +1039,9 @@ class optional<T&> {
     }
 
     template <class U>
-    constexpr T value_or(U&& u) const {
-        static_assert(std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>,
-                      "T must be copy constructible and convertible from U");
-        return has_value() ? *value_ : u;
-    }
-
-    template <class U>
-    constexpr T& value_or(U&& u) && {
-        static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>,
-                      "T must be move constructible and convertible from U");
-        return has_value() ? *value_ : u;
+    constexpr T& value_or(U&& u) const {
+      static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
+      return has_value() ? *value_ : std::forward<U>(u);
     }
 
     //   \rSec3[optional.monadic]{Monadic operations}

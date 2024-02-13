@@ -430,11 +430,38 @@ TEST(OptionalRefTest, Observers) {
     smd::optional::optional<int&>       o1  = var;
     smd::optional::optional<int&>       o2;
     const smd::optional::optional<int&> o3 = var;
-
+    const smd::optional::optional<int&> o4;
+    int var2 = 42;
+    int var3 = 6*9;
     EXPECT_TRUE(*o1 == 42);
     EXPECT_TRUE(*o1 == o1.value());
-    EXPECT_TRUE(o2.value_or(42) == 42);
+    EXPECT_TRUE(o2.value_or(var2) == 42);
     EXPECT_TRUE(o3.value() == 42);
+    EXPECT_TRUE(o3.value_or(var3) == 42);
+    EXPECT_TRUE(o4.value_or(var3) == 54);
+    int j = 99;
+    EXPECT_TRUE(o4.value_or(j) == 99);
+    o4.value_or(j) = 88;
+    EXPECT_TRUE(j == 88);
+    int var99 = 99;
+    EXPECT_TRUE([&](){smd::optional::optional<int&> o(j);return o; }().value_or(var99) == 88);
+
+    EXPECT_TRUE([&](){smd::optional::optional<int&> o;return o; }().value_or(var99) == 99);
+
+
+    EXPECT_TRUE(o3.value_or([&]()->int&{return var3;}()) == 42);
+    EXPECT_TRUE(o4.value_or([&]()->int&{return var3;}()) == 54);
+
+    std::string meow{"meow"};
+    std::string bark{"bark"};
+    smd::optional::optional<std::string&> so1;
+    smd::optional::optional<std::string&> so2{meow};
+    auto t1 = so1.value_or(bark);
+    auto t2 = so2.value_or(bark);
+    // auto t3 = so1.value_or("bark");
+    // auto t4 = so2.value_or("bark");
+    // std::tuple<const std::string&> t("meow");
+
     auto success = std::is_same<decltype(o1.value()), int&>::value;
     static_assert(std::is_same<decltype(o1.value()), int&>::value);
     EXPECT_TRUE(success);
