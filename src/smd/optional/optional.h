@@ -986,21 +986,21 @@ class optional<T&> {
 
     //  \rSec3[optional.dtor]{Destructor}
 
-    ~optional() = default;
+    constexpr ~optional() = default;
 
     // \rSec3[optional.assign]{Assignment}
 
-    optional& operator=(nullopt_t) noexcept {
+    constexpr optional& operator=(nullopt_t) noexcept {
         value_ = nullptr;
         return *this;
     }
 
-    optional& operator=(const optional& rhs) noexcept = default;
-    optional& operator=(optional&& rhs) noexcept      = default;
+    constexpr optional& operator=(const optional& rhs) noexcept = default;
+    constexpr optional& operator=(optional&& rhs) noexcept      = default;
 
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>::value)
-    optional& operator=(U&& u) {
+    constexpr optional& operator=(U&& u) {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
         value_ = std::addressof(u);
@@ -1008,21 +1008,21 @@ class optional<T&> {
     }
 
     template <class U>
-    optional& operator=(const optional<U>& rhs) noexcept {
+    constexpr optional& operator=(const optional<U>& rhs) noexcept {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         value_ = std::addressof(rhs.value());
         return *this;
     }
 
-    template <class U = T>
+    template <class U>
         requires(!detail::is_optional<std::decay_t<U>>::value)
-    optional& emplace(U&& u) noexcept {
+    constexpr optional& emplace(U&& u) noexcept {
         return *this = std::forward<U>(u);
     }
 
     //   \rSec3[optional.swap]{Swap}
 
-    void swap(optional& rhs) noexcept { std::swap(value_, rhs.value_); }
+    constexpr void swap(optional& rhs) noexcept { std::swap(value_, rhs.value_); }
 
     // \rSec3[optional.observe]{Observers}
     constexpr T* operator->() const noexcept { return value_; }
@@ -1039,17 +1039,9 @@ class optional<T&> {
     }
 
     template <class U>
-    constexpr T value_or(U&& u) const& {
-        static_assert(std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>,
-                      "T must be copy constructible and convertible from U");
-        return has_value() ? *value_ : static_cast<T>(std::forward<U>(u));
-    }
-
-    template <class U>
-    constexpr T value_or(U&& u) && {
-        static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>,
-                      "T must be move constructible and convertible from U");
-        return has_value() ? *value_ : static_cast<T>(std::forward<U>(u));
+    constexpr T& value_or(U&& u) const {
+      static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
+      return has_value() ? *value_ : std::forward<U>(u);
     }
 
     //   \rSec3[optional.monadic]{Monadic operations}
@@ -1074,7 +1066,7 @@ class optional<T&> {
         return has_value() ? *value_ : std::forward<F>(f)();
     }
 
-    void reset() noexcept { value_ = nullptr; }
+    constexpr void reset() noexcept { value_ = nullptr; }
 };
 } // namespace smd::optional
 #endif
