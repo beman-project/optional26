@@ -198,6 +198,9 @@ Where deeper constness is desired, \tcode{optional<const T\&>} would prevent non
 \section{Conditional Explicit}
 As in the base template, \tcode{explicit} is made conditional on the type used to construct the optional. \tcode{explicit(!std::is_convertible_v<U, T>)}. This is not present in boost::optional, leading to differences in construction between braced initialization and = that can be surprising.
 
+\section{value_or}
+Have \tcode{value_or} return a \tcode{T\&}. Check that the supplied value can be bound to a T\&.
+
 \section{Compiler Explorer Playground}
 
 See \url{https://godbolt.org/z/n5oooK58W} for a playground with relevant Google Test functions and various optional implementations made available for cross reference.
