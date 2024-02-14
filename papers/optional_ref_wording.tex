@@ -18,7 +18,7 @@
 
 \begin{flushright}
   \begin{tabular}{ll}
-    Document \#: & D2988R2 \\
+    Document \#: & P2988R2 \\
     Date: & \today \\
     Project: & Programming Language C++ \\
     Audience: & LEWG
@@ -292,18 +292,6 @@ Add a reference specialization for the std::optional template.
 
   \rSec3[optional.ctor]{Constructors}
 
-  \pnum
-  The exposition-only variable template \exposid{converts-from-any-cvref}
-  is used by some constructors for \tcode{optional}.
-  \begin{codeblock}
-    template<class T, class W>
-    constexpr bool @\exposid{converts-from-any-cvref}@ =  // \expos
-    disjunction_v<is_constructible<T, W&>, is_convertible<W&, T>,
-    is_constructible<T, W>, is_convertible<W, T>,
-    is_constructible<T, const W&>, is_convertible<const W&, T>,
-    is_constructible<T, const W>, is_convertible<const W, T>>;
-  \end{codeblock}
-
   \indexlibraryctor{optional}%
   \begin{itemdecl}
     constexpr optional() noexcept;
@@ -338,6 +326,8 @@ Add a reference specialization for the std::optional template.
     \pnum
     \throws
     Nothing
+
+    \pnum
     \remarks
     This constructor is trivial.
 
@@ -361,6 +351,7 @@ Add a reference specialization for the std::optional template.
     \ensures
     \tcode{rhs.has_value() == this->has_value()}.
 
+    \pnum
     \remarks
     This constructor is trivial.
 
@@ -385,13 +376,13 @@ Add a reference specialization for the std::optional template.
     \pnum
     \mandates
     \begin{itemize}
-    \item \tcode{is_constructible_v<std::add_lvalue_reference_t<T>, U>} is \tcode{true}
+    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
     \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
     \end{itemize}
 
     \pnum
     \effects
-    Direct-non-list-initializes the referred to value with \tcode{std::addressof(v)}.
+    Direct-non-list-initializes the referred to value with \tcode{addressof(v)}.
 
     \pnum
     \ensures
@@ -419,6 +410,8 @@ Add a reference specialization for the std::optional template.
     \pnum
     \ensures
     \tcode{rhs.has_value() == this->has_value()}.
+
+    \pnum
     \remarks
     The expression inside \keyword{explicit} is equivalent to:
     \begin{codeblock}
@@ -496,19 +489,21 @@ This destructor is trivial.
   \begin{itemdescr}
     \pnum
     \constraints
-    \tcode{is_same_v<remove_cvref_t<U>, optional>} is \tcode{false},
-    \tcode{conjunction_v<is_scalar<T>, is_same<T, decay_t<U>>>} is \tcode{false}
+    \begin{itemize}
+    \item \tcode{is_same_v<remove_cvref_t<U>, optional>} is \tcode{false}
+    \item \tcode{conjunction_v<is_scalar<T>, is_same<T, decay_t<U>>>} is \tcode{false}
+    \end{itemize}
 
     \pnum
     \mandates
     \begin{itemize}
-    \item \tcode{is_constructible_v<std::add_lvalue_reference_t<T>, U>} is \tcode{true}
+    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
     \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
     \end{itemize}
 
     \pnum
     \effects
-    Assigns the referred to value with \tcode{std::addressof(v)}.
+    Assigns the referred to value with \tcode{addressof(v)}.
 
     \pnum
     \ensures
@@ -525,7 +520,7 @@ This destructor is trivial.
     \pnum
     \mandates
     \begin{itemize}
-    \item \tcode{is_constructible_v<std::add_lvalue_reference_t<T>, U>} is \tcode{true}
+    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
     \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
     \end{itemize}
 
@@ -554,7 +549,7 @@ This destructor is trivial.
     \end{itemize}
     \pnum
     \effects
-    Assigns \tcode{*this} \tcode{std::forward<U>(u)}
+    Assigns \tcode{*this} \tcode{forward<U>(u)}
 
     \pnum
     \ensures
@@ -668,13 +663,13 @@ This destructor is trivial.
   \begin{itemdescr}
     \pnum
     \mandates
-    \tcode{std::is_constructible_v<std::add_lvalue_reference_t<T>, decltype(v)>} is \tcode{true}.
+    \tcode{is_constructible_v<add_lvalue_reference_t<T>, decltype(v)>} is \tcode{true}.
 
     \pnum
     \effects
     Equivalent to:
     \begin{codeblock}
-      return has_value() ? value() : std::forward<U>(u);
+      return has_value() ? value() : forward<U>(u);
     \end{codeblock}
   \end{itemdescr}
 
@@ -697,7 +692,7 @@ This destructor is trivial.
     \effects
     Equivalent to:
     \begin{codeblock}
-      return has_value() ? std::invoke(std::forward<F>(f), value()) : result(nullopt);
+      return has_value() ? invoke(forward<F>(f), value()) : result(nullopt);
     \end{codeblock}
   \end{itemdescr}
 
@@ -715,7 +710,7 @@ This destructor is trivial.
     \returns
     If \tcode{*this} refers to a value, an \tcode{optional<U>} object
     whose refered to value is the result of
-    \tcode{invoke(std::forward<F>(f), *val)};
+    \tcode{invoke(forward<F>(f), *val)};
     otherwise, \tcode{optional<U>()}.
   \end{itemdescr}
 
@@ -736,7 +731,7 @@ This destructor is trivial.
       if (has_value()))
         return value()
       else
-        return std::forward<F>(f)();
+        return forward<F>(f)();
       }
     \end{codeblock}
   \end{itemdescr}
@@ -781,6 +776,7 @@ The proposed changes are relative to the current working draft~\cite{N4910}.
 \bibliographystyle{abstract}
 \bibliography{wg21,mybiblio}
 
+\backmatter
 \chapter*{Implementation}
 
 \begin{minted}{c++}
