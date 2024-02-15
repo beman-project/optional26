@@ -18,7 +18,7 @@
 
 \begin{flushright}
   \begin{tabular}{ll}
-    Document \#: & P2988R2 \\
+    Document \#: & P2988R3 \\
     Date: & \today \\
     Project: & Programming Language C++ \\
     Audience: & LEWG
@@ -184,10 +184,10 @@ The definitions of the relational operators are the same as for the base templat
 Because of existing code, \tcode{make_optional<T\&>} must return optional<T> rather than optional<T\&>. Returning optional<T\&> is consistent and defensible, and a few optional implementations in production make this choice. It is, however, quite easy to construct a make_optional expression that deduces a different category causing possibly dangerous changes to code.
 
 \section{Trivial construction}
-Constuction of \tcode{optional<T\&>} should be trivial, because it is straightfoward to implement, and \tcode{optional<T>} is trivial. Boost is not.
+Construction of \tcode{optional<T\&>} should be trivial, because it is straightforward to implement, and \tcode{optional<T>} is trivial. Boost is not.
 
 \section{Value Category Affects value()}
-For several implementations there are distinct overloads for functions depending on value category, with the same implementation. However, this makes it very easy to accidentally steal from the underlying referred to object. Value category should be shallow. Thanks to many people, in particular Peter Dimov, for pointing this out. If ``Deducing \tcode{this}'' had been used, the problem would have been much more subtle in code review.
+For several implementations there are distinct overloads for functions depending on value category, with the same implementation. However, this makes it very easy to accidentally steal from the underlying referred to object. Value category should be shallow. Thanks to many people for pointing this out. If ``Deducing \tcode{this}'' had been used, the problem would have been much more subtle in code review.
 
 \section{Shallow vs Deep const}
 
