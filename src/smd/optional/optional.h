@@ -167,6 +167,7 @@ namespace std {
 #include <compare>
 #include <utility>
 #include <functional>
+#include <ranges>
 
 namespace smd::optional {
 
@@ -199,6 +200,26 @@ template <class T>
     requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional;
 
+} // namespace smd::optional
+namespace std {
+template <typename T>
+inline constexpr bool ranges::enable_view<smd::optional::optional<T>> = true;
+
+template <typename T>
+inline constexpr bool ranges::enable_view<smd::optional::optional<T&>> = true;
+
+template <typename T>
+inline constexpr bool ranges::enable_borrowed_range<smd::optional::optional<T*>> = true;
+
+template <typename T>
+inline constexpr bool ranges::enable_borrowed_range<smd::optional::optional<std::reference_wrapper<T>>> = true;
+
+template <typename T>
+inline constexpr bool ranges::enable_borrowed_range<smd::optional::optional<T&>> = true;
+
+} // namespace std
+
+namespace smd::optional {
 template <class T>
 concept is_derived_from_optional = requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
 
@@ -677,6 +698,36 @@ class optional {
         }
         engaged = false;
     }
+    using iterator       = T*;
+    using const_iterator = const T*;
+
+    // [optional.iterators], iterator support
+    constexpr T* begin() noexcept {
+        if (has_value()) {
+            return std::addressof(value_);
+        } else {
+            return nullptr;
+        }
+    }
+    constexpr const T* begin() const noexcept {
+        if (has_value()) {
+            return std::addressof(value_);
+        } else {
+            return nullptr;
+        }
+    }
+    constexpr T*       end() noexcept { return begin() + has_value(); }
+    constexpr const T* end() const noexcept { return begin() + has_value(); }
+
+    constexpr std::reverse_iterator<T*>       rbegin() noexcept { return reverse_iterator(end()); }
+    constexpr std::reverse_iterator<const T*> rbegin() const noexcept { return reverse_iterator(end()); }
+    constexpr std::reverse_iterator<T*>       rend() noexcept { return reverse_iterator(begin()); }
+    constexpr std::reverse_iterator<const T*> rend() const noexcept { return reverse_iterator(begin()); }
+
+    constexpr const T*                        cbegin() const noexcept { return begin(); }
+    constexpr const T*                        cend() const noexcept { return end(); }
+    constexpr std::reverse_iterator<const T*> crbegin() const noexcept { return rbegin(); }
+    constexpr std::reverse_iterator<const T*> crend() const noexcept { return rend(); }
 };
 
 template <typename T, typename U>
@@ -1040,8 +1091,9 @@ class optional<T&> {
 
     template <class U>
     constexpr T& value_or(U&& u) const {
-      static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
-      return has_value() ? *value_ : std::forward<U>(u);
+        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, decltype(u)>,
+                      "Must be able to bind u to T&");
+        return has_value() ? *value_ : std::forward<U>(u);
     }
 
     //   \rSec3[optional.monadic]{Monadic operations}
@@ -1067,6 +1119,37 @@ class optional<T&> {
     }
 
     constexpr void reset() noexcept { value_ = nullptr; }
+    using iterator       = T*;
+    using const_iterator = const T*;
+
+    // [optional.iterators], iterator support
+    constexpr T* begin() noexcept {
+        if (has_value()) {
+            return value_;
+        } else {
+            return nullptr;
+        }
+    }
+    constexpr const T* begin() const noexcept {
+        if (has_value()) {
+            return value_;
+        } else {
+            return nullptr;
+        }
+    }
+    constexpr T* end() noexcept { return begin() + has_value(); }
+
+    constexpr const T* end() const noexcept { return begin() + has_value(); }
+
+    constexpr std::reverse_iterator<T*>       rbegin() noexcept { return reverse_iterator(end()); }
+    constexpr std::reverse_iterator<const T*> rbegin() const noexcept { return reverse_iterator(end()); }
+    constexpr std::reverse_iterator<T*>       rend() noexcept { return reverse_iterator(begin()); }
+    constexpr std::reverse_iterator<const T*> rend() const noexcept { return reverse_iterator(begin()); }
+
+    constexpr const T*                        cbegin() const noexcept { return begin(); }
+    constexpr const T*                        cend() const noexcept { return end(); }
+    constexpr std::reverse_iterator<const T*> crbegin() const noexcept { return rbegin(); }
+    constexpr std::reverse_iterator<const T*> crend() const noexcept { return rend(); }
 };
 } // namespace smd::optional
 #endif
