@@ -1,0 +1,98 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+title: ~optional<T&>~ Design Notes
+#+date: {{{modification-time(%Y-%m-%d, VC)}}}
+#+author: Steve Downey
+#+email: sdowney@sdowney.org
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 26.1.91 (Org mode 9.2.3)
+#+options: html-link-use-abs-url:nil html-postamble:auto html-preamble:t
+#+options: html-scripts:t html-style:t html5-fancy:nil tex:t
+
+#+STARTUP: showall
+#+OPTIONS: reveal_center:nil reveal_progress:t reveal_history:nil reveal_control:t
+#+OPTIONS: reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1400 reveal_height:1000
+#+OPTIONS: toc:1
+
+#+REVEAL_MARGIN: 0.1
+#+REVEAL_MIN_SCALE: 0.5
+#+REVEAL_MAX_SCALE: 2.5
+#+REVEAL_TRANS: cube
+#+REVEAL_THEME: moon
+#+REVEAL_HLEVEL: 2
+
+#+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+#+REVEAL_HIGHLIGHT_CSS: %r/lib/css/zenburn.css
+#+REVEAL_PLUGINS: (markdown notes)
+
+* Design
+
+- The design is straightforward.
+- The ~optional<T&>~ holds a pointer to the underlying object of type ~T~, or ~nullptr~ if the optional is disengaged.
+- The implementation is simple, especially with C++20 and up techniques, using concept constraints.
+- As the held pointer is a primitive regular type with reference semantics, many operations can be defaulted and are ~noexcept~ by nature.
+- The ~optional<T&>~ implementation is less than 200 lines of code, much of it the monadic functions with identical textual implementations with different signatures and different overloads being called. Deducing ~this~ reduces the size further.
+- In place construction is not supported as it would just be a way of providing immediate life-time issues.
+
+* Relational Operations
+
+- The definitions of the relational operators are the same as for the base template.
+- Interoperable comparisons between ~T~ and ~optional<T&>~ work as expected.
+- This is not true for the boost ~optional<T&>~.
+
+* make_optional
+- Because of existing code, ~make_optional<T&>~ must return optional<T> rather than optional<T&>.
+- Returning optional<T&> is consistent and defensible, and a few optional implementations in production make this choice.
+- It is, however, quite easy to construct a make_optional expression that deduces a different category causing possibly dangerous changes to code.
+
+* Trivial construction
+- Construction of ~optional<T&>~ should be trivial, because it is straightforward to implement, and ~optional<T>~ is trivial.
+- Boost is not.
+
+* Value Category Affects value()
+- For several implementations there are distinct overloads for functions depending on value category, with the same implementation.
+- However, this makes it very easy to accidentally steal from the underlying referred to object.
+- Value category should be shallow.
+- Thanks to many people for pointing this out.
+
+If ``Deducing ~this~'' had been used, the problem would have been much more subtle in code review.
+
+* Shallow vs Deep const
+
+There is some implementation divergence in optionals about deep const for ~optional<T&>~.
+
+That is, can the referred to ~int~ be modified through a ~const optional<int&>~.
+
+Does ~operator->()~ return an ~int*~ or a ~const int*~, and does ~operator*()~ return an ~int&~ or a ~const int&~.
+
+I believe it is overall more defensible if the ~const~ is shallow as it would be for a ~struct ref {int * p;}~ where the constness of the struct ref does not affect if the p pointer can be written through.
+
+This is consistent with the rebinding behavior being proposed.
+
+Where deeper constness is desired, ~optional<const T&>~ would prevent non const access to the underlying object.
+
+* Conditional Explicit
+As in the base template, ~explicit~ is made conditional on the type used to construct the optional.
+
+~explicit(!std::is_convertible_v<U, T>)~.
+
+This is not present in boost::optional, leading to differences in construction between braced initialization and = that can be surprising.
+
+* value_or
+Have ~value_or~ return a ~T&~.
+
+Check that the supplied value can be bound to a ~T&~.
+
+* Dangling
+The constructors should work as ~std::tuple~ does and delete if ~reference_constructs_from_temporary_v~ is true.
+
+~is_constructible~ check also affects viability of construction.
+
+* Compiler Explorer Playground
+
+See https://godbolt.org/z/n5oooK58W for a playground with relevant Google Test functions and various optional implementations made available for cross reference.
