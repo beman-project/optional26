@@ -167,6 +167,7 @@ namespace std {
 #include <compare>
 #include <utility>
 #include <functional>
+#include <type_traits>
 
 namespace smd::optional {
 
@@ -1038,10 +1039,17 @@ class optional<T&> {
         throw bad_optional_access();
     }
 
-    template <class U>
-    constexpr T& value_or(U&& u) const {
-      static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
-      return has_value() ? *value_ : std::forward<U>(u);
+    // template <class U>
+    // constexpr T& value_or(U&& u) const {
+    //   static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
+    //   return has_value() ? *value_ : std::forward<U>(u);
+    // }
+
+    template <class U, class R = std::common_reference_t<T&, U&&>>
+    auto ref_or(U&& u) const -> R {
+        static_assert(!std::reference_constructs_from_temporary_v<R, U>);
+        static_assert(!std::reference_constructs_from_temporary_v<R, T&>);
+        return has_value() ? static_cast<R>(*value_) : static_cast<R>((U&&)u);
     }
 
     //   \rSec3[optional.monadic]{Monadic operations}

@@ -435,29 +435,29 @@ TEST(OptionalRefTest, Observers) {
     int var3 = 6*9;
     EXPECT_TRUE(*o1 == 42);
     EXPECT_TRUE(*o1 == o1.value());
-    EXPECT_TRUE(o2.value_or(var2) == 42);
+    EXPECT_TRUE(o2.ref_or(var2) == 42);
     EXPECT_TRUE(o3.value() == 42);
-    EXPECT_TRUE(o3.value_or(var3) == 42);
-    EXPECT_TRUE(o4.value_or(var3) == 54);
+    EXPECT_TRUE(o3.ref_or(var3) == 42);
+    EXPECT_TRUE(o4.ref_or(var3) == 54);
     int j = 99;
-    EXPECT_TRUE(o4.value_or(j) == 99);
-    o4.value_or(j) = 88;
+    EXPECT_TRUE(o4.ref_or(j) == 99);
+    o4.ref_or(j) = 88;
     EXPECT_TRUE(j == 88);
     int var99 = 99;
-    EXPECT_TRUE([&](){smd::optional::optional<int&> o(j);return o; }().value_or(var99) == 88);
+    EXPECT_TRUE([&](){smd::optional::optional<int&> o(j);return o; }().ref_or(var99) == 88);
 
-    EXPECT_TRUE([&](){smd::optional::optional<int&> o;return o; }().value_or(var99) == 99);
+    EXPECT_TRUE([&](){smd::optional::optional<int&> o;return o; }().ref_or(var99) == 99);
 
 
-    EXPECT_TRUE(o3.value_or([&]()->int&{return var3;}()) == 42);
-    EXPECT_TRUE(o4.value_or([&]()->int&{return var3;}()) == 54);
+    EXPECT_TRUE(o3.ref_or([&]()->int&{return var3;}()) == 42);
+    EXPECT_TRUE(o4.ref_or([&]()->int&{return var3;}()) == 54);
 
     std::string meow{"meow"};
     std::string bark{"bark"};
     smd::optional::optional<std::string&> so1;
     smd::optional::optional<std::string&> so2{meow};
-    auto t1 = so1.value_or(bark);
-    auto t2 = so2.value_or(bark);
+    auto t1 = so1.ref_or(bark);
+    auto t2 = so2.ref_or(bark);
     // auto t3 = so1.value_or("bark");
     // auto t4 = so2.value_or("bark");
     // std::tuple<const std::string&> t("meow");
@@ -518,6 +518,21 @@ TEST(OptionalRefTest, Observers) {
     success = std::is_same<decltype(std::move(ob1)->i_), int>::value;
     static_assert(std::is_same<decltype(std::move(ob1)->i_), int>::value);
     EXPECT_TRUE(success);
+
+}
+
+TEST(OptionalRefTest, RefOr) {
+    smd::optional::optional<int&> o; // disengaged optional<int&>
+    long i{42};
+    auto&& val = o.ref_or(i);
+    ASSERT_EQ(val, 42);
+    static_assert(std::same_as<decltype(o.value()), int&>);
+    static_assert(std::same_as<decltype(o.ref_or(i)), long>);
+
+    smd::optional::optional<base&> b;
+    derived d;
+    static_assert(std::same_as<decltype(b.value()), base&>);
+    static_assert(std::same_as<decltype(b.ref_or(d)), base&>);
 
 }
 
