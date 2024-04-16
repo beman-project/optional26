@@ -18,7 +18,7 @@
 
 \begin{flushright}
   \begin{tabular}{ll}
-    Document \#: & P2988R3 \\
+    Document \#: & D2988R4 \\
     Date: & \today \\
     Project: & Programming Language C++ \\
     Audience: & LEWG
@@ -36,9 +36,10 @@
 \chapter*{Changes Since Last Version}
 
 \begin{itemize}
-\item \textbf{Changes since R1}
+\item \textbf{Changes since R3}
   \begin{itemize}
-  \item Design points called out
+  \item make_optional discussion - always value
+  \item value_or discussion - always value
   \end{itemize}
 \end{itemize}
 
@@ -183,6 +184,10 @@ The definitions of the relational operators are the same as for the base templat
 \section{make_optional}
 Because of existing code, \tcode{make_optional<T\&>} must return optional<T> rather than optional<T\&>. Returning optional<T\&> is consistent and defensible, and a few optional implementations in production make this choice. It is, however, quite easy to construct a make_optional expression that deduces a different category causing possibly dangerous changes to code.
 
+There was some discussion about using library technology to allow selection of the reference overload via the literal spelling \tcode{make_optional<int\&>}. There was anti-consensus to do so. There are exising instances of that spelling that today return an \tcode{optional<T>}, although it is very likely these are mistakes or possibly other optionals. The spelling \tcode{optional<T\&>\{\}} is acceptable as there is no multi-argument emplacement version as there is no location to construct such an instance.
+
+There was also discussion of using \tcode{std::referenece_wrapper} to indicate reference use, in analogy with std::tuple. Unfortunately there are existing uses of optional over reference_wrapper as a workaround for lack of reference specialiazation, and it would be a breaking change for such code.
+
 \section{Trivial construction}
 Construction of \tcode{optional<T\&>} should be trivial, because it is straightforward to implement, and \tcode{optional<T>} is trivial. Boost is not.
 
@@ -199,7 +204,13 @@ Where deeper constness is desired, \tcode{optional<const T\&>} would prevent non
 As in the base template, \tcode{explicit} is made conditional on the type used to construct the optional. \tcode{explicit(!std::is_convertible_v<U, T>)}. This is not present in boost::optional, leading to differences in construction between braced initialization and = that can be surprising.
 
 \section{value_or}
-Have \tcode{value_or} return a \tcode{T\&}. Check that the supplied value can be bound to a T\&.
+\removed{Have \tcode{value_or} return a \tcode{T\&}. Check that the supplied value can be bound to a T\&.}
+
+After extensive discussion, it seems there is no particularly wonderful solution for \tcode{value_or} that does not involve a time machine. Implemntations of optionals that support reference semantics diverge over the return type, and the current one is arguabley wrong, and should use something based on \tcode{common_reference_type}, which of course did not exist when \tcode{optional} was standardized.
+
+The weak consensus is to return a \tcode{T} from \tcode{optional<T\&>::value_or} as this is least likely to cause issues. There was at least one strong objection to this choice, but all other choices had more objections. The author indends to propose free functions \tcode{reference_or}, \tcode{value_or}, \tcode{or_invoke}, and \tcode{yield_if} over all types modeling optional-like, \tcode{concept std::maybe}, in the next revision of \cite{P1255R12}. This would cover \tcode{optional}, \tcode{expected}, and pointer types.
+
+Having \tcode{value_or} return by value also allows the common case of using a literal as the alternative to be expressed concisely.
 
 \section{Compiler Explorer Playground}
 
@@ -316,8 +327,7 @@ Add a reference specialization for the std::optional template.
   \begin{itemdescr}
     \pnum
     \effects
-    If \tcode{rhs} refers to a value, direct-non-list-initializes the referred to value
-    with \tcode{rhs.val}.
+    Initializes \tcode{val} with the value of \tcode{rhs.val}.
 
     \pnum
     \ensures
@@ -343,8 +353,7 @@ Add a reference specialization for the std::optional template.
 
     \pnum
     \effects
-    If \tcode{rhs} refers to a value, direct-non-list-initializes the referred to value
-    with \tcode{rhs.val}.
+    Initializes \tcode{val} with the value of \tcode{rhs.val}.
     \tcode{rhs.has_value()} is unchanged.
 
     \pnum
@@ -405,7 +414,7 @@ Add a reference specialization for the std::optional template.
     \pnum
     \effects
     If \tcode{rhs} refers to a value,
-    direct-non-list-initializes the referred to value with \tcode{addressof(rhs.value()))}.
+    initializes \tcode{val} with the value of\tcode{addressof(rhs.value()))}.
 
     \pnum
     \ensures
@@ -503,7 +512,7 @@ This destructor is trivial.
 
     \pnum
     \effects
-    Assigns the referred to value with \tcode{addressof(v)}.
+    Assigns the \tcode{val} the value of \tcode{addressof(v)}.
 
     \pnum
     \ensures
@@ -757,7 +766,7 @@ This destructor is trivial.
 
 A pure library extension, affecting no other parts of the library or language.
 
-The proposed changes are relative to the current working draft~\cite{N4910}.
+The proposed changes are relative to the current working draft \cite{N4910}.
 
 \chapter*{Document history}
 
@@ -776,26 +785,35 @@ The proposed changes are relative to the current working draft~\cite{N4910}.
 \bibliographystyle{abstract}
 \bibliography{wg21,mybiblio}
 
+\chapter*{Changes Log}
+
+\begin{itemize}
+\item \textbf{Changes since R1}
+  \begin{itemize}
+  \item Design points called out
+  \end{itemize}
+\end{itemize}
+
 \backmatter
 \chapter*{Implementation}
 
 \begin{minted}{c++}
-  namespace detail {
+namespace detail {
 
-    template <class T>
-    struct is_optional_impl : std::false_type {};
+template <class T>
+struct is_optional_impl : std::false_type {};
 
-    template <class T>
-    struct is_optional_impl<optional<T>> : std::true_type {};
+template <class T>
+struct is_optional_impl<optional<T>> : std::true_type {};
 
-    template <class T>
-    using is_optional = is_optional_impl<std::decay_t<T>>;
+template <class T>
+using is_optional = is_optional_impl<std::decay_t<T>>;
 
-  } // namespace detail
+} // namespace detail
 
-  /****************/
-  /* optional<T&> */
-  /****************/
+/****************/
+/* optional<T&> */
+/****************/
 
 template <class T>
 class optional<T&> {
@@ -895,7 +913,7 @@ class optional<T&> {
     }
 
     template <class U>
-    constexpr T& value_or(U&& u) const {
+    constexpr T value_or(U&& u) const {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>,
                                               decltype(u)>,
                       "Must be able to bind u to T&");
@@ -930,6 +948,49 @@ class optional<T&> {
     }
 
     constexpr void reset() noexcept { value_ = nullptr; }
+    using iterator       = T*;
+    using const_iterator = const T*;
+
+    // [optional.iterators], iterator support
+    constexpr T* begin() noexcept {
+        if (has_value()) {
+            return value_;
+        } else {
+            return nullptr;
+        }
+    }
+    constexpr const T* begin() const noexcept {
+        if (has_value()) {
+            return value_;
+        } else {
+            return nullptr;
+        }
+    }
+    constexpr T* end() noexcept { return begin() + has_value(); }
+
+    constexpr const T* end() const noexcept { return begin() + has_value(); }
+
+    constexpr std::reverse_iterator<T*> rbegin() noexcept {
+        return reverse_iterator(end());
+    }
+    constexpr std::reverse_iterator<const T*> rbegin() const noexcept {
+        return reverse_iterator(end());
+    }
+    constexpr std::reverse_iterator<T*> rend() noexcept {
+        return reverse_iterator(begin());
+    }
+    constexpr std::reverse_iterator<const T*> rend() const noexcept {
+        return reverse_iterator(begin());
+    }
+
+    constexpr const T* cbegin() const noexcept { return begin(); }
+    constexpr const T* cend() const noexcept { return end(); }
+    constexpr std::reverse_iterator<const T*> crbegin() const noexcept {
+        return rbegin();
+    }
+    constexpr std::reverse_iterator<const T*> crend() const noexcept {
+        return rend();
+    }
 };
 \end{minted}
 

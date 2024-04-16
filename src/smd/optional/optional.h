@@ -1090,7 +1090,7 @@ class optional<T&> {
     }
 
     template <class U>
-    constexpr T& value_or(U&& u) const {
+    constexpr T value_or(U&& u) const {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, decltype(u)>,
                       "Must be able to bind u to T&");
         return has_value() ? *value_ : std::forward<U>(u);
