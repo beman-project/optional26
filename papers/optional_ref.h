@@ -113,7 +113,7 @@ class optional<T&> {
     }
 
     template <class U>
-    constexpr T& value_or(U&& u) const {
+    constexpr T value_or(U&& u) const {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>,
                                               decltype(u)>,
                       "Must be able to bind u to T&");
@@ -148,4 +148,47 @@ class optional<T&> {
     }
 
     constexpr void reset() noexcept { value_ = nullptr; }
+    using iterator       = T*;
+    using const_iterator = const T*;
+
+    // [optional.iterators], iterator support
+    constexpr T* begin() noexcept {
+        if (has_value()) {
+            return value_;
+        } else {
+            return nullptr;
+        }
+    }
+    constexpr const T* begin() const noexcept {
+        if (has_value()) {
+            return value_;
+        } else {
+            return nullptr;
+        }
+    }
+    constexpr T* end() noexcept { return begin() + has_value(); }
+
+    constexpr const T* end() const noexcept { return begin() + has_value(); }
+
+    constexpr std::reverse_iterator<T*> rbegin() noexcept {
+        return reverse_iterator(end());
+    }
+    constexpr std::reverse_iterator<const T*> rbegin() const noexcept {
+        return reverse_iterator(end());
+    }
+    constexpr std::reverse_iterator<T*> rend() noexcept {
+        return reverse_iterator(begin());
+    }
+    constexpr std::reverse_iterator<const T*> rend() const noexcept {
+        return reverse_iterator(begin());
+    }
+
+    constexpr const T* cbegin() const noexcept { return begin(); }
+    constexpr const T* cend() const noexcept { return end(); }
+    constexpr std::reverse_iterator<const T*> crbegin() const noexcept {
+        return rbegin();
+    }
+    constexpr std::reverse_iterator<const T*> crend() const noexcept {
+        return rend();
+    }
 };

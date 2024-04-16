@@ -440,11 +440,12 @@ TEST(OptionalRefTest, Observers) {
     EXPECT_TRUE(o3.ref_or(var3) == 42);
     EXPECT_TRUE(o4.ref_or(var3) == 54);
     int j = 99;
-    EXPECT_TRUE(o4.ref_or(j) == 99);
-    o4.ref_or(j) = 88;
-    EXPECT_TRUE(j == 88);
+    EXPECT_TRUE(o4.value_or(j) == 99);
+    // o4.value_or(j) = 88;
+    // EXPECT_TRUE(j == 88);
     int var99 = 99;
-    EXPECT_TRUE([&](){smd::optional::optional<int&> o(j);return o; }().ref_or(var99) == 88);
+    j = 88;
+    EXPECT_TRUE([&](){smd::optional::optional<int&> o(j);return o; }().value_or(var99) == 88);
 
     EXPECT_TRUE([&](){smd::optional::optional<int&> o;return o; }().ref_or(var99) == 99);
 
