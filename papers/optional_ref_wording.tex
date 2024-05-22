@@ -18,7 +18,7 @@
 
 \begin{flushright}
   \begin{tabular}{ll}
-    Document \#: & P2988R4 \\
+    Document \#: & P2988R5 \\
     Date: & \today \\
     Project: & Programming Language C++ \\
     Audience: & LEWG
@@ -36,6 +36,11 @@
 \chapter*{Changes Since Last Version}
 
 \begin{itemize}
+\item \textbf{Changes since R4}
+  \begin{itemize}
+  \item feature test macro
+  \item value_or updates from P3091
+  \end{itemize}
 \item \textbf{Changes since R3}
   \begin{itemize}
   \item make_optional discussion - always value
@@ -222,6 +227,8 @@ Add a reference specialization for the std::optional template.
 
 \chapter{Wording}
 
+The wording here cross references and adopts the wording in \cite{P3091R2}.
+
 
 \begin{wording}
 
@@ -232,6 +239,22 @@ Add a reference specialization for the std::optional template.
 
   \indexlibraryglobal{optional}%
   \indexlibrarymember{value_type}{optional}%
+  \begin{removedblock}
+    \begin{codeblock}
+template<class U> constexpr T value_or(U&&) const &;
+template<class U> constexpr T value_or(U&&) &&;
+\end{codeblock}
+\end{removedblock}
+
+\begin{addedblock}
+  \begin{codeblock}
+template <class U = remove_cvref_t<T>, class Self, class... Args>
+    U value_or(this Self&& self, Args&&... args);
+
+template <class U = remove_cvref_t<T>, class Self, class X, class... Args>
+    U value_or(this Self&& self, initializer_list<X> il, Args&&... args);
+  \end{codeblock}
+\end{addedblock}
   \begin{addedblock}
   \begin{codeblock}
     namespace std {
@@ -271,7 +294,15 @@ Add a reference specialization for the std::optional template.
         constexpr explicit operator bool() const noexcept;
         constexpr bool has_value() const noexcept;
         constexpr const T& value() const;                                 // freestanding-deleted
+
+        // Without P3091
         template<class U> constexpr T value_or(U&&) const;
+
+        // With P3091
+        template <class U = remove_cv_t<T>, class... Args>
+          U value_or(Args&&...) const;
+        template <class U = remove_cv_t<T>, class X, class... Args>
+          U constexpr value_or(initializer_list<X>, Args&&...) const;
 
         // \ref{optional.monadic}, monadic operations
         template<class F> constexpr auto and_then(F&& f) const;
@@ -300,6 +331,60 @@ Add a reference specialization for the std::optional template.
   When an \tcode{optional<T\&>} object refers to a value,
   member \tcode{val} points to the referred to object.
   \end{addedblock}
+
+  From P3091
+
+At the end of 22.5.3.6 [optional.observe] in the Working Draft, modify the definition of value_or:
+
+\begin{removedblock}
+  \begin{itemdecl}
+  template<class U> constexpr T value_or(U&&) const &;
+  \end{itemdecl}
+  Description ...
+
+  \begin{itemdecl}
+  template<class U> constexpr T value_or(U&&) &&;
+  \end{itemdecl}
+  Description ...
+\end{removedblock}
+
+\begin{addedblock}
+  \begin{itemdecl}
+template <class U = remove_cvref_t<T>, class Self, class... Args>
+U value_or(this Self&& self, Args&&... args);
+\end{itemdecl}
+
+  \begin{itemdescr}
+    \pnum
+    \mandates
+    is_constructible_v<U, decltype(*std::forward<Self>(self))> \&\&
+is_constructible_v<U, Args...> is true. If U is a reference type, then sizeof...(Args) is 1 and, for v being a value of the single type in Args, the initialization U u(v); is well formed and does not bind u to a temporary whose lifetime is extended (6.7.7 [class.temporary]).
+
+    \pnum
+    \effects
+    Equivalent to:
+
+return self.has_value() ? U(*std::forward<Self>(self)) : U(std::forward<Args>(args)...);
+\end{itemdescr}
+
+  \begin{itemdecl}
+template <class U = remove_cvref_t<T>, class Self, class X, class... Args>
+    U value_or(this Self&& self, initializer_list<X> il, Args&&... args);
+  \end{itemdecl}
+
+  \begin{itemdescr}
+    \pnum
+    \mandates
+ ! is_reference_v<U> \&\& is_constructible_v<U, initializer_list<X>, Args...> \&\&
+is_constructible_v<U, decltype(*std::forward<Self>(self))> is true.
+
+    \pnum
+    \effects
+ Equivalent to:
+
+return self.has_value() ? U(*std::forward<Self>(self)) : U(il, std::forward<Args>(args)...);
+\end{itemdescr}
+\end{addedblock}
 
   \rSec3[optional.ctor]{Constructors}
 
@@ -664,6 +749,7 @@ This destructor is trivial.
     \end{codeblock}
   \end{itemdescr}
 
+  Without P3091
   \indexlibrarymember{value_or}{optional}%
   \begin{itemdecl}
     template<class U> constexpr T value_or(U&& v) const;
@@ -677,10 +763,47 @@ This destructor is trivial.
     \pnum
     \effects
     Equivalent to:
-    \begin{codeblock}
-      return has_value() ? value() : forward<U>(u);
-    \end{codeblock}
+
+    return has_value() ? U(**this) : U(std::forward<Args>(args)...);
   \end{itemdescr}
+
+  With P3091
+  \indexlibrarymember{value_or}{optional}%
+  \begin{itemdecl}
+  template <class U = T, class... Args>
+    U value_or(Args&&...args) const;
+  \end{itemdecl}
+
+  \begin{itemdescr}
+    \pnum
+    \mandates
+    is_constructible_v<U, decltype(**this)> \&\& is_constructible_v<U, Args...>
+is true. If U is a reference type, then sizeof...(Args) is 1 and, for v being a value of the single type in Args, the initialization U u(v); is well formed and does not bind u to a temporary whose lifetime is extended (6.7.7 [class.temporary]).
+
+\pnum
+\effects
+Equivalent to:
+
+return has_value() ? U(**this) : U(std::forward<Args>(args)...);
+  \end{itemdescr}
+
+  \begin{itemdecl}
+template <class U = remove_cv_t<T>, class X, class... Args>
+  U constexpr value_or(initializer_list<X> il, Args&&...) const;
+\end{itemdecl}
+
+\begin{itemdescr}
+    \pnum
+    \mandates
+   ! is_reference_v<U> \&\& is_constructible_v<U, initializer_list<X>, Args...> \&\&
+is_constructible_v<U, decltype(**this)> is true.
+
+  \pnum
+    \effects
+   Equivalent to:
+
+   return has_value() ? U(**this) : U(il, std::forward<Args>(args)...);
+\end{itemdescr}
 
   \rSec3[optional.monadic]{Monadic operations}
 
@@ -759,6 +882,12 @@ This destructor is trivial.
     \tcode{*this} does not refer to a value.
   \end{itemdescr}
 
+\Sec2[version.syn]{Feature-test macro}
+Add the following macro definition to [version.syn], header <version> synopsis, with the value selected by the editor to reflect the date of adoption of this paper:
+
+\begin{codeblock}
+  #define __cpp_lib_optional_ref 20XXXXL // also in <ranges>, <tuple>, <utility>
+\end{codeblock}
 
 \end{wording}
 
