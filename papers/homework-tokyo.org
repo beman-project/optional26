@@ -1,0 +1,312 @@
+#+TITLE: Choices for ~make_optional~ and ~value_or()~
+#+AUTHOR: Steve Downey
+#+EMAIL: sdowney@gmail.com
+#+LANGUAGE: en
+#+DOCNUMBER: P3199R0
+#+AUDIENCE: LEWG
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+DATE: {{{modification-time(%Y-%m-%d, VC)}}}
+#+SOURCE_REPO: https://github.com/steve-downey/wg21org
+#+MACRO: filename (eval (magit-git-string "ls-files" ( buffer-file-name)))
+#+source_file: {{{filename}}}
+#+MACRO: gitver (eval (magit-git-string "describe" "--always" "--long" "--all" "--dirty" "--tags"))
+#+source_version: {{{gitver}}}
+
+#+STARTUP: showall
+
+#+HTML_DOCTYPE: html5
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:t tex:t
+#+OPTIONS: ^:nil
+#+OPTIONS: html-self-link-headlines:t
+
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./wg21org.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./modus-operandi-tinted.css"/>
+
+#+BIBLIOGRAPHY: wg21.bib
+#+BIBLIOGRAPHY: MyLibrary.bib
+
+#+begin_abstract
+Abstract: Homework: Review options for std::make_optional and std::optional<T&>::value_or()
+#+end_abstract
+
+* From the design notes slides
+Recap of 2024-03-20 presentation slides that did not have consensus.
+
+** make_optional
+- Because of existing code, ~make_optional<T&>~ must return optional<T> rather than optional<T&>.
+- Returning optional<T&> is consistent and defensible, and a few optional implementations in production make this choice.
+- It is, however, quite easy to construct a make_optional expression that deduces a different category causing possibly dangerous changes to code.
+
+
+** value_or
+Have ~value_or~ return a ~T&~.
+
+A reference so that there is a shared referent for the or side as well as the optional.
+
+Check that the supplied value can be bound to a ~T&~.
+
+
+* ~std::make_optional~ in the context of ~optional<T&>~
+
+Current specification:
+#+begin_src cpp
+template<class T> constexpr optional<decay_t<T>> make_optional(T&& v);
+// Returns: optional<decay_t<T>>(std​::​forward<T>(v)).
+
+template<class T, class...Args>
+  constexpr optional<T> make_optional(Args&&... args);
+// Effects: Equivalent to: return optional<T>(in_place, std​::​forward<Args>(args)...);
+
+template<class T, class U, class... Args>
+  constexpr optional<T> make_optional(initializer_list<U> il, Args&&... args);
+// Effects: Equivalent to: return optional<T>(in_place, il, std​::​forward<Args>(args)...);
+#+end_src
+
+
+The second two forms are disallowed for std::optional<T&> because in_place with multiple arguments does not make sense.
+
+#+begin_src cpp
+#include <optional>
+
+struct MyStruct {};
+
+MyStruct& func();
+
+static_assert(std::is_same_v<
+                  std::optional<MyStruct>,
+                  decltype(std::make_optional(
+                      MyStruct{}))> == true);
+
+static_assert(std::is_same_v<
+                  std::optional<MyStruct>,
+                  decltype(std::make_optional(
+                      func()))> == true);
+
+std::optional<MyStruct> r1 =
+    std::make_optional<MyStruct>(func());
+
+std::optional<MyStruct> r1a =
+    std::make_optional<MyStruct&>(func());
+
+std::optional<MyStruct> r1b =
+    std::make_optional(func());
+
+
+std::optional<MyStruct> r2 =
+    std::make_optional<MyStruct>(
+        std::move(MyStruct{}));
+
+std::optional<MyStruct> r2a =
+    std::make_optional<MyStruct&&>(
+        std::move(MyStruct{}));
+#+end_src
+
+https://compiler-explorer.com/z/no7znrz9v
+
+We can currently spell as well as deduce ~MyStruct&~ and ~MyStruct&&~ for ~make_optional~ and the result is a ~std::optional<T>~.
+
+I think it is clear that changing the return type for a ~make_optional~ on an expression that has a reference type from a ~std::optional<T>~ to a ~std::optional<T&>~ would not be acceptable in existing code. The code might fail to compile because we forbid dangling temporary binding, but succesful compilation might be even worse.
+
+It's not clear right now that people spelling the template with a ~T&~ are doing so with great deliberateness. There is certainly the possibility that users may be confused and try to get an ~optional<T&>~ out of ~make_optional~, but failure should be generally quickly visible as there is no viable path to construct or assign a ~optional<T>~ to an ~optional<T&>~. Conversions do permit an ~optional<T>~ to be initialized from an ~optional<T&>~, as ~optional~ is fairly permissive about conversions, and this seems mostly desirable.
+
+#+begin_src cpp
+    std::optional<int> x;
+    std::optional<int&> x2 = x;   //fails
+    std::optional<int&> x3{x};    //fails
+    i3 = x;                       //fails
+
+    std::optional<int&> k;
+    std::optional<int&> y = k;    // compiles
+    std::optional<int&> y2{k};    // compiles
+    y = k;                        // compiles
+
+#+end_src
+
+Given the adopted policy regarding ~[[nodiscard]]~ I am not sure we should mandate a diagnostic at this point, without at least more feedback from standard library implementors. Policy paper to come.
+
+** Recommend *Do Nothing*
+Make no changes to the behavior or compilation of std::make_optional. It's not clear right now we need a ~make_optional_ref~ in place of the existing constructors. There's no constructor confusion, or multi-arg emplace. I think I would need evidence that ~std::optional<MyType&>{}~ is not sufficient.
+
+* ~std::optional<T&>::value_or~
+There are different implementations in the optionals in the wild that both support references and support ~value_or~.
+** Standard for ~optional<T>::value_or~
+[cite:@N4928]
+
+#+begin_src cpp
+template<class U> constexpr T value_or(U&& v) const &;
+
+// Mandates: is_copy_constructible_v<T> && is_convertible_v<U&&, T> is true.
+// Effects: Equivalent to:
+//   return has_value() ? **this : static_cast<T>(std::forward<U>(v));
+
+template<class U> constexpr T value_or(U&& v) &&;
+
+// Mandates: is_move_constructible_v<T> && is_convertible_v<U&&, T> is true.
+// Effects: Equivalent to:
+//  return has_value() ? std::move(**this) : static_cast<T>(std::forward<U>(v));
+#+end_src
+
+Note that for ~optional<T>~ moving the value out of a held value in an rvalue-ref optional is entirely reasonable.
+
+It is not for a reference semantic optional.
+
+** Boost
+[cite:@boost_detailed_nodate]
+#+begin_src cpp
+
+template<class U> T optional<T>::value_or(U && v) const& ;
+
+// Effects: Equivalent to if (*this) return **this; else return std::forward<U>(v);.
+
+// Remarks: If T is not CopyConstructible or U && is not convertible to T, the
+// program is ill-formed.  Notes: On compilers that do not support
+// ref-qualifiers on member functions this overload is replaced with the
+// const-qualified member function. On compilers without rvalue reference
+// support the type of v becomes U const&.
+
+template<class U> T optional<T>::value_or(U && v) && ;
+
+// Effects: Equivalent to if (*this) return std::move(**this); else return std::forward<U>(v);.
+
+// Remarks: If T is not MoveConstructible or U && is not convertible to T, the
+// program is ill-formed.  Notes: On compilers that do not support
+// ref-qualifiers on member functions this overload is not present.
+
+template<class R> T& optional<T&>::value_or( R&& r ) const noexcept;
+
+// Effects: Equivalent to if (*this) return **this; else return r;.
+// Remarks: Unless R is an lvalue reference, the program is ill-formed.
+#+end_src
+
+** Tl-optional
+[cite:@brand_tartanllamaoptional_nodate]
+#+begin_src cpp
+ template <class U> constexpr T optional<T&>::value_or(U &&u) && noexcept;
+ #+end_src
+Returns a ~T~ rather than a ~T&~
+** Flux
+[cite:@brindle_tcbrindleflux_nodate]
+This is from Tristan Brindle's tristanbrindle.com/flux/
+
+#+begin_src cpp
+#define FLUX_FWD(x) static_cast<decltype(x)&&>(x)
+//...
+// optional<T&>
+   [[nodiscard]]
+    constexpr auto value_unchecked() const noexcept -> T& { return *ptr_; }
+
+    [[nodiscard]]
+    constexpr auto value_or(auto&& alt) const
+        -> decltype(has_value() ? value_unchecked() : FLUX_FWD(alt))
+    {
+        return has_value() ? value_unchecked() : FLUX_FWD(alt);
+    }
+
+#+end_src
+Flux returns references, but effectively returns a common reference type.
+
+Note that all implementations return a ~T&~ from ~value()~, as well as for ~operator*()~ for all template instantiations. Arguing that value_or should return T because `value` is plausible, but not supportable for existing APIs.
+
+** Think-Cell
+[cite:@gmbh_think-cellthink-cell-library_nodate]
+
+https://github.com/think-cell/think-cell-library/
+
+value_or of both ~optional<T>~ and ~optional<T&>~ returns ~tc::common_reference<decltype(value()), U&&>~, which is like std::common_reference, but doesn't compile for e.g. long and unsigned long).
+
+see:
+- [[https://github.com/think-cell/think-cell-library/blob/b9c84dd7fc926fad80829ed49705fa51afe36e87/tc/optional.h#L270][tc optional value_or]]
+- [[https://github.com/think-cell/think-cell-library/blob/b9c84dd7fc926fad80829ed49705fa51afe36e87/tc/base/conditional.h#L18][Macro definition used]]
+- [[https://github.com/think-cell/think-cell-library/blob/b9c84dd7fc926fad80829ed49705fa51afe36e87/tc/base/type_traits_fwd.h#L822][tc common reference]]
+
+
+** Summary
+| Impl       | Behavior                                               |
+|------------+--------------------------------------------------------|
+| Standard   | optional<T>::value_or returns a T                      |
+| Boost      | optional<T>::value_or returns a T                      |
+|            | optional<T&>::value_or returns a T&                    |
+| TL         | optional<T>::value_or returns a T                      |
+|            | optional<T&>::value_or returns a T                     |
+| Flux       | returns result of ternary, similar to common_reference |
+| Think-cell | returns common_reference, with some caveats            |
+
+
+
+
+** Proposal
+Last night on Mattermost Tomasz Kamiński proposed
+#+begin_src cpp
+    template <class U, class R = std::common_reference_t<T&, U&&>>
+    auto value_or(U&& v) const -> R {
+        static_assert(!std::reference_constructs_from_temporary_v<R, U>);
+        static_assert(!std::reference_constructs_from_temporary_v<R, T&>);
+        return ptr ? static_cast<R>(*ptr) : static_cast<R>((U&&)v);
+    }
+#+end_src
+
+*** Examples
+#+begin_src cpp
+    optional<int&> o; // disengaged optional<int&>
+    long i{42};
+    auto&& val = o.value_or(i);
+    static_assert(std::same_as<decltype(o.value()), int&>);
+    static_assert(std::same_as<decltype(o.value_or(i)), long>);
+
+    optional<base&> b;
+    derived d;
+    static_assert(std::same_as<decltype(b.value()), base&>);
+    static_assert(std::same_as<decltype(b.value_or(d)), base&>);
+
+#+end_src
+https://godbolt.org/z/rWo7Wvd6b
+
+*** Motivation for reference returning value_or
+#+begin_src cpp
+
+struct Logger {
+    virtual void debug(std::string_view sv) = 0;
+};
+
+struct DefaultLogger : public Logger {
+    DefaultLogger() {}
+    DefaultLogger(const DefaultLogger & l) = delete;
+    virtual void debug(std::string_view sv) override {}
+};
+
+DefaultLogger& getDefaultLogger() {
+    static DefaultLogger dl;
+    return dl;
+}
+
+Logger& getLogger(optional<Logger&> logger) {
+    return l.value_or(getDefaultLogger());
+}
+#+end_src
+*** Discussion
+I believe that std::optional<T>::value_or returning a T is an unfortunate and unfixable mistake. Others believe that instead there ought to have been a ~value()~ returning ~T~, and a ~ref()~ returning ~T&~. The ship for changing those has long since sailed.
+
+I believe the use case of alternative references is important, and should be supported. I have been conviced that ~value_or~ is not an available name for that function.
+
+However, given the state of ~std::optional<T>::value_or~, I think this function needs to be called ~ref_or~.
+
+*** Proposal
+We should instead remove ~value_or~. There is no clear correct answer that works generically. Conversions from ~std::optional<reference_wrapper<T>>~ already need to do some work, as do conversions from any other existing optional. Making that work clear is a benefit.
+
+As a fallback, have ~value_or~ return a prvalue, a ~T~. A ~T&~, instead of ~std::common_reference_t<T&, U>~, excludes to many reasonable cases.
+
+[cite/n:@P2988R1]
+
+* References
+#+CITE_EXPORT: csl chicago-author-date.csl
+
+#+PRINT_BIBLIOGRAPHY:
+
+Exported: {{{time(%Y-%m-%d %T)}}}
+
+#+INCLUDE: "toc.css" export html
