@@ -1,6 +1,6 @@
-// smd/optional/optional.h                                            -*-C++-*-
-#ifndef INCLUDED_SMD_OPTIONAL_OPTIONAL
-#define INCLUDED_SMD_OPTIONAL_OPTIONAL
+// beman/optional/optional.h                                            -*-C++-*-
+#ifndef INCLUDED_BEMAN_OPTIONAL_OPTIONAL
+#define INCLUDED_BEMAN_OPTIONAL_OPTIONAL
 
 /*
 22.5.2 Header <optional> synopsis[optional.syn]
@@ -170,7 +170,7 @@ namespace std {
 #include <type_traits>
 #include <ranges>
 
-namespace smd::optional {
+namespace beman::optional {
 
 class monostate {};
 
@@ -201,26 +201,26 @@ template <class T>
     requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional;
 
-} // namespace smd::optional
+} // namespace beman::optional
 namespace std {
 template <typename T>
-inline constexpr bool ranges::enable_view<smd::optional::optional<T>> = true;
+inline constexpr bool ranges::enable_view<beman::optional::optional<T>> = true;
 
 template <typename T>
-inline constexpr bool ranges::enable_view<smd::optional::optional<T&>> = true;
+inline constexpr bool ranges::enable_view<beman::optional::optional<T&>> = true;
 
 template <typename T>
-inline constexpr bool ranges::enable_borrowed_range<smd::optional::optional<T*>> = true;
+inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T*>> = true;
 
 template <typename T>
-inline constexpr bool ranges::enable_borrowed_range<smd::optional::optional<std::reference_wrapper<T>>> = true;
+inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<std::reference_wrapper<T>>> = true;
 
 template <typename T>
-inline constexpr bool ranges::enable_borrowed_range<smd::optional::optional<T&>> = true;
+inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T&>> = true;
 
 } // namespace std
 
-namespace smd::optional {
+namespace beman::optional {
 template <class T>
 concept is_derived_from_optional = requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
 
@@ -1152,5 +1152,5 @@ class optional<T&> {
     constexpr std::reverse_iterator<const T*> crbegin() const noexcept { return rbegin(); }
     constexpr std::reverse_iterator<const T*> crend() const noexcept { return rend(); }
 };
-} // namespace smd::optional
+} // namespace beman::optional
 #endif
