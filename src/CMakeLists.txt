@@ -1,2 +1,2 @@
-add_subdirectory(smd)
+add_subdirectory(beman)
 add_subdirectory(examples)
