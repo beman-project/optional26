@@ -1,4 +1,4 @@
-#include <beman/optional/optional.h>
+#include <beman/optional/optional.hpp>
 
 int main() {
 }
