@@ -1,0 +1,142 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 29,
+    "patch": 2
+  },
+  "configurePresets": [
+    {
+      "name": "common",
+      "description": "General settings that apply to all configurations",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/.build/${presetName}",
+      "installDir": "${sourceDir}/.install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo;Debug;Tsan;Asan"
+      }
+    },
+    {
+      "name": "system",
+      "inherits": "common",
+      "displayName": "System compiler",
+      "description": "Build with default cc and c++ compilers",
+      "toolchainFile": "${sourceDir}/etc/toolchain.cmake"
+    },
+    {
+      "name": "gcc-14",
+      "inherits": "common",
+      "displayName": "GCC 14",
+      "description": "Build with GCC 14 compilers",
+      "toolchainFile": "${sourceDir}/etc/gcc-14-toolchain.cmake"
+    },
+    {
+      "name": "clang-18",
+      "inherits": "common",
+      "displayName": "Clang 18",
+      "description": "Build with Clang 18 compilers",
+      "toolchainFile": "${sourceDir}/etc/clang-18-toolchain.cmake"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "common",
+      "hidden": true,
+      "configuration": "Asan"
+    },
+    {
+      "name": "system",
+      "configurePreset": "system"
+    },
+    {
+      "name": "gcc-14",
+      "configurePreset": "gcc-14"
+    },
+    {
+      "name": "clang-18",
+      "configurePreset": "clang-18"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "common",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "system",
+      "inherits": "common",
+      "configurePreset": "system"
+    },
+    {
+      "name": "gcc-14",
+      "inherits": "common",
+      "configurePreset": "gcc-14"
+    },
+    {
+      "name": "clang-18",
+      "inherits": "common",
+      "configurePreset": "clang-18"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "system",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "system"
+        },
+        {
+          "type": "build",
+          "name": "system"
+        },
+        {
+          "type": "test",
+          "name": "system"
+        }
+      ]
+    },
+    {
+      "name": "gcc-14",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "gcc-14"
+        },
+        {
+          "type": "build",
+          "name": "gcc-14"
+        },
+        {
+          "type": "test",
+          "name": "gcc-14"
+        }
+      ]
+    },
+    {
+      "name": "clang-18",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang-18"
+        },
+        {
+          "type": "build",
+          "name": "clang-18"
+        },
+        {
+          "type": "test",
+          "name": "clang-18"
+        }
+      ]
+    }
+  ]
+}
