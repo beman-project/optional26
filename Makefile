@@ -1,44 +1,15 @@
 #! /usr/bin/make -f
 # -*-makefile-*-
 
-INSTALL_PREFIX?=/home/sdowney/install
+INSTALL_PREFIX?=.install/
 PROJECT?=$(shell basename $(CURDIR))
-BUILD_DIR?=../cmake.bld/${PROJECT}
-CONFIGURATION_TYPES?=RelWithDebInfo;Debug;Tsan;Asan
-DEST?=../install
+BUILD_DIR?=.build
+DEST?=$(INSTALL_PREFIX)
 CMAKE_FLAGS?=
-#CONFIG?=RelWithDebInfo
-USE_DOCKER_FILE:=.use-docker
-DOCKER_CMD := docker volume create cmake.bld; docker-compose run --rm dev
-LOCAL_MAKE_CMD := make -e -f targets.mk
-MAKE_CMD := $(LOCAL_MAKE_CMD)
 
 TARGETS := test clean all ctest
 
-# These targets are only run locally
-LOCAL_ONLY_TARGETS :=
-
-# If .lcldev/use-docker exists, then set `USE_DOCKER` to True
-ifneq ("$(wildcard $(USE_DOCKER_FILE))","")
-	USE_DOCKER := True
-endif
-
-ifdef USE_DOCKER
-	MAKE_CMD := $(DOCKER_CMD) $(MAKE_CMD)
-endif
-
 export
-
-.DEFAULT:
-	$(MAKE_CMD) $@
-
-# These targets are specified separately to enable bash autocomplete.
-$(TARGETS):
-	$(MAKE_CMD) $@
-
-# These targets that should only be run locally.
-$(LOCAL_ONLY_TARGETS):
-	$(LOCAL_MAKE_CMD) $@
 
 .update-submodules:
 	git submodule update --init --recursive
@@ -46,31 +17,75 @@ $(LOCAL_ONLY_TARGETS):
 
 .gitmodules: .update-submodules
 
-.PHONY: use-docker
-use-docker: ## Create docker switch file so that subsequent `make` commands run inside docker container.
-	touch $(USE_DOCKER_FILE)
+CONFIG?=Asan
 
-.PHONY: remove-docker
-remove-docker: ## Remove docker switch file so that subsequent `make` commands run locally.
-	$(RM) $(USE_DOCKER_FILE)
+export
 
-.PHONY: docker-rebuild
-docker-rebuild: ## Rebuilds the docker file using the latest base image.
-	docker-compose build
+ifeq ($(strip $(TOOLCHAIN)),)
+	_build_name?=build-system/
+	_build_dir?=.build/
+	_configuration_types?="RelWithDebInfo;Debug;Tsan;Asan"
+	_cmake_args=-DCMAKE_TOOLCHAIN_FILE=$(CURDIR)/etc/toolchain.cmake
+else
+	_build_name?=build-$(TOOLCHAIN)
+	_build_dir?=.build/
+	_configuration_types?="RelWithDebInfo;Debug;Tsan;Asan"
+	_cmake_args=-DCMAKE_TOOLCHAIN_FILE=$(CURDIR)/etc/$(TOOLCHAIN)-toolchain.cmake
+endif
 
-.PHONY: docker-clean
-docker-clean: ## Clean up the docker volumes and rebuilds the image from scratch.
-	docker-compose down -v
-	docker-compose build
 
-.PHONY: docker-shell
-docker-shell: ## Shell in container
-	docker-compose run --rm dev
+_build_path?=$(_build_dir)/$(_build_name)
+
+define run_cmake =
+	cmake \
+	-G "Ninja Multi-Config" \
+	-DCMAKE_CONFIGURATION_TYPES=$(_configuration_types) \
+	-DCMAKE_INSTALL_PREFIX=$(abspath $(INSTALL_PREFIX)) \
+	-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+	$(_cmake_args) \
+	$(CURDIR)
+endef
+
+default: test
+
+$(_build_path):
+	mkdir -p $(_build_path)
+
+$(_build_path)/CMakeCache.txt: | $(_build_path) .gitmodules
+	cd $(_build_path) && $(run_cmake)
+	-rm compile_commands.json
+	ln -s $(_build_path)/compile_commands.json
+
+compile: $(_build_path)/CMakeCache.txt ## Compile the project
+	cmake --build $(_build_path)  --config $(CONFIG) --target all -- -k 0
+
+install: $(_build_path)/CMakeCache.txt ## Install the project
+	DESTDIR=$(abspath $(DEST)) ninja -C $(_build_path) -k 0  install
+
+ctest: $(_build_path)/CMakeCache.txt ## Run CTest on current build
+	cd $(_build_path) && ctest --output-on-failure
+
+ctest_ : compile
+	cd $(_build_path) && ctest --output-on-failure
+
+test: ctest_ ## Rebuild and run tests
+
+cmake: |  $(_build_path)
+	cd $(_build_path) && ${run_cmake}
+
+clean: $(_build_path)/CMakeCache.txt ## Clean the build artifacts
+	cmake --build $(_build_path)  --config $(CONFIG) --target clean
+
+realclean: ## Delete the build directory
+	rm -rf $(_build_path)
+
+env:
+	$(foreach v, $(.VARIABLES), $(info $(v) = $($(v))))
+
+.PHONY : compile install ctest ctest_ test cmake clean realclean env
 
 
 # Help target
 .PHONY: help
 help: ## Show this help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST) targets.mk | sort
-
-.PHONY: help
