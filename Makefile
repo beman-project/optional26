@@ -84,6 +84,9 @@ env:
 
 .PHONY : compile install ctest ctest_ test cmake clean realclean env
 
+.PHONY: papers
+papers:
+	$(MAKE) -C papers papers
 
 # Help target
 .PHONY: help

@@ -1,8 +1,8 @@
 VENV := .venv/
 SOURCE_VENV := . $(VENV)/bin/activate;
-PYEXEC := $(SOURCE_VENV) python3.11
+PYEXEC := $(SOURCE_VENV) $(PYTHON)
 PIP_SYNC := $(PYEXEC) -m piptools sync
-PYEXECPATH ?= $(shell which python3.11 || which python3.10)
+PYEXECPATH ?= $(shell which python3.12 || which python3.11 || which python3.10)
 PYTHON ?= $(shell basename $(PYEXECPATH))
 REQS_MARKER := $(VENV)/bin/.pip-sync
 PIP := $(PYEXEC) -m pip
@@ -10,6 +10,7 @@ DEPS_DIR := .deps
 
 override DEPS := $(VENV) wg21.bib
 
+default: papers
 
 $(VENV):
 	$(PYTHON) -m venv --system-site-packages $(VENV)
@@ -21,12 +22,25 @@ create-venv:
 	rm -rf $(VENV)
 	make $(VENV)
 
-wording : optional_ref_wording.tex wg21.bib | $(VENV)
+$(DEPS_DIR):
 	mkdir -p $(DEPS_DIR)
+
+.PHONY: papers
+papers: optional_ref_wording.pdf ## Compile papers
+
+optional_ref_wording.pdf : optional_ref_wording.tex wg21.bib $(DEPS_DIR) | $(VENV)
 	$(SOURCE_VENV) latexmk -f -shell-escape -pdflua -use-make -deps -deps-out=$(DEPS_DIR)/$@.d -MP optional_ref_wording.tex
 
-wg21.bib:
+define curl_cmd =
 	curl https://wg21.link/index.bib > wg21.bib
+endef
+
+wg21.bib:
+	$(curl_cmd)
+
+.PHONY: curl-bib
+curl-bib:  ## Download wg21.bib from wg21.link
+	$(curl_cmd)
 
 .PHONY: clean
 clean:
@@ -36,6 +50,6 @@ clean:
 # Include dependencies
 $(foreach file,$(TARGET),$(eval -include $(DEPS_DIR)/$(file).d))
 
-%: force
-	@$(MAKE) -f wg21/Makefile $@
-force: ;
+
+help: ## Show this help.
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST)  | sort
