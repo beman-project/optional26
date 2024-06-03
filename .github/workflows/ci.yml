@@ -85,11 +85,6 @@ jobs:
           chmod +x llvm.sh
           sudo ./llvm.sh ${{matrix.config.clang_version}} all
 
-      - name: Install GCC 13
-        if: matrix.config.name == 'Ubuntu GCC 13'
-        run: |
-          sudo apt update
-          sudo apt-get install g++-13
 
       - name: Install GCC 14
         if: matrix.config.name == 'Ubuntu GCC 14'
