@@ -93,6 +93,7 @@ jobs:
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh ${{matrix.config.clang_version}} all
+          sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
 
 
       - name: Install GCC 14
