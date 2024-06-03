@@ -17,6 +17,15 @@ jobs:
       matrix:
         config:
         - {
+          name: "Ubuntu Clang 17",
+          os: ubuntu-24.04,
+          toolchain: "clang-17-toolchain.cmake",
+          clang_version: 17,
+          installed_clang_version: 14,
+          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+          }
+
+        - {
           name: "Ubuntu Clang 18",
           os: ubuntu-24.04,
           toolchain: "clang-18-toolchain.cmake",
@@ -25,14 +34,14 @@ jobs:
           cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
           }
 
-        # - {
-        #   name: "Ubuntu Clang 19",
-        #   os: ubuntu-24.04,
-        #   toolchain: "clang-19-toolchain.cmake",
-        #   clang_version: 19,
-        #   installed_clang_version: 14,
-        #   cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
-        #   }
+        - {
+          name: "Ubuntu Clang 19",
+          os: ubuntu-24.04,
+          toolchain: "clang-19-toolchain.cmake",
+          clang_version: 19,
+          installed_clang_version: 14,
+          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+          }
 
         - {
             name: "Ubuntu GCC 13",
