@@ -1,8 +1,10 @@
 cmake.bld
-/papers/**/generated/
 compile_commands.json
-.update-submodules
-.use-docker
+/.build/
+/.cache/
+*.pyg
+/.vscode/
+/papers/**/generated/
 /papers/**/.venv/
 /papers/**/_minted-*/
 /papers/**/*.aux
@@ -22,6 +24,4 @@ compile_commands.json
 /papers/**/.venv.work/
 /papers/**/_minted-optional_ref/
 /papers/**/_minted-optional_ref_wording/
-/.cache/
-*.pyg
-/.build/
+.update-submodules
