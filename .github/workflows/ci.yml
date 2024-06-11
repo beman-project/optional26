@@ -1,76 +1,121 @@
-name: ci
+name: Test
+
 on:
-  pull_request:
   push:
-    branches:
-      - main
-      - master
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
     strategy:
       fail-fast: false
+
       matrix:
-        include:
-          - name: "clang17"
-            pkg: "clang-17 clang-tidy-17 g++-13 libc++-17-dev  libc++1-17 libc++abi-17-dev libc++abi1-17 libunwind-17-dev"
-            toolchain: clang-17
-            os: ubuntu-22.04
+        config:
+        - {
+          name: "Ubuntu Clang 17",
+          os: ubuntu-24.04,
+          toolchain: "clang-17-toolchain.cmake",
+          clang_version: 17,
+          installed_clang_version: 14,
+          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+          }
 
+        - {
+          name: "Ubuntu Clang 18",
+          os: ubuntu-24.04,
+          toolchain: "clang-18-toolchain.cmake",
+          clang_version: 18,
+          installed_clang_version: 14,
+          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+          }
 
-          - name: "gcc13"
-            pkg: "gcc-13 g++-13"
-            toolchain: gcc-13
-            os: ubuntu-22.04
+        - {
+          name: "Ubuntu Clang 19",
+          os: ubuntu-24.04,
+          toolchain: "clang-19-toolchain.cmake",
+          clang_version: 19,
+          installed_clang_version: 14,
+          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+          }
 
+        - {
+            name: "Ubuntu GCC 13",
+            os: ubuntu-24.04,
+            toolchain: "gcc-13-toolchain.cmake",
+            clang_version: 17,
+            installed_clang_version: 14,
+            cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+          }
 
-
+        - {
+            name: "Ubuntu GCC 14",
+            os: ubuntu-24.04,
+            toolchain: "gcc-14-toolchain.cmake",
+            clang_version: 17,
+            installed_clang_version: 14,
+            cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+          }
 
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
+          submodules: 'true'
 
-      - name: Configure APT (llvm)
-        continue-on-error: true
-        if: contains(matrix.pkg, 'clang')
+      - uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Install LLVM+Clang
+        if: startsWith(matrix.config.os, 'ubuntu-')
         run: |
-          sudo apt-add-repository --no-update --yes "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+          cat /etc/lsb-release
+          sudo apt-get remove clang-${{matrix.config.installed_clang_version}} \
+            lldb-${{matrix.config.installed_clang_version}} \
+            lld-${{matrix.config.installed_clang_version}} \
+            clangd-${{matrix.config.installed_clang_version}} \
+            clang-tidy-${{matrix.config.installed_clang_version}} \
+            clang-format-${{matrix.config.installed_clang_version}} \
+            clang-tools-${{matrix.config.installed_clang_version}} \
+            llvm-${{matrix.config.installed_clang_version}}-dev \
+            lld-${{matrix.config.installed_clang_version}} \
+            lldb-${{matrix.config.installed_clang_version}} \
+            llvm-${{matrix.config.installed_clang_version}}-tools \
+            libomp-${{matrix.config.installed_clang_version}}-dev \
+            libc++-${{matrix.config.installed_clang_version}}-dev \
+            libc++abi-${{matrix.config.installed_clang_version}}-dev \
+            libclang-common-${{matrix.config.installed_clang_version}}-dev \
+            libclang-${{matrix.config.installed_clang_version}}-dev \
+            libclang-cpp${{matrix.config.installed_clang_version}}-dev \
+            libunwind-${{matrix.config.installed_clang_version}}-dev
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{matrix.config.clang_version}} all
+          sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
 
-      - name: Configure APT
-        continue-on-error: true
+
+      - name: Install GCC 14
+        if: matrix.config.name == 'Ubuntu GCC 14'
         run: |
-          echo 'APT::Acquire::Retries "5";' | sudo tee -a /etc/apt/apt.conf.d/80-retries > /dev/null
-          sudo add-apt-repository --no-update --yes ppa:ubuntu-toolchain-r/ppa
-          sudo add-apt-repository --no-update --yes ppa:ubuntu-toolchain-r/test
-          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | sudo tee /etc/apt/sources.list.d/kitware.list
-          sudo apt-get update
+          sudo apt update
+          sudo apt-get install g++-14
 
-      - name: Install CMake
-        run: sudo apt-get install --yes cmake
 
-      - name: Install Ninja
-        run: sudo apt-get install --yes ninja-build
-
-      - name: Install compiler/tool ${{ matrix.pkg }}
-        run: sudo apt-get install --yes ${{ matrix.pkg }}
+      - name: Configure
+        run: |
+          mkdir -p .build
+          cd .build
+          echo ${{ matrix.config.cmake_args }}
+          echo ${{ matrix.config.toolchain }}
+          cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE=etc/${{ matrix.config.toolchain }} -B . -S ..
 
       - name: Build
         run: |
-          ./bld compile TOOLCHAIN=${{ matrix.toolchain }}
+          cmake --build .build --config Asan --target all -- -k 0
 
       - name: Test
         run: |
-          ./bld test TOOLCHAIN=${{ matrix.toolchain }}
-
-      - name: Test-ASAN
-        run: |
-          ./bld test TOOLCHAIN=${{ matrix.toolchain }} CONFIG=Asan
-
-      - name: Test-TSAN
-        run: |
-          ./bld test TOOLCHAIN=${{ matrix.toolchain }} CONFIG=Tsan
+          cd .build
+          ctest --output-on-failure
