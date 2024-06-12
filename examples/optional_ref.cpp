@@ -12,7 +12,7 @@ auto find_cat_old(std::string) -> Cat* { return nullptr; }
 
 auto find_cat_new(std::string) -> optional<Cat&> { return optional<Cat&>{}; }
 
-Cat* doit_old(Cat& cat) { return &cat; }
+Cat*           doit_old(Cat& cat) { return &cat; }
 optional<Cat&> doit(Cat& cat) { return optional<Cat&>{cat}; }
 
 Cat* before1() {

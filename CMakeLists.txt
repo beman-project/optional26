@@ -8,6 +8,7 @@ set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
 add_subdirectory(extern)
 add_subdirectory(src)
+add_subdirectory(examples)
 
 include(GNUInstallDirs)
 
