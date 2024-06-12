@@ -24,3 +24,7 @@ compile_commands.json
 /papers/_minted-optional_ref_wording/
 /.cache/
 *.pyg
+/.build/
+/papers/P2988/.deps/
+/papers/P2988/.venv/
+_minted-*

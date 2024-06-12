@@ -1,5 +1,5 @@
 [submodule "papers/wg21"]
-	path = papers/wg21
+	path = papers/P2988/wg21
 	url = https://github.com/mpark/wg21.git
 [submodule "extern/googletest"]
 	path = extern/googletest
