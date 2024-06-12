@@ -7,6 +7,26 @@ on:
     branches: [ main ]
 
 jobs:
+  lint:
+    name: Lint C++
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Clang Format
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-format
+
+      - name: Run Clang Format
+        run: |
+          git diff --name-only main | grep -E '\.(h|hpp|hxx|c|cpp|cxx)$' | xargs clang-format -i
+
+      - name: Check Clang Format
+        run: |
+          git diff --name-only main | grep -E '\.(h|hpp|hxx|c|cpp|cxx)$' | xargs clang-format -output-replacements-xml | grep "<replacement " && exit 1 || exit 0
+
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -17,30 +37,30 @@ jobs:
       matrix:
         config:
         - {
-          name: "Ubuntu Clang 17",
-          os: ubuntu-24.04,
-          toolchain: "clang-17-toolchain.cmake",
-          clang_version: 17,
-          installed_clang_version: 14,
-          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+            name: "Ubuntu Clang 17",
+            os: ubuntu-24.04,
+            toolchain: "clang-17-toolchain.cmake",
+            clang_version: 17,
+            installed_clang_version: 14,
+            cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
           }
 
         - {
-          name: "Ubuntu Clang 18",
-          os: ubuntu-24.04,
-          toolchain: "clang-18-toolchain.cmake",
-          clang_version: 18,
-          installed_clang_version: 14,
-          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+            name: "Ubuntu Clang 18",
+            os: ubuntu-24.04,
+            toolchain: "clang-18-toolchain.cmake",
+            clang_version: 18,
+            installed_clang_version: 14,
+            cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
           }
 
         - {
-          name: "Ubuntu Clang 19",
-          os: ubuntu-24.04,
-          toolchain: "clang-19-toolchain.cmake",
-          clang_version: 19,
-          installed_clang_version: 14,
-          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
+            name: "Ubuntu Clang 19",
+            os: ubuntu-24.04,
+            toolchain: "clang-19-toolchain.cmake",
+            clang_version: 19,
+            installed_clang_version: 14,
+            cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
           }
 
         - {
@@ -95,13 +115,11 @@ jobs:
           sudo ./llvm.sh ${{matrix.config.clang_version}} all
           sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
 
-
       - name: Install GCC 14
         if: matrix.config.name == 'Ubuntu GCC 14'
         run: |
           sudo apt update
           sudo apt-get install g++-14
-
 
       - name: Configure
         run: |
