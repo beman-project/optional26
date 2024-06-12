@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(stl-concepts VERSION 0.0.0 LANGUAGES CXX)
+project(beman_optional26 VERSION 0.0.0 LANGUAGES CXX)
 
 enable_testing()
 
