@@ -9,15 +9,15 @@ target_sources(
 include(GNUInstallDirs)
 
 target_include_directories(optional PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_LOWER_PROJECT_NAME}>  # <prefix>/include/scratch
-  )
+)
 
 install(
   TARGETS optional
   EXPORT ${TARGETS_EXPORT_NAME}1
   DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  )
+)
 
 string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_LOWER_PROJECT_NAME)
 
@@ -25,7 +25,7 @@ install(
   DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_LOWER_PROJECT_NAME}
   FILES_MATCHING PATTERN "*.h"
-  )
+)
 
 target_link_libraries(optional)
 

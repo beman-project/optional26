@@ -1,6 +1,4 @@
-#include <beman/optional/optional.hpp>
-
-#include <beman/optional/optional.hpp>
+#include <Beman/Optional26/optional.hpp>
 
 #include <gtest/gtest.h>
 

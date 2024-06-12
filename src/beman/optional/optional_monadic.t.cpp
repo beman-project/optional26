@@ -1,6 +1,4 @@
-#include <beman/optional/optional.hpp>
-
-#include <beman/optional/optional.hpp>
+#include <Beman/Optional26/optional.hpp>
 
 #include <gtest/gtest.h>
 
@@ -9,7 +7,7 @@ constexpr beman::optional::optional<int> get_opt_int(int) { return 42; }
 
 
 TEST(OptionalMonadicTest, Transform) {
-  // lhs is empty
+    // lhs is empty
     beman::optional::optional<int> o1;
     auto o1r = o1.transform([](int i) { return i + 2; });
     static_assert((std::is_same<decltype(o1r), beman::optional::optional<int>>::value));
@@ -85,27 +83,26 @@ TEST(OptionalMonadicTest, Transform) {
 
   }
 
-TEST(OptionalMonadicTest, TransformConstexpr) {
+  TEST(OptionalMonadicTest, TransformConstexpr) {
+      // test each overload in turn
+      constexpr beman::optional::optional<int> o16  = 42;
+      constexpr auto                           o16r = o16.transform(get_int);
+      static_assert(*o16r == 42);
 
-    // test each overload in turn
-    constexpr beman::optional::optional<int> o16 = 42;
-    constexpr auto o16r = o16.transform(get_int);
-    static_assert(*o16r == 42);
+      constexpr beman::optional::optional<int> o20  = 42;
+      constexpr auto                           o20r = std::move(o20).transform(get_int);
+      static_assert(*o20r == 42);
 
-    constexpr beman::optional::optional<int> o20 = 42;
-    constexpr auto o20r = std::move(o20).transform(get_int);
-    static_assert(*o20r == 42);
-
-    constexpr beman::optional::optional<int> o32 = beman::optional::nullopt;
-    constexpr auto o32r = o32.transform(get_int);
-    static_assert(!o32r);
-    constexpr beman::optional::optional<int> o36 = beman::optional::nullopt;
-    constexpr auto o36r = std::move(o36).transform(get_int);
-    static_assert(!o36r);
+      constexpr beman::optional::optional<int> o32  = beman::optional::nullopt;
+      constexpr auto                           o32r = o32.transform(get_int);
+      static_assert(!o32r);
+      constexpr beman::optional::optional<int> o36  = beman::optional::nullopt;
+      constexpr auto                           o36r = std::move(o36).transform(get_int);
+      static_assert(!o36r);
   }
 
 TEST(OptionalMonadicTest, Transform2) {
-  // lhs is empty
+    // lhs is empty
     beman::optional::optional<int> o1;
     auto o1r = o1.transform([](int i) { return i + 2; });
     static_assert((std::is_same<decltype(o1r), beman::optional::optional<int>>::value));
@@ -173,23 +170,22 @@ TEST(OptionalMonadicTest, Transform2) {
     EXPECT_TRUE(!o36r);
   }
 
-TEST(OptionalMonadicTest, TransformConstxpr)
- {
-    // test each overload in turn
-    constexpr beman::optional::optional<int> o16 = 42;
-    constexpr auto o16r = o16.transform(get_int);
-    static_assert(*o16r == 42);
+  TEST(OptionalMonadicTest, TransformConstxpr) {
+      // test each overload in turn
+      constexpr beman::optional::optional<int> o16  = 42;
+      constexpr auto                           o16r = o16.transform(get_int);
+      static_assert(*o16r == 42);
 
-    constexpr beman::optional::optional<int> o20 = 42;
-    constexpr auto o20r = std::move(o20).transform(get_int);
-    static_assert(*o20r == 42);
+      constexpr beman::optional::optional<int> o20  = 42;
+      constexpr auto                           o20r = std::move(o20).transform(get_int);
+      static_assert(*o20r == 42);
 
-    constexpr beman::optional::optional<int> o32 = beman::optional::nullopt;
-    constexpr auto o32r = o32.transform(get_int);
-    static_assert(!o32r);
-    constexpr beman::optional::optional<int> o36 = beman::optional::nullopt;
-    constexpr auto o36r = std::move(o36).transform(get_int);
-    static_assert(!o36r);
+      constexpr beman::optional::optional<int> o32  = beman::optional::nullopt;
+      constexpr auto                           o32r = o32.transform(get_int);
+      static_assert(!o32r);
+      constexpr beman::optional::optional<int> o36  = beman::optional::nullopt;
+      constexpr auto                           o36r = std::move(o36).transform(get_int);
+      static_assert(!o36r);
   }
 
 TEST(OptionalMonadicTest, and_then)
