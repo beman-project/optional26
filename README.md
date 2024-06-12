@@ -38,7 +38,7 @@ Compiling the paper requires a working LaTeX installation. See instructions for 
 
 #### Basic Build
 
-This project strives to be as normal and simple a CMake project as possible. This build workflow in particular will work, producing a static `example` library, ready to package:
+This project strives to be as normal and simple a CMake project as possible. This build workflow in particular will work, producing a static `beman_optional26` library, ready to package:
 
 ```shell
 cmake --workflow --preset gcc-14

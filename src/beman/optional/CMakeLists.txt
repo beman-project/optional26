@@ -1,20 +1,22 @@
-add_library(optional STATIC "")
+SET(TARGET_LIBRARY "beman_optional26")
+
+add_library("${TARGET_LIBRARY}" STATIC "")
 
 target_sources(
-  optional
+  "${TARGET_LIBRARY}"
   PRIVATE
   optional.cpp
 )
 
 include(GNUInstallDirs)
 
-target_include_directories(optional PUBLIC
+target_include_directories("${TARGET_LIBRARY}" PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_LOWER_PROJECT_NAME}>  # <prefix>/include/scratch
 )
 
 install(
-  TARGETS optional
+  TARGETS "${TARGET_LIBRARY}"
   EXPORT ${TARGETS_EXPORT_NAME}1
   DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
@@ -27,7 +29,7 @@ install(
   FILES_MATCHING PATTERN "*.h"
 )
 
-target_link_libraries(optional)
+target_link_libraries("${TARGET_LIBRARY}")
 
 ## Tests
 add_executable(optional_test "")
@@ -41,7 +43,7 @@ target_sources(
   optional_ref_monadic.t.cpp
 )
 
-target_link_libraries(optional_test optional)
+target_link_libraries(optional_test "${TARGET_LIBRARY}")
 target_link_libraries(optional_test gtest)
 target_link_libraries(optional_test gtest_main)
 
