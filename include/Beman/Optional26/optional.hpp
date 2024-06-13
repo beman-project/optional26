@@ -222,8 +222,12 @@ template <typename T>
 inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T&>> = true;
 
 // Since P3168R1: Give std::optional Range Support.
-// template <class T>
-// inline constexpr auto format_kind<beman::optional::optional<T>> = range_format::disabled;
+// Note: At 13.06.2024, gcc and msvc do not implement P2585R1: "Improve default container formatting".
+// TODO @neatudarius: always enable once supported by other compilers.
+#if defined(__clang__)
+template <class T>
+inline constexpr auto format_kind<beman::optional::optional<T>> = range_format::disabled;
+#endif
 
 } // namespace std
 
@@ -316,9 +320,9 @@ class optional {
     }
 
   public:
-    using value_type     = T;
+    using value_type = T;
     // Since P3168R1: Give std::optional Range Support.
-    using iterator       = T*; // see [optional.iterators]
+    using iterator       = T*;       // see [optional.iterators]
     using const_iterator = const T*; // see [optional.iterators]
 
     constexpr optional() noexcept
@@ -689,9 +693,9 @@ class optional {
 
     // Since P3168R1: Give std::optional Range Support.
     // [optional.iterators], iterator support
-    constexpr iterator begin() noexcept { return has_value() ? std::addressof(value_) : nullptr; };
+    constexpr iterator       begin() noexcept { return has_value() ? std::addressof(value_) : nullptr; };
     constexpr const_iterator begin() const noexcept { return has_value() ? std::addressof(value_) : nullptr; };
-    constexpr iterator end() noexcept { return begin() + has_value(); }
+    constexpr iterator       end() noexcept { return begin() + has_value(); }
     constexpr const_iterator end() const noexcept { return begin() + has_value(); }
 
     /// Returns a pointer to the stored value
@@ -940,7 +944,7 @@ class optional<T&> {
     // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
     // Implementation of the range support for optional<T&> reflects P3168R1 for now.
     // [optional.iterators], iterator support
-    using iterator       = T*; // see [optional.iterators]
+    using iterator       = T*;       // see [optional.iterators]
     using const_iterator = const T*; // see [optional.iterators]
 
     // [optional.ctor], constructors
@@ -1075,9 +1079,9 @@ class optional<T&> {
     // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
     // Implementation of the range support for optional<T&> reflects P3168R1 for now.
     // [optional.iterators], iterator support
-    constexpr iterator begin() noexcept { return has_value() ? value_ : nullptr; };
+    constexpr iterator       begin() noexcept { return has_value() ? value_ : nullptr; };
     constexpr const_iterator begin() const noexcept { return has_value() ? value_ : nullptr; };
-    constexpr iterator end() noexcept { return begin() + has_value(); }
+    constexpr iterator       end() noexcept { return begin() + has_value(); }
     constexpr const_iterator end() const noexcept { return begin() + has_value(); }
 
     // \rSec3[optional.observe]{Observers}
