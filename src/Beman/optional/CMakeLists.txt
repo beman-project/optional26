@@ -1,4 +1,4 @@
-SET(TARGET_LIBRARY "beman_optional26")
+set(TARGET_LIBRARY "beman_optional26")
 
 add_library("${TARGET_LIBRARY}" STATIC "")
 

@@ -1,4 +1,4 @@
-SET(BEMAN_OPTIONAL26_LIBRARY "beman_optional26")
+set(BEMAN_OPTIONAL26_LIBRARY "beman_optional26")
 
 include(GNUInstallDirs)
 
