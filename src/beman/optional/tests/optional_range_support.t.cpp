@@ -10,12 +10,12 @@
 namespace test {
 struct empty {};
 struct no_default_ctor {
-    no_default_ctor()                             = delete;
+    no_default_ctor()                                  = delete;
     no_default_ctor(const no_default_ctor&)            = default;
     no_default_ctor(no_default_ctor&&)                 = default;
     no_default_ctor& operator=(const no_default_ctor&) = default;
     no_default_ctor& operator=(no_default_ctor&&)      = default;
-    no_default_ctor(empty){};
+    no_default_ctor(empty) {};
 };
 
 struct base {
@@ -29,18 +29,18 @@ struct derived : public base {
     derived() : base(0), j_(0) {}
     derived(int i, int j) : base(i), j_(j) {}
 };
-}
+} // namespace test
 
 TEST(RangeSupportTest, BeginOnEmptyOptional) {
-    EXPECT_EQ(beman::optional::optional<int> {}.begin(), nullptr);
+    EXPECT_EQ(beman::optional::optional<int>{}.begin(), nullptr);
 
-    EXPECT_EQ(beman::optional::optional<test::empty> {}.begin(), nullptr);
-    
-    EXPECT_EQ(beman::optional::optional<test::no_default_ctor> {}.begin(), nullptr);
-    
-    EXPECT_EQ(beman::optional::optional<test::base> {}.begin(), nullptr);
-    
-    EXPECT_EQ(beman::optional::optional<test::derived> {}.begin(), nullptr);
+    EXPECT_EQ(beman::optional::optional<test::empty>{}.begin(), nullptr);
+
+    EXPECT_EQ(beman::optional::optional<test::no_default_ctor>{}.begin(), nullptr);
+
+    EXPECT_EQ(beman::optional::optional<test::base>{}.begin(), nullptr);
+
+    EXPECT_EQ(beman::optional::optional<test::derived>{}.begin(), nullptr);
 }
 
 TEST(RangeSupportTest, BeginOnNonEmptyOptional) {
@@ -61,17 +61,16 @@ TEST(RangeSupportTest, BeginOnNonEmptyOptional) {
 }
 
 TEST(RangeSupportTest, EndOnEmptyOptional) {
-    EXPECT_EQ(beman::optional::optional<int> {}.end(), nullptr);
+    EXPECT_EQ(beman::optional::optional<int>{}.end(), nullptr);
 
-    EXPECT_EQ(beman::optional::optional<test::empty> {}.end(), nullptr);
-    
-    EXPECT_EQ(beman::optional::optional<test::no_default_ctor> {}.end(), nullptr);
-    
-    EXPECT_EQ(beman::optional::optional<test::base> {}.end(), nullptr);
-    
-    EXPECT_EQ(beman::optional::optional<test::derived> {}.end(), nullptr);
+    EXPECT_EQ(beman::optional::optional<test::empty>{}.end(), nullptr);
+
+    EXPECT_EQ(beman::optional::optional<test::no_default_ctor>{}.end(), nullptr);
+
+    EXPECT_EQ(beman::optional::optional<test::base>{}.end(), nullptr);
+
+    EXPECT_EQ(beman::optional::optional<test::derived>{}.end(), nullptr);
 }
-
 
 TEST(RangeSupportTest, EndOnNonEmptyOptional) {
     beman::optional::optional<int> opt_int = 0XCAFEBABE;
@@ -94,18 +93,18 @@ TEST(RangeSupportTest, LoopOverEmptyRange) {
     beman::optional::optional<int> empty;
     ASSERT_FALSE(empty.has_value());
 
-    for(auto _ : empty) {
+    for (auto _ : empty) {
         ASSERT_TRUE(false) << "Should not be reached: expected not to loop over empty optional";
     }
 }
 
 TEST(RangeSupportTest, LoopOverNonEmptyRange) {
-    const auto expected_value = 0xCAFEBABE;
+    const auto                     expected_value = 0xCAFEBABE;
     beman::optional::optional<int> empty{expected_value};
     ASSERT_TRUE(empty.has_value());
 
     bool entered_loop = false;
-    for(auto i : empty) {
+    for (auto i : empty) {
         EXPECT_EQ(i, expected_value);
         entered_loop = true;
     }
@@ -163,4 +162,3 @@ TEST(RangeSupportTest, FormatOptionalIsStillDisabled) {
     // EXPECT_EQ(std::format("{}", beman::optional::optional<int> {}), "<placeholder>");
 #endif
 }
-
