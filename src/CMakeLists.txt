@@ -1,1 +1,1 @@
-add_subdirectory(beman)
+add_subdirectory(Beman)
