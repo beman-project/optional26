@@ -209,15 +209,22 @@ namespace std {
 template <typename T>
 inline constexpr bool ranges::enable_view<beman::optional::optional<T>> = true;
 
+// Since ${PAPER_NUMBER}: ${PAPER_TITLE}.
+// Note: P3168 and P2988 may have different flows inside LEWG/LWG.
+// Implementation of the range support for optional<T&> reflects P3168R1 for now.
+// [optional.iterators], iterator support
 template <typename T>
 inline constexpr bool ranges::enable_view<beman::optional::optional<T&>> = true;
 
+// TODO: document why this is needed.
 template <typename T>
 inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T*>> = true;
 
+// TODO: document why this is needed.
 template <typename T>
 inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<std::reference_wrapper<T>>> = true;
 
+// TODO: document why this is needed.
 template <typename T>
 inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T&>> = true;
 
