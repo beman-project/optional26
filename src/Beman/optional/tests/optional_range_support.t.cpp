@@ -1,3 +1,10 @@
+/**
+ * This file contains tests for the range support. Check P3168R1: "Give std::optional Range Support".
+ *
+ * RangeSupportTest: test suite for the range support.
+ *
+ * Classes used in the tests: int, pointers, empty, no_default_ctor, base, derived.
+ */
 #include <Beman/Optional26/optional.hpp>
 
 #include <algorithm>
@@ -178,14 +185,12 @@ TEST(RangeSupportTest, IteratorConceptsCheck) {
 }
 
 TEST(RangeSupportTest, FormatOptionalIsStillDisabled) {
-// Since P3168R1: Give std::optional Range Support.
-// Note: At 13.06.2024, gcc and msvc do not implement P2585R1: "Improve default container formatting".
-// TODO @neatudarius: always enable once supported by other compilers.
-#if defined(__clang__)
+// TODO: Always enable when all major compilers implement P2585R1: "Improve default container formatting".
+#if defined(__cpp_lib_format_ranges)
     EXPECT_EQ(std::format_kind<beman::optional::optional<int>>, std::range_format::disabled);
 
-    // Next line shold not compile: formatter is not defined for std::optional and bemans::optional::optional.
-    // EXPECT_EQ(std::format("{}", beman::optional::optional<int> {}), "<placeholder>");
+    // Next line shold not compile: formatter is not defined for optional.
+    // EXPECT_EQ(std::format("{}", beman::optional::optional<int> {}), "[]");
 #endif
 }
 

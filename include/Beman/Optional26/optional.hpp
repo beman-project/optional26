@@ -229,9 +229,8 @@ template <typename T>
 inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T&>> = true;
 
 // Since P3168R1: Give std::optional Range Support.
-// Note: At 13.06.2024, gcc and msvc do not implement P2585R1: "Improve default container formatting".
-// TODO @neatudarius: always enable once supported by other compilers.
-#if defined(__clang__)
+// TODO: Always enable when all major compilers implement P2585R1: "Improve default container formatting".
+#if defined(__cpp_lib_format_ranges)
 template <class T>
 inline constexpr auto format_kind<beman::optional::optional<T>> = range_format::disabled;
 #endif
