@@ -259,17 +259,16 @@ TEST(RangeSupportTest, RangeChainExampleWithVector) {
         }
     };
 
-    auto&& r =
-        v                                     // starting vector
-        | std::ranges::views::transform(test) // generates {nullopt, 3, nullopt, 7, nullopt, nullopt, nullopt, 9, 1}
-        | std::ranges::views::filter([](auto x) {
-              return bool(x);
-          }) // generates {optional<int>{3}, optional<int>{7}, optional<int>{9}, optional<int>{1}}
-        | std::ranges::views::transform([](auto x) { return *x; }) // generates {3, 5, 7, 9}
-        | std::ranges::views::transform([](int i) {
-              // std::cout << i << "\n"; // do not actually do it in tests
-              return i;
-          }) // print + identity transform
+    auto&& r = v                             // starting vector
+               | std::views::transform(test) // generates {nullopt, 3, nullopt, 7, nullopt, nullopt, nullopt, 9, 1}
+               | std::views::filter([](auto x) {
+                     return bool(x);
+                 }) // generates {optional<int>{3}, optional<int>{7}, optional<int>{9}, optional<int>{1}}
+               | std::views::transform([](auto x) { return *x; }) // generates {3, 5, 7, 9}
+               | std::views::transform([](int i) {
+                     // std::cout << i << "\n"; // do not actually do it in tests
+                     return i;
+                 }) // print + identity transform
         ;
 
     ASSERT_TRUE(std::ranges::equal(r, std::vector<int>{3, 7, 9, 1}));
@@ -286,9 +285,9 @@ TEST(RangeSupportTest, RangeChainExampleWithSets) {
         }
     };
 
-    for (auto i : std::ranges::views::iota(1, 10) | std::ranges::views::transform(flt)) {
+    for (auto i : std::views::iota(1, 10) | std::views::transform(flt)) {
         for (auto j : i) { // no need to transform
-            for (auto k : std::ranges::views::iota(0, j)) {
+            for (auto k : std::views::iota(0, j)) {
                 // std::cout << '\a'; // do not actually log in tests
                 std::ignore = k;
             }
@@ -304,11 +303,11 @@ TEST(RangeSupportTest, PythagoreanTriples) {
         return b ? beman::optional::optional<T>{std::move(x)} : beman::optional::nullopt;
     };
     constexpr auto and_then = []<class T>(T&& r, auto fun) {
-        return decltype(r)(r) | std::ranges::views::transform(std::move(fun)) | std::ranges::views::join;
+        return decltype(r)(r) | std::views::transform(std::move(fun)) | std::views::join;
     };
-    auto triples = and_then(std::ranges::views::iota(1), [=](int z) {
-        return and_then(std::ranges::views::iota(1, z + 1), [=](int x) {
-            return and_then(std::ranges::views::iota(x, z + 1),
+    auto triples = and_then(std::views::iota(1), [=](int z) {
+        return and_then(std::views::iota(1, z + 1), [=](int x) {
+            return and_then(std::views::iota(x, z + 1),
                             [=](int y) { return yield_if(x * x + y * y == z * z, std::make_tuple(x, y, z)); });
         });
     });
@@ -316,7 +315,7 @@ TEST(RangeSupportTest, PythagoreanTriples) {
     {
         // Generate first 10 Pythagorean triples.
         // https://mathworld.wolfram.com/PythagoreanTriple.html
-        auto&& r = triples | std::ranges::views::take(10);
+        auto&& r = triples | std::views::take(10);
         EXPECT_TRUE(std::ranges::equal(r,
                                        std::vector{
                                            std::tuple{3, 4, 5},
@@ -359,7 +358,7 @@ TEST(RangeSupportTest, PythagoreanTriples) {
         ASSERT_EQ(bruteforce_generate_nth(100, 200), k100th_triple);
 
         // Generate the 100th Pythagorean triple with ranges.
-        auto&& r = triples | std::ranges::views::drop(99) | std::ranges::views::take(1);
+        auto&& r = triples | std::views::drop(99) | std::views::take(1);
         EXPECT_TRUE(std::ranges::equal(r, std::vector{k100th_triple}));
     }
 }

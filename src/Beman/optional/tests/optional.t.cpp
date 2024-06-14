@@ -823,8 +823,8 @@ TEST(ViewMaybe, CompTestRef) {
 // (This uses one syntax for constrained lambdas
 // in C++20.)
 inline constexpr auto and_then = [](auto&& r, auto fun) {
-    return decltype(r)(r) | std::ranges::views::transform(std::move(fun)) |
-           std::ranges::views::join;
+    return decltype(r)(r) | std::views::transform(std::move(fun)) |
+           std::views::join;
 };
 
 // "yield_if" takes a bool and a value and
@@ -837,7 +837,7 @@ inline constexpr auto yield_if = []<class T>(bool b, T x) {
 
 
 TEST(ViewMaybeTest, PythTripleTest) {
-    using std::ranges::views::iota;
+    using std::views::iota;
     auto triples = and_then(iota(1), [](int z) {
         return and_then(iota(1, z + 1), [=](int x) {
             return and_then(iota(x, z + 1), [=](int y) {
