@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(stl-concepts VERSION 0.0.0 LANGUAGES CXX)
+project(beman_optional26 VERSION 0.0.0 LANGUAGES CXX)
 
 enable_testing()
 
@@ -8,6 +8,7 @@ set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
 add_subdirectory(extern)
 add_subdirectory(src)
+add_subdirectory(examples)
 
 include(GNUInstallDirs)
 

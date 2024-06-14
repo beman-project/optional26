@@ -1,6 +1,6 @@
-#include <beman/optional/optional.hpp>
+#include <Beman/Optional26/optional.hpp>
 
-#include <beman/optional/optional.hpp> // test 2nd include OK
+#include <Beman/Optional26/optional.hpp> // test 2nd include OK
 
 #include <functional>
 #include <ranges>

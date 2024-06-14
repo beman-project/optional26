@@ -1,6 +1,6 @@
 // beman/optional/optional.h                                            -*-C++-*-
-#ifndef INCLUDED_BEMAN_OPTIONAL_OPTIONAL
-#define INCLUDED_BEMAN_OPTIONAL_OPTIONAL
+#ifndef BEMAN_OPTIONAL26_OPTIONAL
+#define BEMAN_OPTIONAL26_OPTIONAL
 
 /*
 22.5.2 Header <optional> synopsis[optional.syn]
