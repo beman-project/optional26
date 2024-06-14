@@ -148,6 +148,23 @@ TEST(RangeSupportTest, RangeConceptsCheck) {
             std::ranges::borrowed_range<beman::optional::optional<int*>>); // borrowed_range is enabled for pointers
         static_assert(std::ranges::random_access_range<beman::optional::optional<int*>>);
     }
+
+    {
+        using ref = std::reference_wrapper<int>;
+        // beman::optional::optional<ref> is a range.
+        static_assert(std::ranges::range<beman::optional::optional<ref>>);
+        static_assert(std::ranges::view<beman::optional::optional<ref>>);
+        static_assert(std::ranges::input_range<beman::optional::optional<ref>>);
+        static_assert(std::ranges::forward_range<beman::optional::optional<ref>>);
+        static_assert(std::ranges::bidirectional_range<beman::optional::optional<ref>>);
+        static_assert(std::ranges::contiguous_range<beman::optional::optional<ref>>);
+        static_assert(std::ranges::common_range<beman::optional::optional<ref>>);
+        static_assert(std::ranges::viewable_range<beman::optional::optional<ref>>);
+        static_assert(std::ranges::borrowed_range<beman::optional::optional<ref>>); // borrowed_range is
+                                                                                    // enabled for
+                                                                                    // reference_wrapper
+        static_assert(std::ranges::random_access_range<beman::optional::optional<ref>>);
+    }
 }
 
 TEST(RangeSupportTest, IteratorConceptsCheck) {

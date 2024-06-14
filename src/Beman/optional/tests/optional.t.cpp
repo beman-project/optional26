@@ -638,42 +638,6 @@ TEST(ViewMaybeTest, Constructors) {
     beman::optional::optional<std::optional<int>> n3{std::optional<int>{}};
 }
 
-TEST(ViewMaybeTest, ConceptCheck) {
-    static_assert(std::ranges::range<beman::optional::optional<int>>);
-    static_assert(std::ranges::view<beman::optional::optional<int>>);
-    static_assert(std::ranges::input_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::forward_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::bidirectional_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::contiguous_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::common_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::viewable_range<beman::optional::optional<int>>);
-    static_assert(!std::ranges::borrowed_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::random_access_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::sized_range<beman::optional::optional<int>>);
-
-    static_assert(std::ranges::range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::view<beman::optional::optional<int*>>);
-    static_assert(std::ranges::input_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::forward_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::bidirectional_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::contiguous_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::common_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::viewable_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::borrowed_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::random_access_range<beman::optional::optional<int*>>);
-
-    using ref = std::reference_wrapper<int>;
-    static_assert(std::ranges::range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::view<beman::optional::optional<ref>>);
-    static_assert(std::ranges::input_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::forward_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::bidirectional_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::contiguous_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::common_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::viewable_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::borrowed_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::random_access_range<beman::optional::optional<ref>>);
-}
 
 TEST(ViewMaybeTest, ConceptCheckRef) {
     static_assert(std::ranges::range<beman::optional::optional<int&>>);
