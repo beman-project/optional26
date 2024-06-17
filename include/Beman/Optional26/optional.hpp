@@ -171,6 +171,8 @@ namespace std {
 #include <type_traits>
 #include <utility>
 
+#include "./detail/__iterator.hpp"
+
 namespace beman::optional {
 
 class monostate {};
@@ -313,8 +315,8 @@ class optional {
   public:
     using value_type = T;
     // Since P3168R1: Give std::optional Range Support.
-    using iterator       = T*;       // see [optional.iterators]
-    using const_iterator = const T*; // see [optional.iterators]
+    using iterator       = beman::optional::normal_iterator<T*, optional>;       // see [optional.iterators]
+    using const_iterator = beman::optional::normal_iterator<const T*, optional>; // see [optional.iterators]
 
     constexpr optional() noexcept
         requires std::is_default_constructible_v<T>
@@ -684,8 +686,8 @@ class optional {
 
     // Since P3168R1: Give std::optional Range Support.
     // [optional.iterators], iterator support
-    constexpr iterator       begin() noexcept { return has_value() ? std::addressof(value_) : nullptr; };
-    constexpr const_iterator begin() const noexcept { return has_value() ? std::addressof(value_) : nullptr; };
+    constexpr iterator       begin() noexcept { return iterator(has_value() ? std::addressof(value_) : nullptr); }
+    constexpr const_iterator begin() const noexcept { return const_iterator(begin()); }
     constexpr iterator       end() noexcept { return begin() + has_value(); }
     constexpr const_iterator end() const noexcept { return begin() + has_value(); }
 

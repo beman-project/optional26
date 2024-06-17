@@ -6,6 +6,7 @@ target_sources(
   "${TARGET_LIBRARY}"
   PRIVATE
   optional.cpp
+  detail/__iterator.cpp
 )
 
 include(GNUInstallDirs)
