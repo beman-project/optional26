@@ -1,6 +1,6 @@
-// beman/optional/optional.h                                            -*-C++-*-
-#ifndef BEMAN_OPTIONAL26_OPTIONAL
-#define BEMAN_OPTIONAL26_OPTIONAL
+// include/Beman/Optional26/optional.hpp                                            -*-C++-*-
+#ifndef BEMAN_OPTIONAL26_OPTIONAL_HPP
+#define BEMAN_OPTIONAL26_OPTIONAL_HPP
 
 /*
 22.5.2 Header <optional> synopsis[optional.syn]
@@ -1129,4 +1129,5 @@ class optional<T&> {
     constexpr void reset() noexcept { value_ = nullptr; }
 };
 } // namespace beman::optional
-#endif
+
+#endif // BEMAN_OPTIONAL26_OPTIONAL_HPP
