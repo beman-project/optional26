@@ -68,6 +68,9 @@ jobs:
 
       - uses: seanmiddleditch/gha-setup-ninja@master
 
+      - name: Activate verbose shell
+        run: set -x
+
       - name: Install LLVM+Clang
         if: startsWith(matrix.config.os, 'ubuntu-')
         run: |
@@ -105,6 +108,7 @@ jobs:
 
       - name: Configure
         run: |
+          rm -rf .build
           mkdir -p .build
           cd .build
           echo ${{ matrix.config.cmake_args }}
