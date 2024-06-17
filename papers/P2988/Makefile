@@ -1,9 +1,9 @@
+PYEXECPATH ?= $(shell which python3.12 || which python3.11 || which python3.10)
+PYTHON ?= $(shell basename $(PYEXECPATH))
 VENV := .venv/
 SOURCE_VENV := . $(VENV)/bin/activate;
 PYEXEC := $(SOURCE_VENV) $(PYTHON)
 PIP_SYNC := $(PYEXEC) -m piptools sync
-PYEXECPATH ?= $(shell which python3.12 || which python3.11 || which python3.10)
-PYTHON ?= $(shell basename $(PYEXECPATH))
 REQS_MARKER := $(VENV)/bin/.pip-sync
 PIP := $(PYEXEC) -m pip
 DEPS_DIR := .deps
