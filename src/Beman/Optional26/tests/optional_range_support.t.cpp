@@ -128,8 +128,7 @@ TEST(RangeSupportTest, RangeConceptsCheck) {
         static_assert(std::ranges::contiguous_range<beman::optional::optional<int>>);
         static_assert(std::ranges::common_range<beman::optional::optional<int>>);
         static_assert(std::ranges::viewable_range<beman::optional::optional<int>>);
-        static_assert(!std::ranges::borrowed_range<beman::optional::optional<int>>); // borrowed_range is disabled for
-                                                                                     // non-pointers
+        static_assert(!std::ranges::borrowed_range<beman::optional::optional<int>>);
         static_assert(std::ranges::random_access_range<beman::optional::optional<int>>);
         static_assert(std::ranges::sized_range<beman::optional::optional<int>>);
     }
@@ -144,8 +143,7 @@ TEST(RangeSupportTest, RangeConceptsCheck) {
         static_assert(std::ranges::contiguous_range<beman::optional::optional<int*>>);
         static_assert(std::ranges::common_range<beman::optional::optional<int*>>);
         static_assert(std::ranges::viewable_range<beman::optional::optional<int*>>);
-        static_assert(
-            std::ranges::borrowed_range<beman::optional::optional<int*>>); // borrowed_range is enabled for pointers
+        static_assert(!std::ranges::borrowed_range<beman::optional::optional<int*>>);
         static_assert(std::ranges::random_access_range<beman::optional::optional<int*>>);
     }
 
@@ -160,9 +158,7 @@ TEST(RangeSupportTest, RangeConceptsCheck) {
         static_assert(std::ranges::contiguous_range<beman::optional::optional<ref>>);
         static_assert(std::ranges::common_range<beman::optional::optional<ref>>);
         static_assert(std::ranges::viewable_range<beman::optional::optional<ref>>);
-        static_assert(std::ranges::borrowed_range<beman::optional::optional<ref>>); // borrowed_range is
-                                                                                    // enabled for
-                                                                                    // reference_wrapper
+        static_assert(!std::ranges::borrowed_range<beman::optional::optional<ref>>);
         static_assert(std::ranges::random_access_range<beman::optional::optional<ref>>);
     }
 }

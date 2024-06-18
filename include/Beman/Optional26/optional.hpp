@@ -211,14 +211,6 @@ inline constexpr bool ranges::enable_view<beman::optional::optional<T>> = true;
 
 // TODO: document why this is needed.
 template <typename T>
-inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T*>> = true;
-
-// TODO: document why this is needed.
-template <typename T>
-inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<std::reference_wrapper<T>>> = true;
-
-// TODO: document why this is needed.
-template <typename T>
 inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T&>> = true;
 
 // Since P3168R1: Give std::optional Range Support.
