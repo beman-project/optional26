@@ -6,6 +6,7 @@ target_sources(
   "${TARGET_LIBRARY}"
   PRIVATE
   optional.cpp
+  detail/__iterator.cpp
 )
 
 include(GNUInstallDirs)
@@ -42,6 +43,7 @@ target_sources(
   tests/optional_monadic.t.cpp
   tests/optional_range_support.t.cpp
   tests/optional_ref_monadic.t.cpp
+  tests/detail/__iterator.t.cpp
 )
 
 target_link_libraries(optional_test "${TARGET_LIBRARY}")
