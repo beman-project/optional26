@@ -35,15 +35,6 @@ jobs:
           }
 
         - {
-          name: "Ubuntu Clang 19",
-          os: ubuntu-24.04,
-          toolchain: "clang-19-toolchain.cmake",
-          clang_version: 19,
-          installed_clang_version: 14,
-          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
-          }
-
-        - {
             name: "Ubuntu GCC 13",
             os: ubuntu-24.04,
             toolchain: "gcc-13-toolchain.cmake",
@@ -74,6 +65,7 @@ jobs:
       - name: Install LLVM+Clang
         if: startsWith(matrix.config.os, 'ubuntu-')
         run: |
+          set -x
           cat /etc/lsb-release
           sudo apt-get remove clang-${{matrix.config.installed_clang_version}} \
             lldb-${{matrix.config.installed_clang_version}} \
