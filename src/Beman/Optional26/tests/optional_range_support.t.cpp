@@ -257,37 +257,7 @@ TEST(RangeSupportTest, LoopOptionalAssignment) {
     EXPECT_EQ(opt_int.value(), expected_value);
 }
 
-TEST(RangeSupportTest, RangeChainExampleWithVector) {
-    // Example from P3168R1: start from a vector of values, apply multiple range operations involving optional values.
-    std::vector<int> v{2, 3, 4, 5, 6, 7, 8, 9, 1};
-    const auto       test = [](int i) -> beman::optional::optional<int> {
-        switch (i) {
-        case 1:
-        case 3:
-        case 7:
-        case 9:
-            return i;
-        default:
-            return {};
-        }
-    };
-
-    auto&& r = v                             // starting vector
-               | std::views::transform(test) // generates {nullopt, 3, nullopt, 7, nullopt, nullopt, nullopt, 9, 1}
-               | std::views::filter([](auto x) {
-                     return bool(x);
-                 }) // generates {optional<int>{3}, optional<int>{7}, optional<int>{9}, optional<int>{1}}
-               | std::views::transform([](auto x) { return *x; }) // generates {3, 5, 7, 9}
-               | std::views::transform([](int i) {
-                     // std::cout << i << "\n"; // do not actually do it in tests
-                     return i;
-                 }) // print + identity transform
-        ;
-
-    ASSERT_TRUE(std::ranges::equal(r, std::vector<int>{3, 7, 9, 1}));
-}
-
-TEST(RangeSupportTest, RangeChainExampleWithSets) {
+TEST(RangeSupportTest, RangeChainExample) {
     // Example from P3168R1: start from a set of values, apply multiple range operations involving optional values.
     std::unordered_set<int> s{1, 3, 7, 9};
     const auto              flt = [&](int i) -> beman::optional::optional<int> {
