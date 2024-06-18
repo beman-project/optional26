@@ -87,7 +87,7 @@ jobs:
             libunwind-${{matrix.config.installed_clang_version}}-dev
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh ${{matrix.config.clang_version}} all
+          sudo /usr/bin/bash -xv ./llvm.sh ${{matrix.config.clang_version}} all
           sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
 
 
