@@ -167,7 +167,7 @@ TEST(NormalIteratorTest, ContainerType) {
         using pointer_type2    = typename containter_type2::pointer;
 
         auto it1 = beman::optional::detail::normal_iterator<pointer_type1, containter_type1>{};
-        auto it2 = beman::optional::detail::normal_iterator<pointer_type1, containter_type2>{};
+        auto it2 = beman::optional::detail::normal_iterator<pointer_type2, containter_type2>{};
 
         static_assert(!std::is_same_v<decltype(it1), decltype(it2)>);
     };
