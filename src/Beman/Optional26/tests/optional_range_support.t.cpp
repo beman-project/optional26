@@ -8,7 +8,9 @@
 #include <Beman/Optional26/optional.hpp>
 
 #include <algorithm>
+#if defined(__cpp_lib_format_ranges)
 #include <format>
+#endif
 #include <functional>
 #include <ranges>
 #include <tuple>

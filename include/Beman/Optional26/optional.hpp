@@ -165,7 +165,9 @@ namespace std {
 */
 
 #include <compare>
+#if defined(__cpp_lib_format_ranges)
 #include <format>
+#endif
 #include <functional>
 #include <ranges>
 #include <type_traits>
@@ -214,7 +216,6 @@ template <typename T>
 inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T&>> = true;
 
 // Since P3168R1: Give std::optional Range Support.
-// TODO: Always enable when all major compilers implement P2585R1: "Improve default container formatting".
 #if defined(__cpp_lib_format_ranges)
 template <class T>
 inline constexpr auto format_kind<beman::optional::optional<T>> = range_format::disabled;
