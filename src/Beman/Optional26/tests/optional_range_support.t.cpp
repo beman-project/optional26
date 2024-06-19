@@ -8,7 +8,9 @@
 #include <Beman/Optional26/optional.hpp>
 
 #include <gtest/gtest.h>
-#include "./__utils.h"
+
+#include <Beman/Optional26/detail/iterator.hpp>
+#include <tests/test_types.hpp>
 
 #include <algorithm>
 #include <concepts>
@@ -22,6 +24,8 @@
 #include <type_traits>
 #include <unordered_set>
 #include <vector>
+
+using namespace beman::optional::test;
 
 TEST(RangeSupportTest, RangeConcepts) {
     const auto test = [](auto&& opt) {
@@ -43,10 +47,10 @@ TEST(RangeSupportTest, RangeConcepts) {
 
     test(beman::optional::optional<int>{});
     test(beman::optional::optional<int*>{});
-    test(beman::optional::optional<test::empty>{});
-    test(beman::optional::optional<test::no_default_ctor>{});
-    test(beman::optional::optional<test::base>{});
-    test(beman::optional::optional<test::derived>{});
+    test(beman::optional::optional<empty>{});
+    test(beman::optional::optional<no_default_ctor>{});
+    test(beman::optional::optional<base>{});
+    test(beman::optional::optional<derived>{});
 }
 
 TEST(RangeSupportTest, IteratorConcepts) {
@@ -72,10 +76,10 @@ TEST(RangeSupportTest, IteratorConcepts) {
 
     test(beman::optional::optional<int>{});
     test(beman::optional::optional<int*>{});
-    test(beman::optional::optional<test::empty>{});
-    test(beman::optional::optional<test::no_default_ctor>{});
-    test(beman::optional::optional<test::base>{});
-    test(beman::optional::optional<test::derived>{});
+    test(beman::optional::optional<empty>{});
+    test(beman::optional::optional<no_default_ctor>{});
+    test(beman::optional::optional<base>{});
+    test(beman::optional::optional<derived>{});
 }
 
 TEST(RangeSupportTest, BeginOnEmptyOptional) {
@@ -94,10 +98,10 @@ TEST(RangeSupportTest, BeginOnEmptyOptional) {
 
     test(beman::optional::optional<int>{});
     test(beman::optional::optional<int*>{});
-    test(beman::optional::optional<test::empty>{});
-    test(beman::optional::optional<test::no_default_ctor>{});
-    test(beman::optional::optional<test::base>{});
-    test(beman::optional::optional<test::derived>{});
+    test(beman::optional::optional<empty>{});
+    test(beman::optional::optional<no_default_ctor>{});
+    test(beman::optional::optional<base>{});
+    test(beman::optional::optional<derived>{});
 }
 
 TEST(RangeSupportTest, BeginOnNonEmptyOptional) {
@@ -116,10 +120,10 @@ TEST(RangeSupportTest, BeginOnNonEmptyOptional) {
 
     test(beman::optional::optional<int>{26});
     test(beman::optional::optional<int*>{reinterpret_cast<int*>(0XCAFEBABE)});
-    test(beman::optional::optional<test::empty>{test::empty{}});
-    test(beman::optional::optional<test::no_default_ctor>{test::no_default_ctor{test::empty{}}});
-    test(beman::optional::optional<test::base>{test::base{}});
-    test(beman::optional::optional<test::derived>{test::derived{}});
+    test(beman::optional::optional<empty>{empty{}});
+    test(beman::optional::optional<no_default_ctor>{no_default_ctor{empty{}}});
+    test(beman::optional::optional<base>{base{}});
+    test(beman::optional::optional<derived>{derived{}});
 }
 
 TEST(RangeSupportTest, EndOnEmptyOptional) {
@@ -138,10 +142,10 @@ TEST(RangeSupportTest, EndOnEmptyOptional) {
 
     test(beman::optional::optional<int>{});
     test(beman::optional::optional<int*>{});
-    test(beman::optional::optional<test::empty>{});
-    test(beman::optional::optional<test::no_default_ctor>{});
-    test(beman::optional::optional<test::base>{});
-    test(beman::optional::optional<test::derived>{});
+    test(beman::optional::optional<empty>{});
+    test(beman::optional::optional<no_default_ctor>{});
+    test(beman::optional::optional<base>{});
+    test(beman::optional::optional<derived>{});
 }
 
 TEST(RangeSupportTest, EndOnNonEmptyOptional) {
@@ -160,10 +164,10 @@ TEST(RangeSupportTest, EndOnNonEmptyOptional) {
 
     test(beman::optional::optional<int>{26});
     test(beman::optional::optional<int*>{reinterpret_cast<int*>(0XCAFEBABE)});
-    test(beman::optional::optional<test::empty>{test::empty{}});
-    test(beman::optional::optional<test::no_default_ctor>{test::no_default_ctor{test::empty{}}});
-    test(beman::optional::optional<test::base>{test::base{}});
-    test(beman::optional::optional<test::derived>{test::derived{}});
+    test(beman::optional::optional<empty>{empty{}});
+    test(beman::optional::optional<no_default_ctor>{no_default_ctor{empty{}}});
+    test(beman::optional::optional<base>{base{}});
+    test(beman::optional::optional<derived>{derived{}});
 }
 
 TEST(RangeSupportTest, FormatOptionalIsStillDisabled) {

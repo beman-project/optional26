@@ -1,11 +1,11 @@
-// include/Beman/Optional26/detail/__iterator.hpp                                            -*-C++-*-
-#ifndef BEMAN_OPTIONAL26_OPTIONAL_DETAIL___ITERATOR_HPP
-#define BEMAN_OPTIONAL26_OPTIONAL_DETAIL___ITERATOR_HPP
+// include/Beman/Optional26/detail/iterator.hpp                                            -*-C++-*-
+#ifndef BEMAN_OPTIONAL26_OPTIONAL_DETAIL_ITERATOR_HPP
+#define BEMAN_OPTIONAL26_OPTIONAL_DETAIL_ITERATOR_HPP
 
 #include <iterator>
 #include <type_traits>
 
-namespace beman::optional {
+namespace beman::optional::detail {
 // Implementation inspired by libstdc++'s normal_iterator
 // (https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/stl_iterator.h)
 //
@@ -142,6 +142,6 @@ operator+(typename normal_iterator<IteratorType, ContainerType>::difference_type
     return normal_iterator(iter.base() + n);
 }
 
-} // namespace beman::optional
+} // namespace beman::optional::detail
 
-#endif // BEMAN_OPTIONAL26_OPTIONAL_DETAIL___ITERATOR_HPP
+#endif // BEMAN_OPTIONAL26_OPTIONAL_DETAIL_ITERATOR_HPP

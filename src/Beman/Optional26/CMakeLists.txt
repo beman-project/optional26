@@ -6,10 +6,11 @@ target_sources(
   "${TARGET_LIBRARY}"
   PRIVATE
   optional.cpp
-  detail/__iterator.cpp
+  detail/iterator.cpp
 )
 
 include(GNUInstallDirs)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories("${TARGET_LIBRARY}" PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../include>
@@ -27,7 +28,7 @@ string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_LOWER_PROJECT_NAME)
 install(
   DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_LOWER_PROJECT_NAME}
-  FILES_MATCHING PATTERN "*.h"
+  FILES_MATCHING PATTERN "*.hpp"
 )
 
 target_link_libraries("${TARGET_LIBRARY}")
@@ -43,7 +44,7 @@ target_sources(
   tests/optional_monadic.t.cpp
   tests/optional_range_support.t.cpp
   tests/optional_ref_monadic.t.cpp
-  tests/detail/__iterator.t.cpp
+  tests/detail/iterator.t.cpp
 )
 
 target_link_libraries(optional_test "${TARGET_LIBRARY}")

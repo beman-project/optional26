@@ -1,7 +1,7 @@
-#ifndef BEMAN_OPTIONAL26_OPTIONAL_TESTS__UTILS_HPP
-#define BEMAN_OPTIONAL26_OPTIONAL_TESTS__UTILS_HPP
+#ifndef BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP
+#define BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP
 
-namespace test {
+namespace beman::optional::test {
 // Classes used in the tests.
 
 // Empty class helper.
@@ -31,6 +31,6 @@ struct derived : public base {
     derived(int i, int j) : base(i), m_j(j) {}
 };
 
-} // namespace test
+} // namespace beman::optional::test
 
-#endif // BEMAN_OPTIONAL26_OPTIONAL_TESTS__UTILS_HPP
+#endif // BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP
