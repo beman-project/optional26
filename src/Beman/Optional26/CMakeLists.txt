@@ -37,10 +37,11 @@ add_executable(optional_test "")
 target_sources(
   optional_test
   PRIVATE
-  optional.t.cpp
-  optional_ref.t.cpp
-  optional_monadic.t.cpp
-  optional_ref_monadic.t.cpp
+  tests/optional.t.cpp
+  tests/optional_ref.t.cpp
+  tests/optional_monadic.t.cpp
+  tests/optional_range_support.t.cpp
+  tests/optional_ref_monadic.t.cpp
 )
 
 target_link_libraries(optional_test "${TARGET_LIBRARY}")

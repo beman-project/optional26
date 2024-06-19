@@ -638,42 +638,6 @@ TEST(ViewMaybeTest, Constructors) {
     beman::optional::optional<std::optional<int>> n3{std::optional<int>{}};
 }
 
-TEST(ViewMaybeTest, ConceptCheck) {
-    static_assert(std::ranges::range<beman::optional::optional<int>>);
-    static_assert(std::ranges::view<beman::optional::optional<int>>);
-    static_assert(std::ranges::input_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::forward_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::bidirectional_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::contiguous_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::common_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::viewable_range<beman::optional::optional<int>>);
-    static_assert(!std::ranges::borrowed_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::random_access_range<beman::optional::optional<int>>);
-    static_assert(std::ranges::sized_range<beman::optional::optional<int>>);
-
-    static_assert(std::ranges::range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::view<beman::optional::optional<int*>>);
-    static_assert(std::ranges::input_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::forward_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::bidirectional_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::contiguous_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::common_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::viewable_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::borrowed_range<beman::optional::optional<int*>>);
-    static_assert(std::ranges::random_access_range<beman::optional::optional<int*>>);
-
-    using ref = std::reference_wrapper<int>;
-    static_assert(std::ranges::range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::view<beman::optional::optional<ref>>);
-    static_assert(std::ranges::input_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::forward_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::bidirectional_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::contiguous_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::common_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::viewable_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::borrowed_range<beman::optional::optional<ref>>);
-    static_assert(std::ranges::random_access_range<beman::optional::optional<ref>>);
-}
 
 TEST(ViewMaybeTest, ConceptCheckRef) {
     static_assert(std::ranges::range<beman::optional::optional<int&>>);
@@ -823,8 +787,8 @@ TEST(ViewMaybe, CompTestRef) {
 // (This uses one syntax for constrained lambdas
 // in C++20.)
 inline constexpr auto and_then = [](auto&& r, auto fun) {
-    return decltype(r)(r) | std::ranges::views::transform(std::move(fun)) |
-           std::ranges::views::join;
+    return decltype(r)(r) | std::views::transform(std::move(fun)) |
+           std::views::join;
 };
 
 // "yield_if" takes a bool and a value and
@@ -837,7 +801,7 @@ inline constexpr auto yield_if = []<class T>(bool b, T x) {
 
 
 TEST(ViewMaybeTest, PythTripleTest) {
-    using std::ranges::views::iota;
+    using std::views::iota;
     auto triples = and_then(iota(1), [](int z) {
         return and_then(iota(1, z + 1), [=](int x) {
             return and_then(iota(x, z + 1), [=](int y) {
