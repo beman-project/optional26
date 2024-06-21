@@ -1,5 +1,5 @@
 /**
- * This file contains tests for beman::optional::detail::normal_iterator.
+ * This file contains tests for beman::optional::detail::contiguous_iterator.
  */
 #include <Beman/Optional26/detail/iterator.hpp>
 
@@ -20,7 +20,7 @@ struct container {};
 
 using namespace beman::optional::test;
 
-TEST(NormalIteratorTest, IteratorConcepts) {
+TEST(IteratorTest, IteratorConcepts) {
     const auto test = [](auto&& it) {
         // The iterator type of it.
         using iterator = typename std::remove_reference_t<decltype(it)>;
@@ -33,23 +33,23 @@ TEST(NormalIteratorTest, IteratorConcepts) {
     };
 
     // non-const iterators
-    test(beman::optional::detail::normal_iterator<int*, container>{});
-    test(beman::optional::detail::normal_iterator<empty*, container>{});
-    test(beman::optional::detail::normal_iterator<no_default_ctor*, container>{});
-    test(beman::optional::detail::normal_iterator<base*, container>{});
-    test(beman::optional::detail::normal_iterator<derived*, container>{});
+    test(beman::optional::detail::contiguous_iterator<int, container>{});
+    test(beman::optional::detail::contiguous_iterator<empty, container>{});
+    test(beman::optional::detail::contiguous_iterator<no_default_ctor, container>{});
+    test(beman::optional::detail::contiguous_iterator<base, container>{});
+    test(beman::optional::detail::contiguous_iterator<derived, container>{});
 
     // const iterators
-    test(beman::optional::detail::normal_iterator<const int*, container>{});
-    test(beman::optional::detail::normal_iterator<const empty*, container>{});
-    test(beman::optional::detail::normal_iterator<const no_default_ctor*, container>{});
-    test(beman::optional::detail::normal_iterator<const base*, container>{});
-    test(beman::optional::detail::normal_iterator<const derived*, container>{});
+    test(beman::optional::detail::contiguous_iterator<const int, container>{});
+    test(beman::optional::detail::contiguous_iterator<const empty, container>{});
+    test(beman::optional::detail::contiguous_iterator<const no_default_ctor, container>{});
+    test(beman::optional::detail::contiguous_iterator<const base, container>{});
+    test(beman::optional::detail::contiguous_iterator<const derived, container>{});
 }
 
-TEST(NormalIterator, DereferenceOperator) {
+TEST(IteratorTest, DereferenceOperator) {
     std::vector<int> v{10, 20, 30, 40, 50};
-    auto             it = beman::optional::detail::normal_iterator<int*, decltype(v)>{v.data()};
+    auto             it = beman::optional::detail::contiguous_iterator<int, decltype(v)>{v.data()};
 
     EXPECT_EQ(*it, 10);
     *it = 100;
@@ -62,7 +62,7 @@ TEST(NormalIterator, DereferenceOperator) {
     EXPECT_EQ(*it, 300);
 }
 
-TEST(NormalIteratorTest, ForwardIterator) {
+TEST(IteratorTest, ForwardIterator) {
     std::vector<int>       v{10, 20, 30, 40, 50};
     const std::vector<int> cv{10, 20, 30, 40, 50};
 
@@ -82,14 +82,11 @@ TEST(NormalIteratorTest, ForwardIterator) {
         EXPECT_EQ(*it, 50);
     };
 
-    test(beman::optional::detail::normal_iterator<int*, decltype(v)>{v.data()});
-    test(beman::optional::detail::normal_iterator<int*, decltype(v)>{v.data()});
-
-    test(beman::optional::detail::normal_iterator<const int*, decltype(cv)>{cv.data()});
-    test(beman::optional::detail::normal_iterator<const int*, decltype(cv)>{cv.data()});
+    test(beman::optional::detail::contiguous_iterator<int, decltype(v)>{v.data()});
+    test(beman::optional::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
 }
 
-TEST(NormalIteratorTest, BidirectionalIterator) {
+TEST(IteratorTest, BidirectionalIterator) {
     std::vector<int>       v{10, 20, 30, 40, 50};
     const std::vector<int> cv{10, 20, 30, 40, 50};
     const auto             test = [](auto&& it) {
@@ -104,14 +101,11 @@ TEST(NormalIteratorTest, BidirectionalIterator) {
         EXPECT_EQ(*it, 10);
     };
 
-    test(beman::optional::detail::normal_iterator<int*, decltype(v)>{v.data()});
-    test(beman::optional::detail::normal_iterator<int*, decltype(v)>{v.data()});
-
-    test(beman::optional::detail::normal_iterator<const int*, decltype(cv)>{cv.data()});
-    test(beman::optional::detail::normal_iterator<const int*, decltype(cv)>{cv.data()});
+    test(beman::optional::detail::contiguous_iterator<int, decltype(v)>{v.data()});
+    test(beman::optional::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
 }
 
-TEST(NormalIteratorTest, RandomAccessIterator) {
+TEST(IteratorTest, RandomAccessIterator) {
     std::vector<int>       v{10, 20, 30, 40, 50};
     const std::vector<int> cv{10, 20, 30, 40, 50};
     const auto             test = [](auto&& it) {
@@ -134,22 +128,19 @@ TEST(NormalIteratorTest, RandomAccessIterator) {
         EXPECT_EQ(*it, 30);
     };
 
-    test(beman::optional::detail::normal_iterator<int*, decltype(v)>{v.data()});
-    test(beman::optional::detail::normal_iterator<int*, decltype(v)>{v.data()});
-
-    test(beman::optional::detail::normal_iterator<const int*, decltype(cv)>{cv.data()});
-    test(beman::optional::detail::normal_iterator<const int*, decltype(cv)>{cv.data()});
+    test(beman::optional::detail::contiguous_iterator<int, decltype(v)>{v.data()});
+    test(beman::optional::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
 }
 
-TEST(NormalIteratorTest, ContainerType) {
+TEST(IteratorTest, ContainerType) {
     // Test for equality.
     constexpr const auto test_eq = [](auto&& container1, auto&& container2) {
         // The container types.
         using containter_type1 = typename std::remove_reference_t<decltype(container1)>;
         using containter_type2 = typename std::remove_reference_t<decltype(container2)>;
 
-        auto it1 = beman::optional::detail::normal_iterator<int*, containter_type1>{};
-        auto it2 = beman::optional::detail::normal_iterator<int*, containter_type2>{};
+        auto it1 = beman::optional::detail::contiguous_iterator<int*, containter_type1>{};
+        auto it2 = beman::optional::detail::contiguous_iterator<int*, containter_type2>{};
 
         static_assert(std::is_same_v<decltype(it1), decltype(it2)>);
     };
@@ -166,8 +157,8 @@ TEST(NormalIteratorTest, ContainerType) {
         using pointer_type1    = typename containter_type1::pointer;
         using pointer_type2    = typename containter_type2::pointer;
 
-        auto it1 = beman::optional::detail::normal_iterator<pointer_type1, containter_type1>{};
-        auto it2 = beman::optional::detail::normal_iterator<pointer_type2, containter_type2>{};
+        auto it1 = beman::optional::detail::contiguous_iterator<pointer_type1, containter_type1>{};
+        auto it2 = beman::optional::detail::contiguous_iterator<pointer_type2, containter_type2>{};
 
         static_assert(!std::is_same_v<decltype(it1), decltype(it2)>);
     };
