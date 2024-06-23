@@ -1,6 +1,6 @@
 // include/Beman/Optional26/detail/iterator.hpp                                            -*-C++-*-
-#ifndef BEMAN_OPTIONAL26_OPTIONAL_DETAIL_ITERATOR_HPP
-#define BEMAN_OPTIONAL26_OPTIONAL_DETAIL_ITERATOR_HPP
+#ifndef BEMAN_OPTIONAL26_DETAIL_ITERATOR_HPP
+#define BEMAN_OPTIONAL26_DETAIL_ITERATOR_HPP
 
 #include <Beman/Optional26/detail/stl_interfaces/iterator_interface.hpp>
 
@@ -17,8 +17,8 @@ namespace beman::optional::detail {
 // @tparam Container - The type of the container the iterator points to. This parameter exists solely so that different
 // containers using this template can instantiate different types, even if the T parameter is the same.
 template <class T, class Container>
-struct contiguous_iterator : boost::stl_interfaces::iterator_interface<
-#if !BOOST_STL_INTERFACES_USE_DEDUCED_THIS
+struct contiguous_iterator : stl_interfaces::iterator_interface<
+#if !BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_USE_DEDUCED_THIS
                                  contiguous_iterator<T, Container>,
 #endif
                                  std::contiguous_iterator_tag,
@@ -51,4 +51,4 @@ struct contiguous_iterator : boost::stl_interfaces::iterator_interface<
 
 } // namespace beman::optional::detail
 
-#endif // BEMAN_OPTIONAL26_OPTIONAL_DETAIL_ITERATOR_HPP
+#endif // BEMAN_OPTIONAL26_DETAIL_ITERATOR_HPP
