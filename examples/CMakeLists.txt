@@ -1,3 +1,6 @@
+# examples/CMakeLists.txt -*-makefile-*-
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 set(BEMAN_OPTIONAL26_LIBRARY "beman_optional26")
 
 include(GNUInstallDirs)

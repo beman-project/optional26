@@ -1,3 +1,6 @@
+// src/Beman/Optional26/tests/optional_ref_monadic.t.cpp -*-C++-*-
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 #include <Beman/Optional26/optional.hpp>
 
 #include <gtest/gtest.h>

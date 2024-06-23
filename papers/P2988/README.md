@@ -1,5 +1,9 @@
 # P2988
 
+<!--
+SPDX-License-Identifier: 2.0 license with LLVM exceptions
+-->
+
 ## Building P2988
 
 Compiling the paper requires a working LaTeX installation. See instructions for configuring your system at [C++ Standard Draft Sources](https://github.com/cplusplus/draft/blob/main/README.rst)

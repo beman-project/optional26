@@ -1,4 +1,5 @@
-// include/Beman/Optional26/detail/stl_interfaces/fwd.hpp                                            -*-C++-*-
+// include/Beman/Optional26/detail/stl_interfaces/fwd.hpp -*-C++-*-
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 // Copyright (C) 2019 T. Zachary Laine
 //

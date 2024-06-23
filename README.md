@@ -1,11 +1,16 @@
 # Beman.Optional26: C++26 Extensions for std::optional
 
+<!--
+SPDX-License-Identifier: 2.0 license with LLVM exceptions
+-->
+
 This implementation incorporates the C++26 extensions added for `std::optional`. The `Beman.Optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
 
 **Implements**:
 * [`std::optional<T&>` (P2988R5)](https://wg21.link/P2988R5)
 * [Give *std::optional* Range Support (P3168R1)](https://wg21.link/P3168R1).
 
+## License
 
 Source is licensed with the Apache 2.0 license with LLVM exceptions
 

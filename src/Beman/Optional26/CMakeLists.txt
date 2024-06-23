@@ -1,3 +1,6 @@
+# src/Beman/Optional26/CMakeLists.txt -*-makefile-*-
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 set(TARGET_LIBRARY "beman_optional26")
 
 add_library("${TARGET_LIBRARY}" STATIC "")

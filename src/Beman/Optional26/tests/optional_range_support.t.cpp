@@ -1,3 +1,6 @@
+// src/Beman/Optional26/tests/optional_range_support.t.cpp -*-C++-*-
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 /**
  * This file contains tests for the range support. Check P3168R1: "Give std::optional Range Support".
  *
