@@ -5,12 +5,12 @@
 #include <iostream>
 
 int main() {
-    beman::optional::optional<int> empty_opt{};
+    beman::optional26::optional<int> empty_opt{};
     if (!empty_opt) {
         std::cout << "empty_opt is empty!\n";
     }
 
-    beman::optional::optional<int> opt{26};
+    beman::optional26::optional<int> opt{26};
     if (opt) {
         std::cout << "opt = " << *opt << "\n";
     }

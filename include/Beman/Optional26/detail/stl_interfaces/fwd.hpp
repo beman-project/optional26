@@ -35,7 +35,7 @@
 
 #endif
 
-namespace beman::optional::detail {
+namespace beman::optional26::detail {
 namespace stl_interfaces {
 
 /** An enumeration used to indicate whether the underlying data have a
@@ -83,6 +83,6 @@ BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_NAMESPACE_V1 {
     } // namespace v1_dtl
 }
 } // namespace stl_interfaces
-} // namespace beman::optional::detail
+} // namespace beman::optional26::detail
 
 #endif

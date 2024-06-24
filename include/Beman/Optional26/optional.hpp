@@ -178,7 +178,7 @@ namespace std {
 
 #include <Beman/Optional26/detail/iterator.hpp>
 
-namespace beman::optional {
+namespace beman::optional26 {
 
 class monostate {};
 
@@ -209,26 +209,26 @@ template <class T>
     requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional;
 
-} // namespace beman::optional
+} // namespace beman::optional26
 
 namespace std {
 // Since P3168R1: Give std::optional Range Support.
 template <typename T>
-inline constexpr bool ranges::enable_view<beman::optional::optional<T>> = true;
+inline constexpr bool ranges::enable_view<beman::optional26::optional<T>> = true;
 
 // TODO: document why this is needed.
 template <typename T>
-inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T&>> = true;
+inline constexpr bool ranges::enable_borrowed_range<beman::optional26::optional<T&>> = true;
 
 // Since P3168R1: Give std::optional Range Support.
 #if defined(__cpp_lib_format_ranges)
 template <class T>
-inline constexpr auto format_kind<beman::optional::optional<T>> = range_format::disabled;
+inline constexpr auto format_kind<beman::optional26::optional<T>> = range_format::disabled;
 #endif
 
 } // namespace std
 
-namespace beman::optional {
+namespace beman::optional26 {
 template <class T>
 concept is_derived_from_optional = requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
 
@@ -1129,6 +1129,6 @@ class optional<T&> {
     constexpr void reset() noexcept { value_ = nullptr; }
 };
 
-} // namespace beman::optional
+} // namespace beman::optional26
 
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP

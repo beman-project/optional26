@@ -17,7 +17,7 @@
 #include <compare>
 #endif
 
-namespace beman::optional::detail {
+namespace beman::optional26::detail {
 namespace stl_interfaces {
 
 /** A type for granting access to the private members of an iterator
@@ -127,9 +127,9 @@ common_diff(T lhs, U rhs) noexcept(noexcept(static_cast<common_t<T, U>>(lhs) - s
 } // namespace detail
 
 } // namespace stl_interfaces
-} // namespace beman::optional::detail
+} // namespace beman::optional26::detail
 
-namespace beman::optional::detail {
+namespace beman::optional26::detail {
 namespace stl_interfaces {
 BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_NAMESPACE_V1 {
 
@@ -416,11 +416,11 @@ BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_NAMESPACE_V1 {
                                                         DifferenceType>;
 }
 } // namespace stl_interfaces
-} // namespace beman::optional::detail
+} // namespace beman::optional26::detail
 
 #if defined(BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_DOXYGEN) || BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_USE_CONCEPTS
 
-namespace beman::optional::detail {
+namespace beman::optional26::detail {
 namespace stl_interfaces {
 BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_NAMESPACE_V2 {
 
@@ -739,13 +739,13 @@ BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_NAMESPACE_V2 {
                                                         DifferenceType>;
 }
 } // namespace stl_interfaces
-} // namespace beman::optional::detail
+} // namespace beman::optional26::detail
 
 #endif
 
 #if defined(BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_DOXYGEN) || BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_USE_DEDUCED_THIS
 
-namespace beman::optional::detail {
+namespace beman::optional26::detail {
 namespace stl_interfaces {
 BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_NAMESPACE_V3 {
 
@@ -928,7 +928,7 @@ BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_NAMESPACE_V3 {
         iterator_interface<IteratorConcept, ValueType, Reference, proxy_arrow_result<Reference>, DifferenceType>;
 }
 } // namespace stl_interfaces
-} // namespace beman::optional::detail
+} // namespace beman::optional26::detail
 
 #endif
 

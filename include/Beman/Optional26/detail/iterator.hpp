@@ -9,7 +9,7 @@
 #include <concepts>
 #include <iterator>
 
-namespace beman::optional::detail {
+namespace beman::optional26::detail {
 
 // Forward declaration.
 template <class T, class Container>
@@ -60,6 +60,6 @@ struct contiguous_iterator : public base_contiguous_iterator<T, Container> {
     T* m_current;
 };
 
-} // namespace beman::optional::detail
+} // namespace beman::optional26::detail
 
 #endif // BEMAN_OPTIONAL26_DETAIL_ITERATOR_HPP

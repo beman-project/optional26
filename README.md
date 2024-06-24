@@ -40,13 +40,13 @@ The next code snippet shows optional range support added in [Give *std::optional
 
 // Example from P3168R1: basic range loop over C++26 optional.
 
-beman::optional::optional<int> empty_opt{};
+beman::optional26::optional<int> empty_opt{};
 for ([[maybe_unused]] const auto& i : empty_opt) {
     // Should not see this in console.
     std::cout << "\"for each loop\" over C++26 optional: empty_opt\n";
 }
 
-beman::optional::optional<int> opt{26};
+beman::optional26::optional<int> opt{26};
 for (const auto& i : opt) {
     // Should see this in console.
     std::cout << "\"for each loop\" over C++26 optional: opt = " << i << "\n";
@@ -66,7 +66,7 @@ The next code snippet shows optional reference support added in [`std::optional<
 {
     // Empty optional example.
     std::optional<int>             std_empty_opt;
-    beman::optional::optional<int> beman_empty_opt;
+    beman::optional26::optional<int> beman_empty_opt;
     assert(!std_empty_opt.has_value() &&
             !beman_empty_opt.has_value()); // or assert(!std_empty_opt && !beman_empty_opt);
     std::cout << "std_vs_beman: .has_value() matches?: "
@@ -76,7 +76,7 @@ The next code snippet shows optional reference support added in [`std::optional<
 {
     // Optional with value example.
     std::optional<int>             std_opt   = 26;
-    beman::optional::optional<int> beman_opt = 26;
+    beman::optional26::optional<int> beman_opt = 26;
     assert(std_opt.has_value() && beman_opt.has_value()); // or assert(std_opt && beman_opt);
     assert(std_opt.value() == beman_opt.value());         // or assert(*std_opt == *beman_opt);
     std::cout << "std_vs_beman: .value() matches?: " << (std_opt.value() == beman_opt.value() ? "yes" : "no")
