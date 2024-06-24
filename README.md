@@ -88,6 +88,12 @@ Full code can be found in [./examples/optional_ref.cpp](./examples/optional_ref.
 
 ## How to Build
 
+### Compiler Support
+
+This is a modern C++ project which can be compiled with the latest C++ standards (**C++20 or later**).
+
+Default build: `C++23`. Please check `etc/${compiler}-flags.cmake`.
+
 ### Dependencies
 
 This project is mainly tested on `Ubuntu 22.04` and `Ubuntu 24.04`, but it should be as portable as CMake is. This project has zero C or C++ dependencies.
