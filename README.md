@@ -97,11 +97,13 @@ Build-time dependencies:
 
 Example of installation on `Ubuntu 24.04`:
 ```shell
-# install tools
+# Install tools:
 apt-get install -y cmake make ninja-build
 
-# example of toolchains
-apt-get install g++-14 gcc-14 clang-18 clang++-18
+# Example of toolchains:
+apt-get install                           \
+  g++-14 gcc-14 gcc-13 g++-14             \
+  clang-18 clang++-18 clang-17 clang++-17
 ```
 
 ### Instructions
@@ -113,9 +115,42 @@ Full set of supported toolchains can be found in [.github/workflows/ci.yml](#.gi
 This project strives to be as normal and simple a CMake project as possible. This build workflow in particular will work, producing a static `beman_optional26` library, ready to package:
 
 ```shell
+# List available preset configurations:
+$ cmake --workflow --list-presets
+Available workflow presets:
+
+  "system"
+  "gcc-14"
+  "gcc-13"
+  "clang-18"
+  "clang-17"
+
+# Run examples:
+$ cmake --workflow --preset gcc-14
 cmake --workflow --preset gcc-14
-cmake --workflow --preset clang-18
-cmake --workflow --preset systems # uses c++ set tool
+Executing workflow step 1 of 3: configure preset "gcc-14"
+...
+-- Build files have been written to: /path/to/repo/.build/gcc-14
+
+Executing workflow step 2 of 3: build preset "gcc-14"
+
+ninja: no work to do.
+
+Executing workflow step 3 of 3: test preset "gcc-14"
+
+Test project /path/to/repo/.build/gcc-14
+        Start   1: OptionalTest.TestGTest
+  1/... Test   #1: OptionalTest.TestGTest ...........................   Passed    0.00 sec
+...
+        Start   x: RangeSupportTest.RangeConcepts
+.../... Test   #x: RangeSupportTest.RangeConcepts ...................   Passed    0.00 sec
+        Start x+1: RangeSupportTest.IteratorConcepts
+.../... Test #x+1: RangeSupportTest.IteratorConcepts ................   Passed    0.00 sec
+...
+
+100% tests passed, 0 tests failed out of ...
+
+Total Test time (real) =   0.09 sec
 ```
 
 This should build and run the tests with GCC 14 with the address and undefined behavior sanitizers enabled.

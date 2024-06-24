@@ -32,11 +32,25 @@
       "toolchainFile": "${sourceDir}/etc/gcc-14-toolchain.cmake"
     },
     {
+      "name": "gcc-13",
+      "inherits": "common",
+      "displayName": "GCC 13",
+      "description": "Build with GCC 13 compilers",
+      "toolchainFile": "${sourceDir}/etc/gcc-13-toolchain.cmake"
+    },
+    {
       "name": "clang-18",
       "inherits": "common",
       "displayName": "Clang 18",
       "description": "Build with Clang 18 compilers",
       "toolchainFile": "${sourceDir}/etc/clang-18-toolchain.cmake"
+    },
+    {
+      "name": "clang-17",
+      "inherits": "common",
+      "displayName": "Clang 17",
+      "description": "Build with Clang 17 compilers",
+      "toolchainFile": "${sourceDir}/etc/clang-17-toolchain.cmake"
     }
   ],
   "buildPresets": [
@@ -54,8 +68,16 @@
       "configurePreset": "gcc-14"
     },
     {
+      "name": "gcc-13",
+      "configurePreset": "gcc-13"
+    },
+    {
       "name": "clang-18",
       "configurePreset": "clang-18"
+    },
+    {
+      "name": "clang-17",
+      "configurePreset": "clang-17"
     }
   ],
   "testPresets": [
@@ -81,9 +103,19 @@
       "configurePreset": "gcc-14"
     },
     {
+      "name": "gcc-13",
+      "inherits": "common",
+      "configurePreset": "gcc-13"
+    },
+    {
       "name": "clang-18",
       "inherits": "common",
       "configurePreset": "clang-18"
+    },
+    {
+      "name": "clang-17",
+      "inherits": "common",
+      "configurePreset": "clang-17"
     }
   ],
   "workflowPresets": [
@@ -122,6 +154,23 @@
       ]
     },
     {
+      "name": "gcc-13",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "gcc-13"
+        },
+        {
+          "type": "build",
+          "name": "gcc-13"
+        },
+        {
+          "type": "test",
+          "name": "gcc-13"
+        }
+      ]
+    },
+    {
       "name": "clang-18",
       "steps": [
         {
@@ -135,6 +184,23 @@
         {
           "type": "test",
           "name": "clang-18"
+        }
+      ]
+    },
+    {
+      "name": "clang-17",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang-17"
+        },
+        {
+          "type": "build",
+          "name": "clang-17"
+        },
+        {
+          "type": "test",
+          "name": "clang-17"
         }
       ]
     }
