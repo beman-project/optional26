@@ -28,6 +28,8 @@ TEST(IteratorTest, IteratorConcepts) {
         // The iterator type of it.
         using iterator = typename std::remove_reference_t<decltype(it)>;
 
+        // Check std::contiguous_iterator concept.
+        // Note: Check the iterator concepts one by one to get the less verbose error message first!
         static_assert(std::input_iterator<iterator>);
         static_assert(std::forward_iterator<iterator>);
         static_assert(std::bidirectional_iterator<iterator>);

@@ -167,6 +167,7 @@ namespace std {
 */
 
 #include <compare>
+#include <concepts>
 #if defined(__cpp_lib_format_ranges)
 #include <format>
 #endif
@@ -320,6 +321,9 @@ class optional {
     // Since P3168R1: Give std::optional Range Support.
     using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
+
+    static_assert(std::contiguous_iterator<iterator>);
+    static_assert(std::contiguous_iterator<const_iterator>);
 
     constexpr optional() noexcept
         requires std::is_default_constructible_v<T>
@@ -722,6 +726,12 @@ class optional {
     }
 };
 
+// Check concepts for the optional<T> class.
+// Test here with T=int/const int. More tests can be found in optional.t.cpp and optional_range_support.t.cpp.
+// Since P3168R1: Give std::optional Range Support.
+static_assert(std::ranges::range<optional<int>>);
+static_assert(std::ranges::range<optional<const int>>);
+
 template <typename T, typename U>
 concept optional_eq_rel = requires(const T& t, const U& u) {
     { t == u } -> std::convertible_to<bool>;
@@ -945,6 +955,9 @@ class optional<T&> {
     using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
 
+    static_assert(std::contiguous_iterator<iterator>);
+    static_assert(std::contiguous_iterator<const_iterator>);
+
     // [optional.ctor], constructors
     //    constexpr optional() noexcept;
     //    constexpr optional(nullopt_t) noexcept;
@@ -1127,6 +1140,16 @@ class optional<T&> {
 
     constexpr void reset() noexcept { value_ = nullptr; }
 };
+
+// Check concepts for the optional<T&> class.
+// Test here with T=int/const int. More tests can be found in optional.t.cpp and optional_range_support.t.cpp.
+// Since ${PAPER_NUMBER}: ${PAPER_TITLE}.
+// Note: P3168 and P2988 may have different flows inside LEWG/LWG.
+// Implementation of the range support for optional<T&> reflects P3168R1 for now.
+// [optional.iterators], iterator support
+static_assert(std::ranges::range<optional<int&>>);
+static_assert(std::ranges::range<optional<const int&>>);
+
 } // namespace beman::optional
 
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP

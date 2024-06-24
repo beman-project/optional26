@@ -6,6 +6,7 @@
 
 #include <Beman/Optional26/detail/stl_interfaces/iterator_interface.hpp>
 
+#include <concepts>
 #include <iterator>
 
 namespace beman::optional::detail {
@@ -38,8 +39,11 @@ struct contiguous_iterator : public base_contiguous_iterator<T, Container> {
     using base_type = base_contiguous_iterator<T, Container>;
     // Alias for types from the base class.
     using typename base_type::difference_type;
+    using typename base_type::iterator_category;
+    using typename base_type::iterator_concept;
     using typename base_type::pointer;
     using typename base_type::reference;
+    using typename base_type::value_type;
 
     // Default constructor.
     contiguous_iterator() noexcept : m_current() {}
@@ -58,6 +62,11 @@ struct contiguous_iterator : public base_contiguous_iterator<T, Container> {
   private:
     T* m_current;
 };
+
+// Check concepts for the contiguous_iterator class.
+// Test here with Container=int[]/const int[]. More tests can be found in iterator.t.cpp.
+static_assert(std::contiguous_iterator<contiguous_iterator<int, int[]>>);
+static_assert(std::contiguous_iterator<contiguous_iterator<const int, const int[]>>);
 
 } // namespace beman::optional::detail
 

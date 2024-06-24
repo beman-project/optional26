@@ -35,6 +35,7 @@ TEST(RangeSupportTest, RangeConcepts) {
         // The optional type is the opt type without the reference.
         using optional = std::remove_reference_t<decltype(opt)>;
 
+        // Check std::ranges::range concept.
         static_assert(std::ranges::range<optional>);
         static_assert(std::ranges::view<optional>);
         static_assert(std::ranges::input_range<optional>);
