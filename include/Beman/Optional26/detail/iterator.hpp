@@ -39,11 +39,8 @@ struct contiguous_iterator : public base_contiguous_iterator<T, Container> {
     using base_type = base_contiguous_iterator<T, Container>;
     // Alias for types from the base class.
     using typename base_type::difference_type;
-    using typename base_type::iterator_category;
-    using typename base_type::iterator_concept;
     using typename base_type::pointer;
     using typename base_type::reference;
-    using typename base_type::value_type;
 
     // Default constructor.
     contiguous_iterator() noexcept : m_current() {}
