@@ -17,3 +17,11 @@ int main() {
 
     return 0;
 }
+
+// # build example:
+// $ cmake --workflow --preset gcc-14
+//
+// # run example:
+// $ .build/gcc-14/examples/RelWithDebInfo/sample
+// empty_opt is empty!
+// opt = 26

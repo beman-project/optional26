@@ -5,6 +5,8 @@
 #include <iostream>
 
 int main() {
+    // Example from P3168R1: basic range loop over C++26 optional.
+
     beman::optional::optional<int> empty_opt{};
     for ([[maybe_unused]] const auto& i : empty_opt) {
         // Should not see this in console.
@@ -16,5 +18,14 @@ int main() {
         // Should see this in console.
         std::cout << "\"for each loop\" over C++26 optional: opt = " << i << "\n";
     }
+
     return 0;
 }
+
+// # build example:
+// $ cmake --workflow --preset gcc-14
+//
+// # run example:
+// $ .build/gcc-14/examples/RelWithDebInfo/range_loop
+//                                                # note: 1st log (empty_opt) is missing from console!
+// "for each loop" over C++26 optional: opt = 26  # 2nd log (non empty opt)
