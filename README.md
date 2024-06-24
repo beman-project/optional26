@@ -4,7 +4,7 @@
 SPDX-License-Identifier: 2.0 license with LLVM exceptions
 -->
 
-This implementation incorporates the C++26 extensions added for `std::optional`. The `Beman.Optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
+This repository implements `std::optional` extensions targeting C++26. The `Beman.Optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
 
 **Implements**:
 * [Give *std::optional* Range Support (P3168R1)](https://wg21.link/P3168R1)
@@ -12,19 +12,10 @@ This implementation incorporates the C++26 extensions added for `std::optional`.
 
 ## License
 
-Source is licensed with the Apache 2.0 license with LLVM exceptions
+Source, documentation and associated papers are licensed with the Apache 2.0 license with LLVM exceptions.
 
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-Documentation and associated papers are licensed with the Creative Commons Attribution 4.0 International license.
-
-// SPDX-License-Identifier: CC-BY-4.0
-
-The intent is that the source and documentation are available for use by people implementing their own optional types as well as people using the optional presented here as-is.
-
-The README itself is licesed with CC0 1.0 Universal. Copy the contents and incorporate in your own work as you see fit.
-
-// SPDX-License-Identifier: CC0-1.0
 
 ## Examples
 
@@ -96,9 +87,9 @@ Default build: `C++23`. Please check `etc/${compiler}-flags.cmake`.
 
 ### Dependencies
 
-This project is mainly tested on `Ubuntu 22.04` and `Ubuntu 24.04`, but it should be as portable as CMake is. This project has zero C or C++ dependencies.
+This project is mainly tested on `Ubuntu 22.04` and `Ubuntu 24.04`, but it should be as portable as CMake is. This project has no C or C++ dependencies.
 
-It does require few tools as build-time dependencies:
+Build-time dependencies:
 
 - `cmake`
 - `ninja`, `make`, or another CMake-supported build system

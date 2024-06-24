@@ -6,21 +6,6 @@ SPDX-License-Identifier: 2.0 license with LLVM exceptions
 
 List of usage examples for `Beman.Optional26`.
 
-## License
-Source is licensed with the Apache 2.0 license with LLVM exceptions
-
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-
-Documentation and associated papers are licensed with the Creative Commons Attribution 4.0 International license.
-
-// SPDX-License-Identifier: CC-BY-4.0
-
-The intent is that the source and documentation are available for use by people implementing their own optional types as well as people using the optional presented here as-is.
-
-The README itself is licesed with CC0 1.0 Universal. Copy the contents and incorporate in your own work as you see fit.
-
-// SPDX-License-Identifier: CC0-1.0
-
 ## Sample
 
 Check [sample](sample.cpp) for basic `Beman.Optional26` library usage.
