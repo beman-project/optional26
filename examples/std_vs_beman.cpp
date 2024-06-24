@@ -10,7 +10,7 @@
 int main() {
     {
         // Empty optional example.
-        std::optional<int>             std_empty_opt;
+        std::optional<int>               std_empty_opt;
         beman::optional26::optional<int> beman_empty_opt;
         assert(!std_empty_opt.has_value() &&
                !beman_empty_opt.has_value()); // or assert(!std_empty_opt && !beman_empty_opt);
@@ -20,7 +20,7 @@ int main() {
 
     {
         // Optional with value example.
-        std::optional<int>             std_opt   = 26;
+        std::optional<int>               std_opt   = 26;
         beman::optional26::optional<int> beman_opt = 26;
         assert(std_opt.has_value() && beman_opt.has_value()); // or assert(std_opt && beman_opt);
         assert(std_opt.value() == beman_opt.value());         // or assert(*std_opt == *beman_opt);

@@ -15,7 +15,7 @@ struct no_default {
     no_default(no_default&&)                 = default;
     no_default& operator=(const no_default&) = default;
     no_default& operator=(no_default&&)      = default;
-    no_default(empty){};
+    no_default(empty) {};
 };
 
 struct base {
@@ -37,7 +37,7 @@ TEST(OptionalRefTest, Constructors) {
     (void)i1;
     (void)i2;
 
-    int                           i  = 0;
+    int                               i  = 0;
     beman::optional26::optional<int&> i3 = i;
     (void)i3;
 
@@ -46,7 +46,7 @@ TEST(OptionalRefTest, Constructors) {
     (void)e1;
     (void)e2;
 
-    empty                           e{};
+    empty                               e{};
     beman::optional26::optional<empty&> e3 = e;
     (void)e3;
 
@@ -64,8 +64,8 @@ TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<int&> i4 = ie;
     EXPECT_FALSE(i4);
 
-    base                           b{1};
-    derived                        d(1, 2);
+    base                               b{1};
+    derived                            d(1, 2);
     beman::optional26::optional<base&> b1 = b;
     beman::optional26::optional<base&> b2 = d;
 
@@ -74,8 +74,8 @@ TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<base&>    b4{d2};
 
     beman::optional26::optional<derived&> empty;
-    beman::optional26::optional<base&> fromEmpty(empty);
-    beman::optional26::optional<base&> fromEmpty2 = empty;
+    beman::optional26::optional<base&>    fromEmpty(empty);
+    beman::optional26::optional<base&>    fromEmpty2 = empty;
 }
 
 TEST(OptionalRefTest, Assignment) {
@@ -106,8 +106,8 @@ TEST(OptionalRefTest, Assignment) {
 }
 
 TEST(OptionalRefTest, RelationalOps) {
-    int                           i1 = 4;
-    int                           i2 = 42;
+    int                               i1 = 4;
+    int                               i2 = 42;
     beman::optional26::optional<int&> o1{i1};
     beman::optional26::optional<int&> o2{i2};
     beman::optional26::optional<int&> o3{};
@@ -183,8 +183,8 @@ TEST(OptionalRefTest, RelationalOps) {
         EXPECT_TRUE(o1 >= 4);
         EXPECT_TRUE(4 >= o1);
     }
-    std::string                           s4 = "hello";
-    std::string                           s5 = "xyz";
+    std::string                               s4 = "hello";
+    std::string                               s5 = "xyz";
     beman::optional26::optional<std::string&> o4{s4};
     beman::optional26::optional<std::string&> o5{s5};
 
@@ -287,7 +287,7 @@ TEST(OptionalRefTest, Triviality) {
     {
         struct T {
             T(const T&) {}
-            T(T&&){};
+            T(T&&) {};
             T& operator=(const T&) { return *this; }
             T& operator=(T&&) { return *this; };
             ~T() {}
@@ -377,21 +377,21 @@ TEST(OptionalRefTest, MakeOptional) {
     EXPECT_TRUE(o1 == o2);
 
     std::tuple<int, int, int, int> tvar{0, 1, 2, 3};
-    auto o3 = beman::optional26::make_optional<std::tuple<int, int, int, int>&>(tvar);
+    auto                           o3 = beman::optional26::make_optional<std::tuple<int, int, int, int>&>(tvar);
     EXPECT_TRUE(std::get<0>(*o3) == 0);
     EXPECT_TRUE(std::get<1>(*o3) == 1);
     EXPECT_TRUE(std::get<2>(*o3) == 2);
     EXPECT_TRUE(std::get<3>(*o3) == 3);
 
     std::vector<int> ivec{0, 1, 2, 3};
-    auto o4 = beman::optional26::make_optional<std::vector<int>&>(ivec);
+    auto             o4 = beman::optional26::make_optional<std::vector<int>&>(ivec);
     EXPECT_TRUE(o4.value()[0] == 0);
     EXPECT_TRUE(o4.value()[1] == 1);
     EXPECT_TRUE(o4.value()[2] == 2);
     EXPECT_TRUE(o4.value()[3] == 3);
 
     takes_init_and_variadic tiv{{0, 1}, 2, 3};
-    auto o5 = beman::optional26::make_optional<takes_init_and_variadic&>(tiv);
+    auto                    o5 = beman::optional26::make_optional<takes_init_and_variadic&>(tiv);
     EXPECT_TRUE(o5->v[0] == 0);
     EXPECT_TRUE(o5->v[1] == 1);
     EXPECT_TRUE(std::get<0>(o5->t) == 2);
@@ -427,13 +427,13 @@ struct move_detector {
 };
 
 TEST(OptionalRefTest, Observers) {
-    int                                 var = 42;
+    int                                     var = 42;
     beman::optional26::optional<int&>       o1  = var;
     beman::optional26::optional<int&>       o2;
     const beman::optional26::optional<int&> o3 = var;
     const beman::optional26::optional<int&> o4;
-    int var2 = 42;
-    int var3 = 6*9;
+    int                                     var2 = 42;
+    int                                     var3 = 6 * 9;
     EXPECT_TRUE(*o1 == 42);
     EXPECT_TRUE(*o1 == o1.value());
     EXPECT_TRUE(o2.value_or(var2) == 42);
@@ -445,21 +445,28 @@ TEST(OptionalRefTest, Observers) {
     // o4.value_or(j) = 88;
     // EXPECT_TRUE(j == 88);
     int var99 = 99;
-    j = 88;
-    EXPECT_TRUE([&](){beman::optional26::optional<int&> o(j);return o; }().value_or(var99) == 88);
+    j         = 88;
+    EXPECT_TRUE([&]() {
+        beman::optional26::optional<int&> o(j);
+        return o;
+    }()
+                    .value_or(var99) == 88);
 
-    EXPECT_TRUE([&](){beman::optional26::optional<int&> o;return o; }().value_or(var99) == 99);
+    EXPECT_TRUE([&]() {
+        beman::optional26::optional<int&> o;
+        return o;
+    }()
+                    .value_or(var99) == 99);
 
+    EXPECT_TRUE(o3.value_or([&]() -> int& { return var3; }()) == 42);
+    EXPECT_TRUE(o4.value_or([&]() -> int& { return var3; }()) == 54);
 
-    EXPECT_TRUE(o3.value_or([&]()->int&{return var3;}()) == 42);
-    EXPECT_TRUE(o4.value_or([&]()->int&{return var3;}()) == 54);
-
-    std::string meow{"meow"};
-    std::string bark{"bark"};
+    std::string                               meow{"meow"};
+    std::string                               bark{"bark"};
     beman::optional26::optional<std::string&> so1;
     beman::optional26::optional<std::string&> so2{meow};
-    auto t1 = so1.value_or(bark);
-    auto t2 = so2.value_or(bark);
+    auto                                      t1 = so1.value_or(bark);
+    auto                                      t2 = so2.value_or(bark);
     // auto t3 = so1.value_or("bark");
     // auto t4 = so2.value_or("bark");
     // std::tuple<const std::string&> t("meow");
@@ -503,12 +510,14 @@ TEST(OptionalRefTest, Observers) {
     static_assert(std::is_same<decltype(std::move(o1).operator->()), int*>::value);
     EXPECT_TRUE(success);
 
-    struct int_box {int i_;};
-    int_box i1{3};
-    beman::optional26::optional<int_box&>       ob1  = i1;
+    struct int_box {
+        int i_;
+    };
+    int_box                                     i1{3};
+    beman::optional26::optional<int_box&>       ob1 = i1;
     beman::optional26::optional<int_box&>       ob2;
     const beman::optional26::optional<int_box&> ob3 = i1;
-    success = std::is_same<decltype(ob1->i_), int>::value;
+    success                                         = std::is_same<decltype(ob1->i_), int>::value;
     static_assert(std::is_same<decltype(ob1->i_), int>::value);
     EXPECT_TRUE(success);
     success = std::is_same<decltype(ob2->i_), int>::value;
@@ -520,22 +529,20 @@ TEST(OptionalRefTest, Observers) {
     success = std::is_same<decltype(std::move(ob1)->i_), int>::value;
     static_assert(std::is_same<decltype(std::move(ob1)->i_), int>::value);
     EXPECT_TRUE(success);
-
 }
 
 TEST(OptionalRefTest, MoveCheck) {
-    int x = 0;
-    int& y =  std::move(beman::optional26::optional<int&>(x)).value();
+    int  x = 0;
+    int& y = std::move(beman::optional26::optional<int&>(x)).value();
     EXPECT_EQ(&y, &x);
 
-    int& z =  *std::move(beman::optional26::optional<int&>(x));
+    int& z = *std::move(beman::optional26::optional<int&>(x));
     EXPECT_EQ(&z, &x);
-
 }
 
 TEST(OptionalRefTest, SwapValue) {
-    int                           var    = 42;
-    int                           twelve = 12;
+    int                               var    = 42;
+    int                               twelve = 12;
     beman::optional26::optional<int&> o1     = var;
     beman::optional26::optional<int&> o2     = twelve;
     o1.swap(o2);
@@ -554,7 +561,7 @@ TEST(OptionalRefTest, SwapWNull) {
 }
 
 TEST(OptionalRefTest, SwapNullIntializedWithValue) {
-    int                           var = 42;
+    int                               var = 42;
     beman::optional26::optional<int&> o1  = beman::optional26::nullopt;
     beman::optional26::optional<int&> o2  = var;
     o1.swap(o2);

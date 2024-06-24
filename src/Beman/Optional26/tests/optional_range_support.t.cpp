@@ -198,7 +198,7 @@ TEST(RangeSupportTest, LoopOverEmptyRange) {
 }
 
 TEST(RangeSupportTest, LoopOverNonEmptyRange) {
-    const auto                     expected_value = 0xCAFEBABE;
+    const auto                       expected_value = 0xCAFEBABE;
     beman::optional26::optional<int> empty{expected_value};
     ASSERT_TRUE(empty.has_value());
 

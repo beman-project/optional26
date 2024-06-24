@@ -46,7 +46,7 @@ beman::optional26::optional<Cat&> api() {
 
 int main() {
     // Example from P2988R5: optional reference.
-    [[maybe_unused]] Cat*                            old_cat = std17::api();
+    [[maybe_unused]] Cat*                              old_cat = std17::api();
     [[maybe_unused]] beman::optional26::optional<Cat&> new_cat = std26::api();
 
     return 0;
