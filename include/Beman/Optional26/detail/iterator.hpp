@@ -60,11 +60,6 @@ struct contiguous_iterator : public base_contiguous_iterator<T, Container> {
     T* m_current;
 };
 
-// Check concepts for the contiguous_iterator class.
-// Test here with Container=int[]/const int[]. More tests can be found in iterator.t.cpp.
-static_assert(std::contiguous_iterator<contiguous_iterator<int, int[]>>);
-static_assert(std::contiguous_iterator<contiguous_iterator<const int, const int[]>>);
-
 } // namespace beman::optional::detail
 
 #endif // BEMAN_OPTIONAL26_DETAIL_ITERATOR_HPP

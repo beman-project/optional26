@@ -65,12 +65,16 @@ TEST(RangeSupportTest, IteratorConcepts) {
         // e.g. const_iterator = optional<T>::const_iterator if opt is optional<T>
         using const_iterator = typename std::remove_reference_t<decltype(opt)>::const_iterator;
 
+        // Check std::contiguous_iterator concept.
+        // Note: Check each sub-concept to get the less verbose error message first!
         static_assert(std::input_iterator<iterator>);
         static_assert(std::forward_iterator<iterator>);
         static_assert(std::bidirectional_iterator<iterator>);
         static_assert(std::random_access_iterator<iterator>);
         static_assert(std::contiguous_iterator<iterator>);
 
+        // Check std::contiguous_iterator concept.
+        // Note: Check each sub-concept to get the less verbose error message first!
         static_assert(std::input_iterator<const_iterator>);
         static_assert(std::forward_iterator<const_iterator>);
         static_assert(std::bidirectional_iterator<const_iterator>);
