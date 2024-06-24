@@ -6,6 +6,7 @@
 
 #include <Beman/Optional26/detail/stl_interfaces/iterator_interface.hpp>
 
+#include <concepts>
 #include <iterator>
 
 namespace beman::optional::detail {
@@ -32,6 +33,8 @@ struct contiguous_iterator : stl_interfaces::iterator_interface<
     using difference_type   = std::iterator_traits<iterator_type>::difference_type;
     using reference         = std::iterator_traits<iterator_type>::reference;
     using pointer           = std::iterator_traits<iterator_type>::pointer;
+
+    static_assert(std::contiguous_iterator<iterator_type>);
 
     // Default constructor.
     contiguous_iterator() noexcept : m_current() {}
