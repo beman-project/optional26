@@ -1,3 +1,6 @@
+# /CMakeLists.txt -*-makefile-*-
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 cmake_minimum_required(VERSION 3.10)
 
 project(beman_optional26 VERSION 0.0.0 LANGUAGES CXX)

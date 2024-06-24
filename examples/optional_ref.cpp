@@ -1,34 +1,59 @@
+// examples/optional_ref.cpp -*-C++-*-
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 #include <Beman/Optional26/optional.hpp>
 
 #include <string>
-
-using beman::optional::optional;
 
 struct Cat {
     int catalog_index{0};
 };
 
-auto find_cat_old(std::string) -> Cat* { return nullptr; }
+namespace std17 {
 
-auto find_cat_new(std::string) -> optional<Cat&> { return optional<Cat&>{}; }
+// Prior to C++26, the code would look like this.
+// Using raw pointers to represent optional references.
+// Note: Using smart pointers would also be a choice, but it involves ownership semantics.
 
-Cat*           doit_old(Cat& cat) { return &cat; }
-optional<Cat&> doit(Cat& cat) { return optional<Cat&>{cat}; }
+Cat* find_cat(std::string) { return nullptr; }
 
-Cat* before1() {
-    Cat* cat = find_cat_old("Fido");
+Cat* do_it(Cat& cat) { return &cat; }
+
+Cat* api() {
+    Cat* cat = find_cat("Fido");
     if (cat != nullptr) {
-        return doit_old(*cat);
+        return do_it(*cat);
     }
     return nullptr;
 }
 
-optional<Cat&> after1() {
-    optional<Cat&> cat = find_cat_new("Fido");
-    return cat.and_then(doit);
+} // namespace std17
+
+namespace std26 {
+// After C++26 with P2988R5, the code would look like this.
+// Using directly optional to represent optional references.
+
+beman::optional26::optional<Cat&> find_cat(std::string) { return {}; }
+
+beman::optional26::optional<Cat&> do_it(Cat& cat) { return {cat}; }
+
+beman::optional26::optional<Cat&> api() {
+    beman::optional26::optional<Cat&> cat = find_cat("Fido");
+    return cat.and_then(do_it);
 }
 
+} // namespace std26
+
 int main() {
-    Cat*           cat_p = before1();
-    optional<Cat&> cat_r = after1();
+    // Example from P2988R5: optional reference.
+    [[maybe_unused]] Cat*                              old_cat = std17::api();
+    [[maybe_unused]] beman::optional26::optional<Cat&> new_cat = std26::api();
+
+    return 0;
 }
+
+// # build example:
+// $ cmake --workflow --preset gcc-14
+//
+// # run example:
+// $ .build/gcc-14/examples/RelWithDebInfo/optional_ref

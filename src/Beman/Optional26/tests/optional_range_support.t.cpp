@@ -1,3 +1,6 @@
+// src/Beman/Optional26/tests/optional_range_support.t.cpp -*-C++-*-
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 /**
  * This file contains tests for the range support. Check P3168R1: "Give std::optional Range Support".
  *
@@ -7,7 +10,13 @@
  */
 #include <Beman/Optional26/optional.hpp>
 
+#include <gtest/gtest.h>
+
+#include <Beman/Optional26/detail/iterator.hpp>
+#include <tests/test_types.hpp>
+
 #include <algorithm>
+#include <concepts>
 #if defined(__cpp_lib_format_ranges)
 #include <format>
 #endif
@@ -15,212 +24,182 @@
 #include <ranges>
 #include <tuple>
 #include <optional>
+#include <type_traits>
 #include <unordered_set>
 #include <vector>
-#include <gtest/gtest.h>
 
-namespace test {
-/**
- * Empty class helper.
- **/
-struct empty {};
+using namespace beman::optional26::test;
 
-/**
- * No default constructor class helper.
- **/
-struct no_default_ctor {
-    no_default_ctor()                                  = delete;
-    no_default_ctor(const no_default_ctor&)            = default;
-    no_default_ctor(no_default_ctor&&)                 = default;
-    no_default_ctor& operator=(const no_default_ctor&) = default;
-    no_default_ctor& operator=(no_default_ctor&&)      = default;
-    no_default_ctor(empty) {};
-};
+TEST(RangeSupportTest, RangeConcepts) {
+    const auto test = [](auto&& opt) {
+        // The optional type is the opt type without the reference.
+        using optional = std::remove_reference_t<decltype(opt)>;
 
-/**
- * Base class helper.
- **/
-struct base {
-    int i_;
-    base() : i_(0) {}
-    base(int i) : i_(i) {}
-};
+        // Check std::ranges::range concept.
+        static_assert(std::ranges::range<optional>);
+        static_assert(std::ranges::view<optional>);
+        static_assert(std::ranges::input_range<optional>);
+        static_assert(std::ranges::forward_range<optional>);
+        static_assert(std::ranges::bidirectional_range<optional>);
+        static_assert(std::ranges::contiguous_range<optional>);
+        static_assert(std::ranges::common_range<optional>);
+        static_assert(std::ranges::viewable_range<optional>);
+        static_assert(!std::ranges::borrowed_range<optional>);
+        static_assert(std::ranges::random_access_range<optional>);
+        static_assert(std::ranges::sized_range<optional>);
+    };
 
-/**
- * Derived class helper.
- **/
-struct derived : public base {
-    int j_;
-    derived() : base(0), j_(0) {}
-    derived(int i, int j) : base(i), j_(j) {}
-};
-} // namespace test
+    test(beman::optional26::optional<int>{});
+    test(beman::optional26::optional<int*>{});
+    test(beman::optional26::optional<empty>{});
+    test(beman::optional26::optional<no_default_ctor>{});
+    test(beman::optional26::optional<base>{});
+    test(beman::optional26::optional<derived>{});
+}
+
+TEST(RangeSupportTest, IteratorConcepts) {
+    const auto test = [](auto&& opt) {
+        // The iterator type is the same as the iterator of the optional.
+        // e.g. iterator = optional<T>::iterator if opt is optional<T>
+        using iterator = typename std::remove_reference_t<decltype(opt)>::iterator;
+        // e.g. const_iterator = optional<T>::const_iterator if opt is optional<T>
+        using const_iterator = typename std::remove_reference_t<decltype(opt)>::const_iterator;
+
+        // Check std::contiguous_iterator concept.
+        // Note: Check each sub-concept to get the less verbose error message first!
+        static_assert(std::input_iterator<iterator>);
+        static_assert(std::forward_iterator<iterator>);
+        static_assert(std::bidirectional_iterator<iterator>);
+        static_assert(std::random_access_iterator<iterator>);
+        static_assert(std::contiguous_iterator<iterator>);
+
+        // Check std::contiguous_iterator concept.
+        // Note: Check each sub-concept to get the less verbose error message first!
+        static_assert(std::input_iterator<const_iterator>);
+        static_assert(std::forward_iterator<const_iterator>);
+        static_assert(std::bidirectional_iterator<const_iterator>);
+        static_assert(std::random_access_iterator<const_iterator>);
+        static_assert(std::contiguous_iterator<const_iterator>);
+    };
+
+    test(beman::optional26::optional<int>{});
+    test(beman::optional26::optional<int*>{});
+    test(beman::optional26::optional<empty>{});
+    test(beman::optional26::optional<no_default_ctor>{});
+    test(beman::optional26::optional<base>{});
+    test(beman::optional26::optional<derived>{});
+}
 
 TEST(RangeSupportTest, BeginOnEmptyOptional) {
-    EXPECT_EQ(beman::optional::optional<int>{}.begin(), nullptr);
+    const auto test = [](auto&& opt) {
+        // The iterator type is the same as the iterator of the optional.
+        // e.g. iterator = optional<T>::iterator if opt is optional<T>
+        using iterator = typename std::remove_reference_t<decltype(opt)>::iterator;
+        // e.g. const_iterator = optional<T>::const_iterator if opt is optional<T>
+        using const_iterator = typename std::remove_reference_t<decltype(opt)>::const_iterator;
 
-    EXPECT_EQ(beman::optional::optional<test::empty>{}.begin(), nullptr);
+        EXPECT_EQ(opt.begin(), iterator());
 
-    EXPECT_EQ(beman::optional::optional<test::no_default_ctor>{}.begin(), nullptr);
+        const auto& const_opt = opt;
+        EXPECT_EQ(const_opt.begin(), const_iterator());
+    };
 
-    EXPECT_EQ(beman::optional::optional<test::base>{}.begin(), nullptr);
-
-    EXPECT_EQ(beman::optional::optional<test::derived>{}.begin(), nullptr);
+    test(beman::optional26::optional<int>{});
+    test(beman::optional26::optional<int*>{});
+    test(beman::optional26::optional<empty>{});
+    test(beman::optional26::optional<no_default_ctor>{});
+    test(beman::optional26::optional<base>{});
+    test(beman::optional26::optional<derived>{});
 }
 
 TEST(RangeSupportTest, BeginOnNonEmptyOptional) {
-    beman::optional::optional<int> opt_int = 26;
-    EXPECT_EQ(opt_int.begin(), &*opt_int);
+    const auto test = [](auto&& opt) {
+        // The iterator type is the same as the iterator of the optional.
+        // e.g. iterator = optional<T>::iterator if opt is optional<T>
+        using iterator = typename std::remove_reference_t<decltype(opt)>::iterator;
+        // e.g. const_iterator = optional<T>::const_iterator if opt is optional<T>
+        using const_iterator = typename std::remove_reference_t<decltype(opt)>::const_iterator;
 
-    beman::optional::optional<test::empty> opt_empty = test::empty{};
-    EXPECT_EQ(opt_empty.begin(), &*opt_empty);
+        EXPECT_EQ(opt.begin(), iterator(&*opt));
 
-    beman::optional::optional<test::no_default_ctor> opt_no_default_ctor = test::no_default_ctor{test::empty{}};
-    EXPECT_EQ(opt_no_default_ctor.begin(), &*opt_no_default_ctor);
+        const auto& const_opt = opt;
+        EXPECT_EQ(const_opt.begin(), const_iterator(&*opt));
+    };
 
-    beman::optional::optional<test::base> opt_base = test::base{};
-    EXPECT_EQ(opt_base.begin(), &*opt_base);
-
-    beman::optional::optional<test::derived> opt_derived = test::derived{};
-    EXPECT_EQ(opt_derived.begin(), &*opt_derived);
+    test(beman::optional26::optional<int>{26});
+    test(beman::optional26::optional<int*>{reinterpret_cast<int*>(0XCAFEBABE)});
+    test(beman::optional26::optional<empty>{empty{}});
+    test(beman::optional26::optional<no_default_ctor>{no_default_ctor{empty{}}});
+    test(beman::optional26::optional<base>{base{}});
+    test(beman::optional26::optional<derived>{derived{}});
 }
 
 TEST(RangeSupportTest, EndOnEmptyOptional) {
-    EXPECT_EQ(beman::optional::optional<int>{}.end(), nullptr);
+    const auto test = [](auto&& opt) {
+        // The iterator type is the same as the iterator of the optional.
+        // e.g. iterator = optional<T>::iterator if opt is optional<T>
+        using iterator = typename std::remove_reference_t<decltype(opt)>::iterator;
+        // e.g. const_iterator = optional<T>::const_iterator if opt is optional<T>
+        using const_iterator = typename std::remove_reference_t<decltype(opt)>::const_iterator;
 
-    EXPECT_EQ(beman::optional::optional<test::empty>{}.end(), nullptr);
+        EXPECT_EQ(opt.end(), iterator());
 
-    EXPECT_EQ(beman::optional::optional<test::no_default_ctor>{}.end(), nullptr);
+        const auto& const_opt = opt;
+        EXPECT_EQ(const_opt.end(), const_iterator());
+    };
 
-    EXPECT_EQ(beman::optional::optional<test::base>{}.end(), nullptr);
-
-    EXPECT_EQ(beman::optional::optional<test::derived>{}.end(), nullptr);
+    test(beman::optional26::optional<int>{});
+    test(beman::optional26::optional<int*>{});
+    test(beman::optional26::optional<empty>{});
+    test(beman::optional26::optional<no_default_ctor>{});
+    test(beman::optional26::optional<base>{});
+    test(beman::optional26::optional<derived>{});
 }
 
 TEST(RangeSupportTest, EndOnNonEmptyOptional) {
-    beman::optional::optional<int> opt_int = 0XCAFEBABE;
-    EXPECT_EQ(opt_int.end(), opt_int.begin() + 1);
+    const auto test = [](auto&& opt) {
+        // The iterator type is the same as the iterator of the optional.
+        // e.g. iterator = optional<T>::iterator if opt is optional<T>
+        using iterator = typename std::remove_reference_t<decltype(opt)>::iterator;
+        // e.g. const_iterator = optional<T>::const_iterator if opt is optional<T>
+        using const_iterator = typename std::remove_reference_t<decltype(opt)>::const_iterator;
 
-    beman::optional::optional<test::empty> opt_empty = test::empty{};
-    EXPECT_EQ(opt_empty.end(), opt_empty.begin() + 1);
+        EXPECT_EQ(opt.end(), iterator(&*opt + 1));
 
-    beman::optional::optional<test::no_default_ctor> opt_no_default_ctor = test::no_default_ctor{test::empty{}};
-    EXPECT_EQ(opt_no_default_ctor.end(), opt_no_default_ctor.begin() + 1);
+        const auto& const_opt = opt;
+        EXPECT_EQ(const_opt.end(), const_iterator(&*opt + 1));
+    };
 
-    beman::optional::optional<test::base> opt_base = test::base{};
-    EXPECT_EQ(opt_base.end(), opt_base.begin() + 1);
-
-    beman::optional::optional<test::derived> opt_derived = test::derived{};
-    EXPECT_EQ(opt_derived.end(), opt_derived.begin() + 1);
-}
-
-TEST(RangeSupportTest, RangeConceptsCheck) {
-    {
-        // std::optional is not (yet) a range.
-        static_assert(!std::ranges::range<std::optional<int>>);
-    }
-
-    {
-        // beman::optional::optional<int> is a range.
-        static_assert(std::ranges::range<beman::optional::optional<int>>);
-        static_assert(std::ranges::view<beman::optional::optional<int>>);
-        static_assert(std::ranges::input_range<beman::optional::optional<int>>);
-        static_assert(std::ranges::forward_range<beman::optional::optional<int>>);
-        static_assert(std::ranges::bidirectional_range<beman::optional::optional<int>>);
-        static_assert(std::ranges::contiguous_range<beman::optional::optional<int>>);
-        static_assert(std::ranges::common_range<beman::optional::optional<int>>);
-        static_assert(std::ranges::viewable_range<beman::optional::optional<int>>);
-        static_assert(!std::ranges::borrowed_range<beman::optional::optional<int>>);
-        static_assert(std::ranges::random_access_range<beman::optional::optional<int>>);
-        static_assert(std::ranges::sized_range<beman::optional::optional<int>>);
-    }
-
-    {
-        // beman::optional::optional<int*> is a range.
-        static_assert(std::ranges::range<beman::optional::optional<int*>>);
-        static_assert(std::ranges::view<beman::optional::optional<int*>>);
-        static_assert(std::ranges::input_range<beman::optional::optional<int*>>);
-        static_assert(std::ranges::forward_range<beman::optional::optional<int*>>);
-        static_assert(std::ranges::bidirectional_range<beman::optional::optional<int*>>);
-        static_assert(std::ranges::contiguous_range<beman::optional::optional<int*>>);
-        static_assert(std::ranges::common_range<beman::optional::optional<int*>>);
-        static_assert(std::ranges::viewable_range<beman::optional::optional<int*>>);
-        static_assert(!std::ranges::borrowed_range<beman::optional::optional<int*>>);
-        static_assert(std::ranges::random_access_range<beman::optional::optional<int*>>);
-    }
-
-    {
-        using ref = std::reference_wrapper<int>;
-        // beman::optional::optional<ref> is a range.
-        static_assert(std::ranges::range<beman::optional::optional<ref>>);
-        static_assert(std::ranges::view<beman::optional::optional<ref>>);
-        static_assert(std::ranges::input_range<beman::optional::optional<ref>>);
-        static_assert(std::ranges::forward_range<beman::optional::optional<ref>>);
-        static_assert(std::ranges::bidirectional_range<beman::optional::optional<ref>>);
-        static_assert(std::ranges::contiguous_range<beman::optional::optional<ref>>);
-        static_assert(std::ranges::common_range<beman::optional::optional<ref>>);
-        static_assert(std::ranges::viewable_range<beman::optional::optional<ref>>);
-        static_assert(!std::ranges::borrowed_range<beman::optional::optional<ref>>);
-        static_assert(std::ranges::random_access_range<beman::optional::optional<ref>>);
-    }
-}
-
-TEST(RangeSupportTest, IteratorConceptsCheck) {
-    {
-        // beman::optional::optional<int>::iterator is an iterator type.
-        static_assert(std::input_iterator<beman::optional::optional<int>::iterator>);
-        static_assert(std::forward_iterator<beman::optional::optional<int>::iterator>);
-        static_assert(std::bidirectional_iterator<beman::optional::optional<int>::iterator>);
-        static_assert(std::random_access_iterator<beman::optional::optional<int>::iterator>);
-        static_assert(std::contiguous_iterator<beman::optional::optional<int>::iterator>);
-
-        // beman::optional::optional<int>::const_iterator is an iterator type.
-        static_assert(std::input_iterator<beman::optional::optional<int>::const_iterator>);
-        static_assert(std::forward_iterator<beman::optional::optional<int>::const_iterator>);
-        static_assert(std::bidirectional_iterator<beman::optional::optional<int>::const_iterator>);
-        static_assert(std::random_access_iterator<beman::optional::optional<int>::const_iterator>);
-        static_assert(std::contiguous_iterator<beman::optional::optional<int>::const_iterator>);
-    }
-
-    {
-        // beman::optional::optional<int*>::iterator is an iterator type.
-        static_assert(std::input_iterator<beman::optional::optional<int*>::iterator>);
-        static_assert(std::forward_iterator<beman::optional::optional<int*>::iterator>);
-        static_assert(std::bidirectional_iterator<beman::optional::optional<int*>::iterator>);
-        static_assert(std::random_access_iterator<beman::optional::optional<int*>::iterator>);
-        static_assert(std::contiguous_iterator<beman::optional::optional<int*>::iterator>);
-
-        // beman::optional::optional<int*>::const_iterator is an iterator type.
-        static_assert(std::input_iterator<beman::optional::optional<int*>::const_iterator>);
-        static_assert(std::forward_iterator<beman::optional::optional<int*>::const_iterator>);
-        static_assert(std::bidirectional_iterator<beman::optional::optional<int*>::const_iterator>);
-        static_assert(std::random_access_iterator<beman::optional::optional<int*>::const_iterator>);
-        static_assert(std::contiguous_iterator<beman::optional::optional<int*>::const_iterator>);
-    }
+    test(beman::optional26::optional<int>{26});
+    test(beman::optional26::optional<int*>{reinterpret_cast<int*>(0XCAFEBABE)});
+    test(beman::optional26::optional<empty>{empty{}});
+    test(beman::optional26::optional<no_default_ctor>{no_default_ctor{empty{}}});
+    test(beman::optional26::optional<base>{base{}});
+    test(beman::optional26::optional<derived>{derived{}});
 }
 
 TEST(RangeSupportTest, FormatOptionalIsStillDisabled) {
 // TODO: Always enable when all major compilers implement P2585R1: "Improve default container formatting".
 #if defined(__cpp_lib_format_ranges)
-    EXPECT_EQ(std::format_kind<beman::optional::optional<int>>, std::range_format::disabled);
+    EXPECT_EQ(std::format_kind<beman::optional26::optional<int>>, std::range_format::disabled);
 
     // Next line shold not compile: formatter is not defined for optional.
-    // EXPECT_EQ(std::format("{}", beman::optional::optional<int> {}), "[]");
+    // EXPECT_EQ(std::format("{}", beman::optional26::optional<int> {}), "[]");
 #endif
 }
 
 TEST(RangeSupportTest, LoopOverEmptyRange) {
-    beman::optional::optional<int> empty;
+    beman::optional26::optional<int> empty;
     ASSERT_FALSE(empty.has_value());
 
-    for (auto _ : empty) {
+    for ([[maybe_unused]] auto _ : empty) {
         ASSERT_TRUE(false) << "Should not be reached: expected not to loop over empty optional";
     }
 }
 
 TEST(RangeSupportTest, LoopOverNonEmptyRange) {
-    const auto                     expected_value = 0xCAFEBABE;
-    beman::optional::optional<int> empty{expected_value};
+    const auto                       expected_value = 0xCAFEBABE;
+    beman::optional26::optional<int> empty{expected_value};
     ASSERT_TRUE(empty.has_value());
 
     bool entered_loop = false;
@@ -234,7 +213,7 @@ TEST(RangeSupportTest, LoopOverNonEmptyRange) {
 TEST(RangeSupportTest, LoopOptionalAccess) {
     // Example from P3168R1: should access the value from an optional object.
     const int  expected_value = 0xCAFEBABE;
-    const auto get_optional   = [&]() -> beman::optional::optional<int> { return expected_value; };
+    const auto get_optional   = [&]() -> beman::optional26::optional<int> { return expected_value; };
     ASSERT_TRUE(get_optional().has_value());
 
     for (auto&& opt : get_optional()) {
@@ -246,7 +225,7 @@ TEST(RangeSupportTest, LoopOptionalAssignment) {
     // Example from P3168R1: should mutate the value from an optional object.
     const int  initial_expected_value = 0xCAFEBABE;
     const int  expected_value         = 0xDEADBEEF;
-    const auto get_optional           = [&]() -> beman::optional::optional<int> { return initial_expected_value; };
+    const auto get_optional           = [&]() -> beman::optional26::optional<int> { return initial_expected_value; };
     ASSERT_TRUE(get_optional().has_value());
     ASSERT_TRUE(get_optional().value() == initial_expected_value);
 
@@ -262,7 +241,7 @@ TEST(RangeSupportTest, LoopOptionalAssignment) {
 TEST(RangeSupportTest, RangeChainExample) {
     // Example from P3168R1: start from a set of values, apply multiple range operations involving optional values.
     std::unordered_set<int> s{1, 3, 7, 9};
-    const auto              flt = [&](int i) -> beman::optional::optional<int> {
+    const auto              flt = [&](int i) -> beman::optional26::optional<int> {
         if (s.contains(i)) {
             return i;
         } else {
@@ -284,8 +263,8 @@ TEST(RangeSupportTest, RangeChainExample) {
 TEST(RangeSupportTest, PythagoreanTriples) {
     // Example from P3168R1: generate an infinite sequence of Pythagorean triples.
     // (x, y, z) is a Pythagorean triple if 1 <= x <= y <= z and x^2 + y^2 = z^2.
-    constexpr auto yield_if = []<class T>(bool b, T x) -> beman::optional::optional<T> {
-        return b ? beman::optional::optional<T>{std::move(x)} : beman::optional::nullopt;
+    constexpr auto yield_if = []<class T>(bool b, T x) -> beman::optional26::optional<T> {
+        return b ? beman::optional26::optional<T>{std::move(x)} : beman::optional26::nullopt;
     };
     constexpr auto and_then = []<class T>(T&& r, auto fun) {
         return decltype(r)(r) | std::views::transform(std::move(fun)) | std::views::join;

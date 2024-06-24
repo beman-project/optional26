@@ -1,4 +1,6 @@
-// include/Beman/Optional26/optional.hpp                                            -*-C++-*-
+// include/Beman/Optional26/optional.hpp -*-C++-*-
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 #ifndef BEMAN_OPTIONAL26_OPTIONAL_HPP
 #define BEMAN_OPTIONAL26_OPTIONAL_HPP
 
@@ -165,6 +167,7 @@ namespace std {
 */
 
 #include <compare>
+#include <concepts>
 #if defined(__cpp_lib_format_ranges)
 #include <format>
 #endif
@@ -173,7 +176,9 @@ namespace std {
 #include <type_traits>
 #include <utility>
 
-namespace beman::optional {
+#include <Beman/Optional26/detail/iterator.hpp>
+
+namespace beman::optional26 {
 
 class monostate {};
 
@@ -204,26 +209,26 @@ template <class T>
     requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional;
 
-} // namespace beman::optional
+} // namespace beman::optional26
 
 namespace std {
 // Since P3168R1: Give std::optional Range Support.
 template <typename T>
-inline constexpr bool ranges::enable_view<beman::optional::optional<T>> = true;
+inline constexpr bool ranges::enable_view<beman::optional26::optional<T>> = true;
 
 // TODO: document why this is needed.
 template <typename T>
-inline constexpr bool ranges::enable_borrowed_range<beman::optional::optional<T&>> = true;
+inline constexpr bool ranges::enable_borrowed_range<beman::optional26::optional<T&>> = true;
 
 // Since P3168R1: Give std::optional Range Support.
 #if defined(__cpp_lib_format_ranges)
 template <class T>
-inline constexpr auto format_kind<beman::optional::optional<T>> = range_format::disabled;
+inline constexpr auto format_kind<beman::optional26::optional<T>> = range_format::disabled;
 #endif
 
 } // namespace std
 
-namespace beman::optional {
+namespace beman::optional26 {
 template <class T>
 concept is_derived_from_optional = requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
 
@@ -314,8 +319,8 @@ class optional {
   public:
     using value_type = T;
     // Since P3168R1: Give std::optional Range Support.
-    using iterator       = T*;       // see [optional.iterators]
-    using const_iterator = const T*; // see [optional.iterators]
+    using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
+    using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
 
     constexpr optional() noexcept
         requires std::is_default_constructible_v<T>
@@ -685,8 +690,10 @@ class optional {
 
     // Since P3168R1: Give std::optional Range Support.
     // [optional.iterators], iterator support
-    constexpr iterator       begin() noexcept { return has_value() ? std::addressof(value_) : nullptr; };
-    constexpr const_iterator begin() const noexcept { return has_value() ? std::addressof(value_) : nullptr; };
+    constexpr iterator       begin() noexcept { return iterator(has_value() ? std::addressof(value_) : nullptr); }
+    constexpr const_iterator begin() const noexcept {
+        return const_iterator(has_value() ? std::addressof(value_) : nullptr);
+    }
     constexpr iterator       end() noexcept { return begin() + has_value(); }
     constexpr const_iterator end() const noexcept { return begin() + has_value(); }
 
@@ -936,8 +943,8 @@ class optional<T&> {
     // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
     // Implementation of the range support for optional<T&> reflects P3168R1 for now.
     // [optional.iterators], iterator support
-    using iterator       = T*;       // see [optional.iterators]
-    using const_iterator = const T*; // see [optional.iterators]
+    using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
+    using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
 
     // [optional.ctor], constructors
     //    constexpr optional() noexcept;
@@ -1071,8 +1078,8 @@ class optional<T&> {
     // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
     // Implementation of the range support for optional<T&> reflects P3168R1 for now.
     // [optional.iterators], iterator support
-    constexpr iterator       begin() noexcept { return has_value() ? value_ : nullptr; };
-    constexpr const_iterator begin() const noexcept { return has_value() ? value_ : nullptr; };
+    constexpr iterator       begin() noexcept { return iterator(has_value() ? value_ : nullptr); };
+    constexpr const_iterator begin() const noexcept { return const_iterator(has_value() ? value_ : nullptr); };
     constexpr iterator       end() noexcept { return begin() + has_value(); }
     constexpr const_iterator end() const noexcept { return begin() + has_value(); }
 
@@ -1121,6 +1128,7 @@ class optional<T&> {
 
     constexpr void reset() noexcept { value_ = nullptr; }
 };
-} // namespace beman::optional
+
+} // namespace beman::optional26
 
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP
