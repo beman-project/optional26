@@ -27,9 +27,6 @@ struct contiguous_iterator : stl_interfaces::iterator_interface<
                                  std::contiguous_iterator_tag,
                                  T> {
     using iterator_type     = T*;
-    using iterator_category = std::iterator_traits<iterator_type>::iterator_category;
-    using iterator_concept  = std::iterator_traits<iterator_type>::iterator_concept;
-    using value_type        = std::iterator_traits<iterator_type>::value_type;
     using difference_type   = std::iterator_traits<iterator_type>::difference_type;
     using reference         = std::iterator_traits<iterator_type>::reference;
     using pointer           = std::iterator_traits<iterator_type>::pointer;
