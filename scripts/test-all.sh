@@ -10,7 +10,7 @@
 set -e
 set -x
 
-# rm -rf .build
+rm -rf .build
 
 cmake --workflow --preset gcc-14   &> /dev/null && echo "passed" || echo "gcc-14 test failed."
 cmake --workflow --preset gcc-13   &> /dev/null && echo "passed" || echo "gcc-13 test failed."

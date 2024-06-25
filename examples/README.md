@@ -11,6 +11,7 @@ List of usage examples for `Beman.Optional26`.
 Check [sample](sample.cpp) for basic `Beman.Optional26` library usage.
 
 Build and run instructions:
+
 ```shell
 # build
 $ cmake --workflow --preset gcc-14
@@ -29,9 +30,9 @@ std_vs_beman: .value() matches?: yes
 ## Range Support (P3168R1)
 
 Range support added in [*Give std::optional Range Support* (P3168R1)](https://wg21.link/P3168R1) examples:
+
 * [./range_loop.cpp](./range_loop.cpp)
 * [./pythagorean_triples.cpp](./pythagorean_triples.cpp)
-
 
 Build and run instructions:
 

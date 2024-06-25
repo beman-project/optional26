@@ -7,6 +7,7 @@ SPDX-License-Identifier: 2.0 license with LLVM exceptions
 This repository implements `std::optional` extensions targeting C++26. The `Beman.Optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
 
 **Implements**:
+
 * [Give *std::optional* Range Support (P3168R1)](https://wg21.link/P3168R1)
 * [`std::optional<T&>` (P2988R5)](https://wg21.link/P2988R5)
 
@@ -15,7 +16,6 @@ This repository implements `std::optional` extensions targeting C++26. The `Bema
 Source, documentation and associated papers are licensed with the Apache 2.0 license with LLVM exceptions.
 
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-
 
 ## Examples
 
@@ -91,11 +91,12 @@ This project is mainly tested on `Ubuntu 22.04` and `Ubuntu 24.04`, but it shoul
 
 Build-time dependencies:
 
-- `cmake`
-- `ninja`, `make`, or another CMake-supported build system
-  - CMake defaults to "Unix Makefiles" on POSIX systems
+* `cmake`
+* `ninja`, `make`, or another CMake-supported build system
+  * CMake defaults to "Unix Makefiles" on POSIX systems
 
 Example of installation on `Ubuntu 24.04`:
+
 ```shell
 # Install tools:
 apt-get install -y cmake make ninja-build
@@ -108,7 +109,7 @@ apt-get install                           \
 
 ### Instructions
 
-Full set of supported toolchains can be found in [.github/workflows/ci.yml](#.github/workflows/ci.yml).
+Full set of supported toolchains can be found in [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 #### Basic Build
 
@@ -168,14 +169,15 @@ The makefile will use your system compiler, `c++`, if no toolchain name is provi
 ## Papers
 
 Latest revision(s) of the papers can be built / found at:
+
 * [give-std-optional-range-support](https://github.com/neatudarius/give-std-optional-range-support/) for `Give *std::optional* Range Support (P3168)`
-    * issue: [#1831](https://github.com/cplusplus/papers/issues/1831)
+  * issue: [#1831](https://github.com/cplusplus/papers/issues/1831)
   * LEWG:
     * Reviewed in Tokyo 2024.
     * Forwarded by LEWG April electronic poll to LWG.
   * LWG:
     * To be reviewed in Saint Louis 2024.
 * [./papers/P2988/README.md](./papers/P2988/README.md) for `std::optional<T&> (P2988)`.
-    * issue: [#1661](https://github.com/cplusplus/papers/issues/1661)
-    * LEWG:
-      * Reviewed in Tokyo 2024.
+  * issue: [#1661](https://github.com/cplusplus/papers/issues/1661)
+  * LEWG:
+    * Reviewed in Tokyo 2024.
