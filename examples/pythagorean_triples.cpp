@@ -3,6 +3,7 @@
 
 #include <Beman/Optional26/optional.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <concepts>
 #include <iostream>
