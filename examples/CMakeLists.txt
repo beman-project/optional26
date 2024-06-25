@@ -7,6 +7,7 @@ include(GNUInstallDirs)
 
 # List of all buildable examples.
 set(EXAMPLES
+  concept_checks
   optional_ref
   pythagorean_triples
   range_loop

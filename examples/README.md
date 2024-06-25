@@ -12,6 +12,7 @@ Check basic `Beman.Optional26` library usages:
 
 * local [./sample.cpp](./sample.cpp) or [sample.cpp@Compiler Explorer](https://godbolt.org/z/47vGje65x)
 * local [./std_vs_beman.cpp](./std_vs_beman.cpp) or [std_vs_beman.cpp@Compiler Explorer](https://godbolt.org/z/ds5MvfGe6)
+* local [./concept_checks.cpp](./concep_checks.cpp) or [concept_checks.cpp@Compiler Explorer](https://godbolt.org/z/7eYb4Wbjc)
 
 
 ### Local Build and Run
@@ -29,6 +30,9 @@ opt = 26
 $ .build/gcc-14/examples/RelWithDebInfo/std_vs_beman
 std_vs_beman: .has_value() matches?: yes
 std_vs_beman: .value() matches?: yes
+
+# run concept_checks.cpp
+$ .build/gcc-14/examples/RelWithDebInfo/concept_checks
 ```
 
 ## Range Support (P3168R1)
