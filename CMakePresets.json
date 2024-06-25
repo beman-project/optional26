@@ -39,6 +39,13 @@
       "toolchainFile": "${sourceDir}/etc/gcc-13-toolchain.cmake"
     },
     {
+      "name": "clang-19",
+      "inherits": "common",
+      "displayName": "Clang 19",
+      "description": "Build with Clang 19 compilers",
+      "toolchainFile": "${sourceDir}/etc/clang-19-toolchain.cmake"
+    },
+    {
       "name": "clang-18",
       "inherits": "common",
       "displayName": "Clang 18",
@@ -70,6 +77,10 @@
     {
       "name": "gcc-13",
       "configurePreset": "gcc-13"
+    },
+    {
+      "name": "clang-19",
+      "configurePreset": "clang-19"
     },
     {
       "name": "clang-18",
@@ -106,6 +117,11 @@
       "name": "gcc-13",
       "inherits": "common",
       "configurePreset": "gcc-13"
+    },
+    {
+      "name": "clang-19",
+      "inherits": "common",
+      "configurePreset": "clang-19"
     },
     {
       "name": "clang-18",
@@ -167,6 +183,23 @@
         {
           "type": "test",
           "name": "gcc-13"
+        }
+      ]
+    },
+    {
+      "name": "clang-19",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang-19"
+        },
+        {
+          "type": "build",
+          "name": "clang-19"
+        },
+        {
+          "type": "test",
+          "name": "clang-19"
         }
       ]
     },
