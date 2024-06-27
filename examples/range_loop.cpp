@@ -5,7 +5,7 @@
 #include <iostream>
 
 int main() {
-    // Example from P3168R1: basic range loop over C++26 optional.
+    // Example from P3168R2: basic range loop over C++26 optional.
 
     beman::optional26::optional<int> empty_opt{};
     for ([[maybe_unused]] const auto& i : empty_opt) {

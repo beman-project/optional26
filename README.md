@@ -8,7 +8,7 @@ This repository implements `std::optional` extensions targeting C++26. The `Bema
 
 **Implements**:
 
-* [Give *std::optional* Range Support (P3168R1)](https://wg21.link/P3168R1)
+* [Give *std::optional* Range Support (P3168R2)](https://wg21.link/P3168R2)
 * [`std::optional<T&>` (P2988R5)](https://wg21.link/P2988R5)
 
 ## License
@@ -23,13 +23,13 @@ Full runable examples can be found in `examples/` - please check [./examples/REA
 
 ### range_loop
 
-The next code snippet shows optional range support added in [Give *std::optional* Range Support (P3168R1)](https://wg21.link/P3168R1):
+The next code snippet shows optional range support added in [Give *std::optional* Range Support (P3168R2)](https://wg21.link/P3168R2):
 
 ```cpp
 #include <Beman/Optional26/optional.hpp>
 ...
 
-// Example from P3168R1: basic range loop over C++26 optional.
+// Example from P3168R2: basic range loop over C++26 optional.
 
 beman::optional26::optional<int> empty_opt{};
 for ([[maybe_unused]] const auto& i : empty_opt) {
@@ -44,7 +44,7 @@ for (const auto& i : opt) {
 }
 ```
 
-Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp). Check for local build and run instructions in [./examples/README.md](./examples/README.md) or [range_loop.cpp@Compiler Explorer](https://godbolt.org/z/f8dWaxsGo)/
+Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp). Check for local build and run instructions in [./examples/README.md](./examples/README.md) or try [range_loop.cpp@Compiler Explorer](https://godbolt.org/z/f8dWaxsGo).
 
 https://godbolt.org/z/f8dWaxsGo
 

@@ -35,9 +35,9 @@ std_vs_beman: .value() matches?: yes
 $ .build/gcc-14/examples/RelWithDebInfo/concept_checks
 ```
 
-## Range Support (P3168R1)
+## Range Support (P3168R2)
 
-Range support added in [*Give std::optional Range Support* (P3168R1)](https://wg21.link/P3168R1) examples:
+Range support added in [*Give std::optional Range Support* (P3168R2)](https://wg21.link/P3168R2) examples:
 
 * local [./range_loop.cpp](./range_loop.cpp) or [range_loop.cpp@Compiler Explorer](https://godbolt.org/z/f8dWaxsGo)
 * local [./pythagorean_triples.cpp](./pythagorean_triples.cpp) or [pythagorean_triples.cpp@Compiler Explorer](https://godbolt.org/z/fGr8jYM6P)

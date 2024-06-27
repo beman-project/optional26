@@ -212,7 +212,7 @@ class optional;
 } // namespace beman::optional26
 
 namespace std {
-// Since P3168R1: Give std::optional Range Support.
+// Since P3168R2: Give std::optional Range Support.
 template <typename T>
 inline constexpr bool ranges::enable_view<beman::optional26::optional<T>> = true;
 
@@ -220,7 +220,7 @@ inline constexpr bool ranges::enable_view<beman::optional26::optional<T>> = true
 template <typename T>
 inline constexpr bool ranges::enable_borrowed_range<beman::optional26::optional<T&>> = true;
 
-// Since P3168R1: Give std::optional Range Support.
+// Since P3168R2: Give std::optional Range Support.
 #if defined(__cpp_lib_format_ranges)
 template <class T>
 inline constexpr auto format_kind<beman::optional26::optional<T>> = range_format::disabled;
@@ -318,7 +318,7 @@ class optional {
 
   public:
     using value_type = T;
-    // Since P3168R1: Give std::optional Range Support.
+    // Since P3168R2: Give std::optional Range Support.
     using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
 
@@ -688,7 +688,7 @@ class optional {
         swap(engaged, rhs.engaged);
     }
 
-    // Since P3168R1: Give std::optional Range Support.
+    // Since P3168R2: Give std::optional Range Support.
     // [optional.iterators], iterator support
     constexpr iterator       begin() noexcept { return iterator(has_value() ? std::addressof(value_) : nullptr); }
     constexpr const_iterator begin() const noexcept {
@@ -941,7 +941,7 @@ class optional<T&> {
     using value_type = T&;
     // Since ${PAPER_NUMBER}: ${PAPER_TITLE}.
     // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
-    // Implementation of the range support for optional<T&> reflects P3168R1 for now.
+    // Implementation of the range support for optional<T&> reflects P3168R2 for now.
     // [optional.iterators], iterator support
     using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
@@ -1076,7 +1076,7 @@ class optional<T&> {
 
     // Since ${PAPER_NUMBER}: ${PAPER_TITLE}.
     // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
-    // Implementation of the range support for optional<T&> reflects P3168R1 for now.
+    // Implementation of the range support for optional<T&> reflects P3168R2 for now.
     // [optional.iterators], iterator support
     constexpr iterator       begin() noexcept { return iterator(has_value() ? value_ : nullptr); };
     constexpr const_iterator begin() const noexcept { return const_iterator(has_value() ? value_ : nullptr); };
