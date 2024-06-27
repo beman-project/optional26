@@ -53,7 +53,7 @@ for (const auto& i : opt) {
 }
 ```
 
-Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp). Build and run instructions in [./examples/README.md](./examples/README.md).
+Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp). Build and run instructions in [./examples/README.md](./examples/README.md).  Or [try it on compiler explorer](https://godbolt.org/z/b5ThEqqhf)
 
 ### optional_ref
 
@@ -148,7 +148,7 @@ Latest revision(s) of the papers can be built / found at:
     * Reviewed in Tokyo 2024.
     * Forwarded by LEWG April electronic poll to LWG.
   * LWG:
-    * To be reviewed in Saint Louis 2024.
+    * Reviewed and approved in Saint Louis 2024.
 * [./papers/P2988/README.md](./papers/P2988/README.md) for `std::optional<T&> (P2988)`.
     * issue: [#1661](https://github.com/cplusplus/papers/issues/1661)
     * LEWG:
