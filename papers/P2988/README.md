@@ -9,6 +9,7 @@ SPDX-License-Identifier: 2.0 license with LLVM exceptions
 Compiling the paper requires a working LaTeX installation. See instructions for configuring your system at [C++ Standard Draft Sources](https://github.com/cplusplus/draft/blob/main/README.rst)
 
 The papers/ subdirectory has the LaTeX souces for P2988 and the supporting macro definitions. To build, run
+
 ```shell
 make papers
 ```
