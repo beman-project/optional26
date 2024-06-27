@@ -18,8 +18,9 @@ echo "All C++ files were linted."
 find scripts/ -name "*.sh" | xargs shellcheck || echo "shellcheck failed."
 echo "All scripts files were linted."
 
-# TODO: Lint all CMake files in the project.
-# echo "All CMake files were linted."
+# Lint all CMake files in the project.
+find . -name CMakeLists.txt | xargs cmake-format -i || echo "cmake-format failed."
+echo "All CMake files were linted."
 
 # Lint all Markdown files in the project.
 find README.md examples/ -name "*.md" | xargs markdownlint -f || echo "markdownlint failed."
