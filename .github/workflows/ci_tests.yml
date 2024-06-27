@@ -63,4 +63,3 @@ jobs:
           set -x
           pwd
           scripts/run-tests.sh --fresh --preset ${{matrix.config.toolchain}} --verbose
-

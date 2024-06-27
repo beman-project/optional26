@@ -21,6 +21,7 @@ BASE_DIRS=(
 function print_usage() {
     echo "Usage: $0"
     echo "  -h, --help: Display help."
+    echo "  -f, --fix: Fix all linting issues. Default: false."
     echo "  -a, --all: Lint all files."
     echo "  -c, --cpp: Lint C++ files."
     echo "  -s, --shell: Lint shell scripts."
@@ -31,11 +32,21 @@ function print_usage() {
 
 # Parse command line arguments.
 function parse_args() {
+    # If no arguments are provided, print usage and exit.
+    if [[ $# -eq 0 ]]; then
+        print_usage
+        exit 1
+    fi
+
     while [[ $# -gt 0 ]]; do
         case $1 in
             -h|--help)
                 print_usage
-                exit 0
+                exit 1
+                ;;
+            -f|--fix)
+                FIX_INPLACE=true
+                shift
                 ;;
             -a|--all)
                 lint_all_files
@@ -85,94 +96,136 @@ function check_linters_installed() {
         echo " -> ${linter}..."
         if ! command -v "${linter}" &> /dev/null; then
             echo "${linter} could not be found."
-            exit 1
+            return 1;
         fi
     done
     echo "Checking linters finished: all linters installed."
-    echo ""
+    return 0;
 }
 
 # Lint all C++ files in the project.
 function lint_cpp_files() {
     echo "Linting C++ files..."
+    clang-format --version &> /dev/null
 
     CPP_DIRS=(
         "${BASE_DIRS[@]}"
     )
-    find -E "${CPP_DIRS[@]}" -regex '.*\.(h|hpp|hxx|cpp|c|cxx)' | xargs clang-format -i -style=file || echo "clang-format failed."
+    
+    FIX_INPLACE_FLAG=""
+    if [ "${FIX_INPLACE}" = true ]; then
+        FIX_INPLACE_FLAG="-i"
+    else
+        FIX_INPLACE_FLAG="--dry-run"
+    fi
+
+    find "${CPP_DIRS[@]}" -regex '.*\.\(h\|cpp\)$' | xargs clang-format --Werror -style=file --verbose ${FIX_INPLACE_FLAG}
 
     echo "Done."
     echo ""
+
+    return 0;
 }
 
 # Lint all shell files in the project.
 function lint_shell_files() {
     echo "Linting shell files..."
+    shellcheck --version &> /dev/null
 
     SHELL_DIRS=(
         "${BASE_DIRS[@]}"
     )
-    find -E "${SHELL_DIRS[@]}" -regex '.*\.(sh)' | xargs shellcheck || echo "shellcheck failed."
+
+    find "${SHELL_DIRS[@]}" -regex '.*\.\(sh\)$'
+    find "${SHELL_DIRS[@]}" -regex '.*\.\(sh\)$' | xargs shellcheck
     
     echo "Done."
     echo ""
-}
 
-# Lint all CMake files in the project.
-function lint_cmake_files() {
-    echo "Linting CMake files..."
-
-    CMAKE_DIRS=(
-        CMakeLists.txt
-        "${BASE_DIRS[@]}"
-        cmake
-    )
-    find -E "${CMAKE_DIRS[@]}" -regex '.*CMakeLists\.txt' | xargs cmake-format -i || echo "cmake-format failed."
-
-    echo "Done."
-    echo ""
+    return 0
 }
 
 # Lint all Markdown files in the project.
 function lint_markdown_files() {
     echo "Linting Markdown files..."
+    markdownlint --version &> /dev/null
 
     MD_DIRS=(
         README.md
         "${BASE_DIRS[@]}"
         papers/P2988/README.md
     )
-    find -E "${MD_DIRS[@]}" -regex '.*\.(md)' | xargs markdownlint -f || echo "markdownlint failed."
+
+    FIX_INPLACE_FLAG=""
+    if [ "${FIX_INPLACE}" = true ]; then
+        FIX_INPLACE_FLAG="-f"
+    fi
+
+    find "${MD_DIRS[@]}" -regex '.*\.\(md\)$'
+    find "${MD_DIRS[@]}" -regex '.*\.\(md\)$' | xargs markdownlint "${FIX_INPLACE_FLAG}" 
 
     echo "Done."
     echo ""
+
+    return 0;
 }
 
 # Lint all YAML files in the project.
 function lint_yaml_files() {
     echo "Linting YAML files..."
+    yamllint --version &> /dev/null
 
     YAML_DIRS=(
         .github/
         "${BASE_DIRS[@]}"
     )
-    find -E "${YAML_DIRS[@]}" -regex '.*\.(yml)' | xargs yamlfmt || echo "yamlfmt failed."
+
+    find "${YAML_DIRS[@]}" -regex '.*\.\(yml\)$'
+    find "${YAML_DIRS[@]}" -regex '.*\.\(yml\)$' | xargs yamllint -c .yamllint
 
     echo "Done."
     echo ""
+
+    return 0;
+}
+
+# Lint all CMake files in the project.
+function lint_cmake_files() {
+    echo "Linting CMake files..."
+    cmake-format --version &> /dev/null
+
+    CMAKE_DIRS=(
+        CMakeLists.txt
+        "${BASE_DIRS[@]}"
+        cmake
+    )
+
+    CMAKE_FORMAT_FLAGS=
+    if [ "${FIX_INPLACE}" = true ]; then
+        CMAKE_FORMAT_FLAGS="-i"
+    else
+        CMAKE_FORMAT_FLAGS="--check"
+    fi
+
+    find "${CMAKE_DIRS[@]}" -regex '.*CMakeLists\.txt$'
+    find "${CMAKE_DIRS[@]}" -regex '.*CMakeLists\.txt$' | xargs cmake-format ${CMAKE_FORMAT_FLAGS}
+
+    echo "Done."
+    echo ""
+
+    return 0;
 }
 
 # Lint all files in the project.
 function lint_all_files() {
-    check_linters_installed || exit 1
-
     lint_cpp_files          || exit 1
     lint_shell_files        || exit 1
-    lint_cmake_files        || exit 1
     lint_markdown_files     || exit 1
     lint_yaml_files         || exit 1
+    lint_cmake_files        || exit 1
 
     echo "All linters finished."
+    return 0;
 }
 
 parse_args "$@"
