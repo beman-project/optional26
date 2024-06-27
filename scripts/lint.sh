@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# scripts/lint.sh -*-shell-*-
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 # Lint all files in the project.
