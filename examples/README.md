@@ -14,7 +14,6 @@ Check basic `Beman.Optional26` library usages:
 * local [./std_vs_beman.cpp](./std_vs_beman.cpp) or [std_vs_beman.cpp@Compiler Explorer](https://godbolt.org/z/ds5MvfGe6)
 * local [./concept_checks.cpp](./concep_checks.cpp) or [concept_checks.cpp@Compiler Explorer](https://godbolt.org/z/7eYb4Wbjc)
 
-
 ### Local Build and Run
 
 ```shell

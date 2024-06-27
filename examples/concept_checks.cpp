@@ -36,7 +36,7 @@ struct derived : public base {
     derived(int i, int j) : base(i), m_j(j) {}
 };
 
-} //
+} // namespace test
 
 const auto test_concepts_disabled = [](auto&& opt) {
     // The optional type is the opt type without the reference.
@@ -84,7 +84,6 @@ int main() {
         test_concepts_disabled(std::optional<test::derived>{});
     }
 
-
     {
         // beman::optional26::optional meets range concepts.
         test_concepts_enabled(beman::optional26::optional<int>{});
@@ -103,4 +102,3 @@ int main() {
 //
 // # run example:
 // $ .build/gcc-14/examples/RelWithDebInfo/concept_checks
-

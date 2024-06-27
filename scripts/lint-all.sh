@@ -24,3 +24,11 @@ echo "All scripts files were linted."
 # Lint all Markdown files in the project.
 find README.md examples/ -name "*.md" | xargs markdownlint -f || echo "markdownlint failed."
 echo "All Markdown files were linted."
+
+# TODO: Lint all YAML files in the project.
+# echo "All YAML files were linted."
+
+# TODO: Lint all JSON files in the project.
+# echo "All JSON files were linted."
+
+echo "All linters finished."
