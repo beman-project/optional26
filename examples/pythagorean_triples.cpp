@@ -3,13 +3,14 @@
 
 #include <Beman/Optional26/optional.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <concepts>
 #include <iostream>
 #include <ranges>
 
 int main() {
-    // Example from P3168R1: generate an infinite sequence of Pythagorean triples.
+    // Example from P3168R2: generate an infinite sequence of Pythagorean triples.
     // (x, y, z) is a Pythagorean triple if 1 <= x <= y <= z and x^2 + y^2 = z^2.
     constexpr auto yield_if = []<class T>(bool b, T x) -> beman::optional26::optional<T> {
         return b ? beman::optional26::optional<T>{std::move(x)} : beman::optional26::nullopt;

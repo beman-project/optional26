@@ -1,0 +1,3 @@
+# shellcheck
+# allow for non-alphanumeric filenames
+disable=SC2038 

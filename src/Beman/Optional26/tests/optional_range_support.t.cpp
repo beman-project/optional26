@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 /**
- * This file contains tests for the range support. Check P3168R1: "Give std::optional Range Support".
+ * This file contains tests for the range support. Check P3168R2: "Give std::optional Range Support".
  *
  * RangeSupportTest: test suite for the range support.
  *
@@ -211,7 +211,7 @@ TEST(RangeSupportTest, LoopOverNonEmptyRange) {
 }
 
 TEST(RangeSupportTest, LoopOptionalAccess) {
-    // Example from P3168R1: should access the value from an optional object.
+    // Example from P3168R2: should access the value from an optional object.
     const int  expected_value = 0xCAFEBABE;
     const auto get_optional   = [&]() -> beman::optional26::optional<int> { return expected_value; };
     ASSERT_TRUE(get_optional().has_value());
@@ -222,7 +222,7 @@ TEST(RangeSupportTest, LoopOptionalAccess) {
 }
 
 TEST(RangeSupportTest, LoopOptionalAssignment) {
-    // Example from P3168R1: should mutate the value from an optional object.
+    // Example from P3168R2: should mutate the value from an optional object.
     const int  initial_expected_value = 0xCAFEBABE;
     const int  expected_value         = 0xDEADBEEF;
     const auto get_optional           = [&]() -> beman::optional26::optional<int> { return initial_expected_value; };
@@ -239,7 +239,7 @@ TEST(RangeSupportTest, LoopOptionalAssignment) {
 }
 
 TEST(RangeSupportTest, RangeChainExample) {
-    // Example from P3168R1: start from a set of values, apply multiple range operations involving optional values.
+    // Example from P3168R2: start from a set of values, apply multiple range operations involving optional values.
     std::unordered_set<int> s{1, 3, 7, 9};
     const auto              flt = [&](int i) -> beman::optional26::optional<int> {
         if (s.contains(i)) {
@@ -261,7 +261,7 @@ TEST(RangeSupportTest, RangeChainExample) {
 }
 
 TEST(RangeSupportTest, PythagoreanTriples) {
-    // Example from P3168R1: generate an infinite sequence of Pythagorean triples.
+    // Example from P3168R2: generate an infinite sequence of Pythagorean triples.
     // (x, y, z) is a Pythagorean triple if 1 <= x <= y <= z and x^2 + y^2 = z^2.
     constexpr auto yield_if = []<class T>(bool b, T x) -> beman::optional26::optional<T> {
         return b ? beman::optional26::optional<T>{std::move(x)} : beman::optional26::nullopt;
