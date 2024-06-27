@@ -54,9 +54,7 @@ for (const auto& i : opt) {
 }
 ```
 
-Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp). Check for local build and run instructions in [./examples/README.md](./examples/README.md) or try [range_loop.cpp@Compiler Explorer](https://godbolt.org/z/f8dWaxsGo).
-
-https://godbolt.org/z/f8dWaxsGo
+Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp). Build and run instructions in [./examples/README.md](./examples/README.md).  Or [try it on Compiler Explorer](https://godbolt.org/z/b5ThEqqhf).
 
 ### optional_ref
 
