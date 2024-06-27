@@ -1,67 +1,28 @@
 name: Test
-
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-
+    branches: [main]
 jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-
     strategy:
       fail-fast: false
-
       matrix:
         config:
-        - {
-          name: "Ubuntu Clang 17",
-          os: ubuntu-24.04,
-          toolchain: "clang-17-toolchain.cmake",
-          clang_version: 17,
-          installed_clang_version: 14,
-          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
-          }
-
-        - {
-          name: "Ubuntu Clang 18",
-          os: ubuntu-24.04,
-          toolchain: "clang-18-toolchain.cmake",
-          clang_version: 18,
-          installed_clang_version: 14,
-          cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
-          }
-
-        - {
-            name: "Ubuntu GCC 13",
-            os: ubuntu-24.04,
-            toolchain: "gcc-13-toolchain.cmake",
-            clang_version: 17,
-            installed_clang_version: 14,
-            cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
-          }
-
-        - {
-            name: "Ubuntu GCC 14",
-            os: ubuntu-24.04,
-            toolchain: "gcc-14-toolchain.cmake",
-            clang_version: 17,
-            installed_clang_version: 14,
-            cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "
-          }
-
+          - {name: "Ubuntu Clang 17", os: ubuntu-24.04, toolchain: "clang-17-toolchain.cmake", clang_version: 17, installed_clang_version: 14, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu Clang 18", os: ubuntu-24.04, toolchain: "clang-18-toolchain.cmake", clang_version: 18, installed_clang_version: 14, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu GCC 13", os: ubuntu-24.04, toolchain: "gcc-13-toolchain.cmake", clang_version: 17, installed_clang_version: 14, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu GCC 14", os: ubuntu-24.04, toolchain: "gcc-14-toolchain.cmake", clang_version: 17, installed_clang_version: 14, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: 'true'
-
       - uses: seanmiddleditch/gha-setup-ninja@master
-
       - name: Activate verbose shell
         run: set -x
-
       - name: Install LLVM+Clang
         if: startsWith(matrix.config.os, 'ubuntu-')
         run: |
@@ -89,15 +50,11 @@ jobs:
           chmod +x llvm.sh
           sudo ./llvm.sh ${{matrix.config.clang_version}} all
           sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
-
-
       - name: Install GCC 14
         if: matrix.config.name == 'Ubuntu GCC 14'
         run: |
           sudo apt update
           sudo apt-get install g++-14
-
-
       - name: Configure
         run: |
           rm -rf .build
@@ -106,11 +63,9 @@ jobs:
           echo ${{ matrix.config.cmake_args }}
           echo ${{ matrix.config.toolchain }}
           cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE=etc/${{ matrix.config.toolchain }} -B . -S ..
-
       - name: Build
         run: |
           cmake --build .build --config Asan --target all -- -k 0
-
       - name: Test
         run: |
           cd .build
