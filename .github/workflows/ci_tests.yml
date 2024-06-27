@@ -14,6 +14,7 @@ jobs:
         config:
           - {name: "Ubuntu Clang 17", os: ubuntu-24.04, toolchain: clang-17, clang_version: 17, installed_clang_version: 14}
           - {name: "Ubuntu Clang 18", os: ubuntu-24.04, toolchain: clang-18, clang_version: 18, installed_clang_version: 14}
+          - {name: "Ubuntu Clang 19", os: ubuntu-24.04, toolchain: clang-19, clang_version: 19, installed_clang_version: 14}
           - {name: "Ubuntu GCC 13", os: ubuntu-24.04, toolchain: gcc-13, clang_version: 17, installed_clang_version: 14}
           - {name: "Ubuntu GCC 14", os: ubuntu-24.04, toolchain: gcc-14, clang_version: 17, installed_clang_version: 14}
     steps:
@@ -61,5 +62,5 @@ jobs:
         run: |
           set -x
           pwd
-          ls -l scripts/run-tests.sh
           scripts/run-tests.sh --fresh --preset ${{matrix.config.toolchain}} --verbose
+
