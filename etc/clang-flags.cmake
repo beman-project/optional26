@@ -5,10 +5,12 @@
 
 include_guard(GLOBAL)
 
-set(CMAKE_CXX_STANDARD 23)
+if(NOT "${CMAKE_CXX_STANDARD}")
+  set(CMAKE_CXX_STANDARD 23)
+endif()
 
 set(CMAKE_CXX_FLAGS
-    "-stdlib=libc++ -Wall -Wextra "
+    "-std=c++${CMAKE_CXX_STANDARD} -Wall -Wextra -stdlib=libc++"
     CACHE STRING "CXX_FLAGS" FORCE)
 
 set(CMAKE_CXX_FLAGS_DEBUG

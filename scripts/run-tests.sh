@@ -32,6 +32,15 @@ ALL_CONFIGURATIONS=(
 # Actual cmake configuration to use.
 CMAKE_CONFIGURATION="RelWithDebInfo"
 
+# C++ standards to test.
+ALL_STANDARDS=(
+    20
+    23
+    26
+)
+# Default standard to use.
+CXX_STANDARD=23
+
 # Print print_usage information.
 function print_usage() {
     echo "Usage: $0"
@@ -42,6 +51,8 @@ function print_usage() {
     echo "                Available presets: ${ALL_TOOLCHAINS[*]}"
     echo "  -c, --config: Run tests on a specific configuration. Default: ${CMAKE_CONFIGURATION}"
     echo "                Available configurations: ${ALL_CONFIGURATIONS[*]}"
+    echo "  -s, --std: Run tests with a specific C++ standard. Default: ${CXX_STANDARD}"
+    echo "                Available standards: ${ALL_STANDARDS[*]}"
 }
 
 # Parse command line arguments.
@@ -77,6 +88,11 @@ function parse_args() {
                 ;;
             -c|--config)
                 CMAKE_CONFIGURATION="$2"
+                shift
+                shift
+                ;;
+            -s|--std)
+                CXX_STANDARD="$2"
                 shift
                 shift
                 ;;
@@ -124,7 +140,7 @@ function test_with_toolchain() {
     echo "Testing with ${toolchain}..."
 
     cd "${BUILD_DIR}"
-    cmd="cmake -G \"Ninja Multi-Config\"  -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan;Debug;Release\" -DCMAKE_TOOLCHAIN_FILE=\"${toolchain}\" -B . -S .."
+    cmd="cmake -G \"Ninja Multi-Config\"  -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan;Debug;Release\" -DCMAKE_TOOLCHAIN_FILE=\"${toolchain}\" -DCMAKE_CXX_STANDARD=\"${CXX_STANDARD}\" -B . -S .."
     run_command "${cmd}" "config"  "config failed" "config successful"
 
     cd ..

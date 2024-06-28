@@ -22,6 +22,7 @@ function print_usage() {
     echo "Usage: $0"
     echo "  -h, --help: Display help."
     echo "  -f, --fix: Fix all linting issues. Default: false."
+    echo "  -v, --verbose: Enable verbose output."
     echo "  -a, --all: Lint all files."
     echo "  -c, --cpp: Lint C++ files."
     echo "  -s, --shell: Lint shell scripts."
@@ -46,6 +47,10 @@ function parse_args() {
                 ;;
             -f|--fix)
                 FIX_INPLACE=true
+                shift
+                ;;
+            -v|--verbose)
+                set -x
                 shift
                 ;;
             -a|--all)
