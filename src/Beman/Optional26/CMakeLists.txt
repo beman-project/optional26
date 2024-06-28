@@ -48,4 +48,8 @@ target_link_libraries(optional_test gtest)
 target_link_libraries(optional_test gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(optional_test)
+
+# Note: clang-19 + gtest_discover_tests + Asan setup causes errors on some platforms.
+# Temporary switch to gtest_add_tests and skip some Asan checks.
+enable_testing()
+gtest_add_tests(optional_test "" AUTO)
