@@ -119,7 +119,7 @@ function lint_cpp_files() {
         FIX_INPLACE_FLAG="--dry-run"
     fi
 
-    find "${CPP_DIRS[@]}" -regex '.*\.\(h\|cpp\)$' | xargs clang-format --Werror -style=file --verbose ${FIX_INPLACE_FLAG}
+    find "${CPP_DIRS[@]}" -regex '.*\.\(hpp\|cpp\)$' | xargs clang-format --Werror -style=file --verbose ${FIX_INPLACE_FLAG}
 
     echo "Done."
     echo ""
@@ -197,7 +197,8 @@ function lint_cmake_files() {
     CMAKE_DIRS=(
         CMakeLists.txt
         "${BASE_DIRS[@]}"
-        cmake
+        cmake/
+        etc
     )
 
     CMAKE_FORMAT_FLAGS=
@@ -207,8 +208,8 @@ function lint_cmake_files() {
         CMAKE_FORMAT_FLAGS="--check"
     fi
 
-    find "${CMAKE_DIRS[@]}" -regex '.*CMakeLists\.txt$'
-    find "${CMAKE_DIRS[@]}" -regex '.*CMakeLists\.txt$' | xargs cmake-format ${CMAKE_FORMAT_FLAGS}
+    find "${CMAKE_DIRS[@]}" -regex '.*\(CMakeLists\.txt\|cmake\)$'
+    find "${CMAKE_DIRS[@]}" -regex '.*\(CMakeLists\.txt\|cmake\)$' | xargs cmake-format ${CMAKE_FORMAT_FLAGS}
 
     echo "Done."
     echo ""

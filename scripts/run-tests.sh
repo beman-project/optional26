@@ -76,7 +76,7 @@ function parse_args() {
                 shift
                 ;;
             -c|--config)
-                CMAKE_CONFIGURATION=("$2")
+                CMAKE_CONFIGURATION="$2"
                 shift
                 shift
                 ;;
