@@ -192,7 +192,7 @@ function lint_cmake_files() {
     fi
 
     find "${CMAKE_DIRS[@]}" -regex '.*\(CMakeLists\.txt\|cmake\)$'
-    find "${CMAKE_DIRS[@]}" -regex '.*\(CMakeLists\.txt\|cmake\)$' | xargs cmake-format ${CMAKE_FORMAT_FLAGS}
+    find "${CMAKE_DIRS[@]}" -regex '.*\(CMakeLists\.txt\|cmake\)$' | xargs cmake-format -c .cmake-format.yml ${CMAKE_FORMAT_FLAGS}
 
     echo "Done."
     echo ""
