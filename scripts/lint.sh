@@ -86,28 +86,6 @@ function parse_args() {
     done
 }
 
-# Check if all linters are installed.
-function check_linters_installed() {
-    echo "Checking linters..."
-    linters=(
-        clang-format
-        shellcheck
-        cmake-format
-        markdownlint
-        yamlfmt
-    )
-
-    for linter in "${linters[@]}"; do
-        echo " -> ${linter}..."
-        if ! command -v "${linter}" &> /dev/null; then
-            echo "${linter} could not be found."
-            return 1;
-        fi
-    done
-    echo "Checking linters finished: all linters installed."
-    return 0;
-}
-
 # Lint all C++ files in the project.
 function lint_cpp_files() {
     echo "Linting C++ files..."
