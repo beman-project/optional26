@@ -35,21 +35,6 @@ install(
 target_link_libraries("${TARGET_LIBRARY}")
 
 # Tests
-add_executable(optional_test "")
-
-target_sources(
-  optional_test
-  PRIVATE tests/optional.t.cpp tests/optional_ref.t.cpp
-          tests/optional_monadic.t.cpp tests/optional_range_support.t.cpp
-          tests/optional_ref_monadic.t.cpp tests/detail/iterator.t.cpp)
-
-target_link_libraries(optional_test "${TARGET_LIBRARY}")
-target_link_libraries(optional_test gtest)
-target_link_libraries(optional_test gtest_main)
-
-include(GoogleTest)
-
-# Note: clang-19 + gtest_discover_tests + Asan setup causes errors on some platforms.
-# Temporary switch to gtest_add_tests and skip some Asan checks.
-enable_testing()
-gtest_add_tests(optional_test "" AUTO)
+if("${CMAKE_BUILD_TESTS}")
+  add_subdirectory(tests)
+endif()
