@@ -1,4 +1,8 @@
-# shellcheck
+# /.shellcheckrcc -*-config-*-
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# Default configuration for shellcheck
+
 
 # allow for non-alphanumeric filenames (https://www.shellcheck.net/wiki/SC2038)
 disable=SC2038 

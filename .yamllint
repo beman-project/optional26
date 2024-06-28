@@ -1,4 +1,7 @@
----
+# /.yamllint -*-config-*-
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# Default configuration for yamllint.
 
 yaml-files:
   - '*.yaml'

@@ -1,5 +1,10 @@
+// /.markdownlint.json -*-config-*-
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+// Default configuration for markdownlint.
+// Check https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md
+
 {
-    // Check https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md
     // MD013: Line length
     "MD013": false,
     // MD024: Multiple headers with the same content

@@ -9,6 +9,10 @@
 
 set -e
 
+# Always run from the root of the project.
+REPO_ROOT="$(dirname "$(realpath $0)")/.."
+cd "${REPO_ROOT}"
+
 # Toolchains to test.
 ALL_TOOLCHAINS=(
     gcc-14
@@ -111,7 +115,7 @@ function run_command() {
     # Command to run.
     cmd="$1"
     if [ ! "$VERBOSE" ]; then
-        cmd+="&> /dev/null"
+        cmd+=" &> /dev/null"
     fi
 
     # Messages.
@@ -131,41 +135,56 @@ function run_command() {
 
 # Run tests with a specific toolchain.
 function test_with_toolchain() {
+    # Always run from the root of the project.
+    cd "${REPO_ROOT}"
+
     toolchain="etc/$1-toolchain.cmake"
+    echo "Testing with ${toolchain}..."
     if [ ! -f "${toolchain}" ]; then
         echo "Toolchain file not found: ${toolchain}"
         exit 1
     fi
 
-    echo "Testing with ${toolchain}..."
+    # If FRESH is set or having multiple toolchain, remove the existing build directory.
+    if [ "$FRESH" ] || [ "${#TOOLCHAINS[@]}" -gt 1 ] ; then
+        echo "[WARNING] Removing existing build directory: ${BUILD_DIR} ..."
+        rm -rf "${BUILD_DIR}"
+        mkdir -p "${BUILD_DIR}"
+    fi
 
+    # Configure.
     cd "${BUILD_DIR}"
     cmd="cmake -G \"Ninja Multi-Config\"  -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan;Debug;Release\" -DCMAKE_TOOLCHAIN_FILE=\"${toolchain}\" -DCMAKE_CXX_STANDARD=\"${CXX_STANDARD}\" -B . -S .."
-    run_command "${cmd}" "config"  "config failed" "config successful"
+    run_command "${cmd}" "config"  "config failed" "config successful" || return 1
 
+    # Build.
     cd ..
     cmd="cmake --build \"${BUILD_DIR}\" --config \"${CMAKE_CONFIGURATION}\" --target all -- -k 0"
-    run_command "${cmd}" "build"  "build failed" "build successful"
+    run_command "${cmd}" "build"  "build failed" "build successful" || return 1
 
+    # Run tests.
     cd "${BUILD_DIR}"
     cmd="ctest --output-on-failure"
-    run_command "${cmd}" "tests"  "tests failed" "tests passed"
+    run_command "${cmd}" "tests"  "tests failed" "tests passed" || return 1
     cd ..
 }
 
 # Run tests with all toolchains.
 function test_all_toolchains() {
     for toolchain in "${TOOLCHAINS[@]}"; do
-        if [ "$FRESH" ]; then
-            echo "[WARNING] Removing existing build directory: ${BUILD_DIR} ..."
-            rm -rf "${BUILD_DIR}"
-            mkdir -p "${BUILD_DIR}"
+        cmd="test_with_toolchain \"${toolchain}\" \"${CMAKE_ARGS}\""
+        # If multiple toolchains are provided, continue to the next toolchain.
+        # Otherwise, stop the script on the first failure.
+        if [ "${#TOOLCHAINS[@]}" -gt 1 ]; then
+            cmd+=" || true"
         fi
+        eval "${cmd}"
 
-        test_with_toolchain "${toolchain}" "${CMAKE_ARGS}"
+        echo "Done testing with ${toolchain}."
+        echo ""
     done
 }
 
 parse_args "$@"
 test_all_toolchains
-echo "Done."
+echo "$0 all jobs are done."
