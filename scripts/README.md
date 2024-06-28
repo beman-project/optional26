@@ -1,6 +1,6 @@
 # Local Scripts
 
-## Local Linters
+ ## Local Linters
 
 Run all linters on codebase example:
 
