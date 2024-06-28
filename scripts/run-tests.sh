@@ -10,7 +10,7 @@
 set -e
 
 # Toolchains to test.
-TOOLCHAINS=(
+ALL_TOOLCHAINS=(
     gcc-14
     gcc-13
     clang-19
@@ -21,6 +21,17 @@ TOOLCHAINS=(
 # Build directory.
 BUILD_DIR=".build"
 
+# CMake configurations to test.
+ALL_CONFIGURATIONS=(
+    "Debug"
+    "Release"
+    "RelWithDebInfo"
+    "Asan"
+)
+
+# Actual cmake configuration to use.
+CMAKE_CONFIGURATION="RelWithDebInfo"
+
 # Print print_usage information.
 function print_usage() {
     echo "Usage: $0"
@@ -28,7 +39,9 @@ function print_usage() {
     echo "  -v, --verbose: Display verbose output."
     echo "  -f, --fresh: Run tests on a fresh build directory."
     echo "  -p, --preset: Run tests on a specific toolchain. Default: all"
-    echo "                Available presets: ${TOOLCHAINS[*]}"
+    echo "                Available presets: ${ALL_TOOLCHAINS[*]}"
+    echo "  -c, --config: Run tests on a specific configuration. Default: ${CMAKE_CONFIGURATION}"
+    echo "                Available configurations: ${ALL_CONFIGURATIONS[*]}"
 }
 
 # Parse command line arguments.
@@ -55,10 +68,15 @@ function parse_args() {
                 ;;
             -p|--preset)
                 if [ "$2" == "all" ]; then
-                    TOOLCHAINS=("${TOOLCHAINS[@]}")
+                    TOOLCHAINS=("${ALL_TOOLCHAINS[@]}")
                 else
                     TOOLCHAINS=("$2")
                 fi
+                shift
+                shift
+                ;;
+            -c|--config)
+                CMAKE_CONFIGURATION=("$2")
                 shift
                 shift
                 ;;
@@ -98,14 +116,19 @@ function run_command() {
 # Run tests with a specific toolchain.
 function test_with_toolchain() {
     toolchain="etc/$1-toolchain.cmake"
+    if [ ! -f "${toolchain}" ]; then
+        echo "Toolchain file not found: ${toolchain}"
+        exit 1
+    fi
+
     echo "Testing with ${toolchain}..."
 
     cd "${BUILD_DIR}"
-    cmd="cmake -G \"Ninja Multi-Config\"  -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" -DCMAKE_TOOLCHAIN_FILE=\"${toolchain}\" -B . -S .."
+    cmd="cmake -G \"Ninja Multi-Config\"  -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan;Debug;Release\" -DCMAKE_TOOLCHAIN_FILE=\"${toolchain}\" -B . -S .."
     run_command "${cmd}" "config"  "config failed" "config successful"
 
     cd ..
-    cmd="cmake --build \"${BUILD_DIR}\" --config Asan --target all -- -k 0"
+    cmd="cmake --build \"${BUILD_DIR}\" --config \"${CMAKE_CONFIGURATION}\" --target all -- -k 0"
     run_command "${cmd}" "build"  "build failed" "build successful"
 
     cd "${BUILD_DIR}"
