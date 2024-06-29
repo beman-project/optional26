@@ -102,7 +102,7 @@ function lint_cpp_files() {
         FIX_INPLACE_FLAG="--dry-run"
     fi
 
-    find "${CPP_DIRS[@]}" -regex '.*\.\(hpp\|cpp\)$' | xargs clang-format --Werror -style=file --verbose ${FIX_INPLACE_FLAG}
+    find "${CPP_DIRS[@]}" -regex '.*\.\(hpp\|cpp\)$' | xargs clang-format --Werror --style=file --verbose ${FIX_INPLACE_FLAG}
 
     echo "Done."
     echo ""
