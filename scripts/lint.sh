@@ -145,7 +145,7 @@ function lint_markdown_files() {
     fi
 
     find ${MD_DIRS[@]} -regex '.*\.\(md\)$'
-    find "${MD_DIRS[@]}" -regex '.*\.\(md\)$' | xargs markdownlint "${FIX_INPLACE_FLAG}" 
+    find "${MD_DIRS[@]}" -regex '.*\.\(md\)$' | xargs markdownlint --config .markdownlint.yml "${FIX_INPLACE_FLAG}" 
 
     echo "Done."
     echo ""

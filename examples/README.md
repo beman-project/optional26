@@ -1,4 +1,4 @@
-# Beman.Optional26 Examples
+# Beman.Optional26: Examples
 
 <!--
 SPDX-License-Identifier: 2.0 license with LLVM exceptions
