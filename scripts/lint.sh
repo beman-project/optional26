@@ -8,6 +8,7 @@
 # Expected tools to be installed on the system. A pre-check is done to ensure all tools are installed.
 
 set -e
+set -x
 
 # Base directories to lint.
 BASE_DIRS=(
@@ -16,6 +17,12 @@ BASE_DIRS=(
     scripts
     src
 )
+
+# Linter to run.
+# e.g. lint_cpp_files, lint_shell_files, lint_markdown_files, lint_yaml_files, lint_cmake_files
+#      or
+#      lint_all_files
+LINTER=
 
 # Print usage information.
 function print_usage() {
@@ -29,6 +36,8 @@ function print_usage() {
     echo "  -m, --markdown: Lint Markdown files."
     echo "  -y, --yaml: Lint YAML files."
     echo "  -C, --cmake: Lint CMake files."
+
+    exit 1
 }
 
 # Parse command line arguments.
@@ -54,28 +63,28 @@ function parse_args() {
                 shift
                 ;;
             -a|--all)
-                lint_all_files
-                exit 0
+                LINTER=lint_all_files
+                shift
                 ;;
             -c|--cpp)
-                lint_cpp_files
-                exit 0
+                LINTER=lint_cpp_files
+                shift
                 ;;
             -s|--shell)
-                lint_shell_files
-                exit 0
+                LINTER=lint_shell_files
+                shift
                 ;;
             -m|--markdown)
-                lint_markdown_files
-                exit 0
+                LINTER=lint_markdown_files
+                shift
                 ;;
             -y|--yaml)
-                lint_yaml_files
-                exit 0
+                LINTER=lint_yaml_files
+                shift
                 ;;
             -C|--cmake)
-                lint_cmake_files
-                exit 0
+                LINTER=lint_cmake_files
+                shift
                 ;;
             *)
                 echo "Unknown option: $1"
@@ -84,6 +93,10 @@ function parse_args() {
                 ;;
         esac
     done
+
+    # If no linter is specified, exit.
+    [ ! -z "${LINTER}" ] || print_usage
+    return 0
 }
 
 # Lint all C++ files in the project.
@@ -95,14 +108,14 @@ function lint_cpp_files() {
         "${BASE_DIRS[@]}"
     )
     
-    FIX_INPLACE_FLAG=""
+    CLANG_FORMAT_FLAGS=""
     if [ "${FIX_INPLACE}" = true ]; then
-        FIX_INPLACE_FLAG="-i"
+        CLANG_FORMAT_FLAGS="-i"
     else
-        FIX_INPLACE_FLAG="--dry-run"
+        CLANG_FORMAT_FLAGS="--dry-run"
     fi
 
-    find "${CPP_DIRS[@]}" -regex '.*\.\(hpp\|cpp\)$' | xargs clang-format --Werror --style=file --verbose ${FIX_INPLACE_FLAG}
+    find "${CPP_DIRS[@]}" -regex '.*\.\(hpp\|cpp\)$' | xargs clang-format --Werror --style=file ${CLANG_FORMAT_FLAGS} --verbose
 
     echo "Done."
     echo ""
@@ -139,13 +152,13 @@ function lint_markdown_files() {
         papers/P2988/README.md
     )
 
-    FIX_INPLACE_FLAG=""
+    MARKDOWNLINT_FLAGS=
     if [ "${FIX_INPLACE}" = true ]; then
-        FIX_INPLACE_FLAG="-f"
+        MARKDOWNLINT_FLAGS="-f"
     fi
 
     find ${MD_DIRS[@]} -regex '.*\.\(md\)$'
-    find "${MD_DIRS[@]}" -regex '.*\.\(md\)$' | xargs markdownlint --config .markdownlint.yml "${FIX_INPLACE_FLAG}" 
+    find "${MD_DIRS[@]}" -regex '.*\.\(md\)$' | xargs markdownlint --config .markdownlint.yml "${MARKDOWNLINT_FLAGS}"
 
     echo "Done."
     echo ""
@@ -213,3 +226,4 @@ function lint_all_files() {
 }
 
 parse_args "$@"
+eval "${LINTER}"
