@@ -1,5 +1,5 @@
 # cmake-format: off
-# etc/gcc-flags.cmake -*- cmake -*-
+# etc/gcc-flags.cmake -*-cmake-*-
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # cmake-format: on
 

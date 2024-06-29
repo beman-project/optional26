@@ -1,5 +1,5 @@
 # cmake-format: off
-# examples/CMakeLists.txt -*- cmake -*-
+# examples/CMakeLists.txt -*-cmake-*-
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # cmake-format: on
 
