@@ -1,4 +1,4 @@
-# /.clang-format -*-config-*-
+# .clang-format -*-config-*-
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 # Default configuration for clang-format.
