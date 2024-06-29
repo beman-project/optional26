@@ -3,6 +3,37 @@
 ## Local Run Tests
 
 <details open>
+<summary> scripts/run-tests.sh dependencies </summary>
+
+`scripts/run-tests.sh` requires linters to be installed:
+* `C++`: [clang-format](https://clang.llvm.org/docs/ClangFormat.html)
+* `Shell`: [shellcheck](https://www.shellcheck.net/)
+* `Markdown`: [markdownlint](https://github.com/DavidAnson/markdownlint)
+* `YAML`: [yamllint](https://yamllint.readthedocs.io/en/stable/)
+* `Cmake`: [cmake-format](https://cmake-format.readthedocs.io/en/latest/)
+
+```shell
+# Linter install example on Ubuntu 24.04:
+
+# Install clang-format with https://apt.llvm.org/llvm.sh or apt
+$ sudo apt-get install clang-format-18
+
+# Install shellcheck with apt-get
+$ sudo apt-get install shellcheck
+
+# Install markdownlint-cli with npm
+$ sudo npm install -g markdownlint-cli
+
+# Install yamllint with apt
+$ sudo apt-get install yamllint
+
+# Install cmake-format with apt
+$ sudo apt-get install cmake-format
+```
+</details>
+
+
+<details open>
 <summary> scripts/run-tests.sh: print usage </summary>
 
 ```shell
