@@ -14,13 +14,13 @@ cmake_policy(VERSION 3.27)
 
 set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
-# Include the CTest module.
+# Includes
 include(CTest)
+include(FetchContent)
 
 # Build the tests only if enabled via the CLI flag: BUILD_TESTING.
 if(BUILD_TESTING)
   # Fetch GoogleTest
-  include(FetchContent)
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
