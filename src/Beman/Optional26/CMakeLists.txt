@@ -3,24 +3,22 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # cmake-format: on
 
-set(TARGET_LIBRARY "beman_optional26")
+add_library(beman_optional26 STATIC "")
 
-add_library("${TARGET_LIBRARY}" STATIC "")
-
-target_sources("${TARGET_LIBRARY}" PRIVATE optional.cpp detail/iterator.cpp)
+target_sources(beman_optional26 PRIVATE optional.cpp detail/iterator.cpp)
 
 include(GNUInstallDirs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(
-  "${TARGET_LIBRARY}"
+  beman_optional26
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_LOWER_PROJECT_NAME}> # <prefix>/include/scratch
 )
 
 install(
-  TARGETS "${TARGET_LIBRARY}"
+  TARGETS beman_optional26
   EXPORT ${TARGETS_EXPORT_NAME}1
   DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
@@ -32,7 +30,7 @@ install(
   FILES_MATCHING
   PATTERN "*.hpp")
 
-target_link_libraries("${TARGET_LIBRARY}")
+target_link_libraries(beman_optional26)
 
 # Tests
 if(BUILD_TESTING)

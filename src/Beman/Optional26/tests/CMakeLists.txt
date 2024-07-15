@@ -15,7 +15,7 @@ add_executable(optional_test
   detail/iterator.t.cpp
 )
 
-target_link_libraries(optional_test "${TARGET_LIBRARY}" GTest::gtest GTest::gtest_main)
+target_link_libraries(optional_test beman_optional26 GTest::gtest GTest::gtest_main)
 
 # Note: clang-19 + gtest_discover_tests + Asan setup causes errors on some platforms.
 # Temporary switch to gtest_add_tests and skip some Asan checks.
