@@ -14,8 +14,7 @@
       "binaryDir": "${sourceDir}/.build/${presetName}",
       "installDir": "${sourceDir}/.install/${presetName}",
       "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo;Debug;Tsan;Asan",
-        "CMAKE_BUILD_TESTS": true
+        "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo;Debug;Tsan;Asan"
       }
     },
     {

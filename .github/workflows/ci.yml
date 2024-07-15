@@ -66,7 +66,7 @@ jobs:
           cd .build
           echo ${{ matrix.config.cmake_args }}
           echo ${{ matrix.config.toolchain }}
-          cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE=etc/${{ matrix.config.toolchain }} -DCMAKE_BUILD_TESTS=true -B . -S ..
+          cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE=etc/${{ matrix.config.toolchain }} -B . -S ..
       - name: Build
         run: |
           set -x
