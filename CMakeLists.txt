@@ -19,8 +19,6 @@ include(CTest)
 
 # Build the tests only if enabled via the CLI flag: BUILD_TESTING.
 if(BUILD_TESTING)
-  enable_testing()
-
   # Fetch GoogleTest
   include(FetchContent)
   FetchContent_Declare(
