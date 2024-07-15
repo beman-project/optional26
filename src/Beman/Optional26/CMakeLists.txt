@@ -35,6 +35,6 @@ install(
 target_link_libraries("${TARGET_LIBRARY}")
 
 # Tests
-if("${CMAKE_BUILD_TESTS}")
+if(${CMAKE_BUILD_TESTS})
   add_subdirectory(tests)
 endif()

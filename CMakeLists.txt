@@ -14,7 +14,7 @@ cmake_policy(VERSION 3.27)
 
 set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
-if("${CMAKE_BUILD_TESTS}")
+if(${CMAKE_BUILD_TESTS})
   enable_testing()
 
   # Fetch GoogleTest
