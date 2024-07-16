@@ -31,9 +31,9 @@ jobs:
           set -x
           cat /etc/lsb-release
           # Remove existing Clang installations.
-          sudo apt-get remove clang-${{matrix.config.installed_clang_version}} \
-            lldb-${{matrix.config.installed_clang_version}} \
-            lld-${{matrix.config.installed_clang_version}} \
+          sudo apt-get remove \
+            clang-${{matrix.config.installed_clang_version}} \
+            clang++-${{matrix.config.installed_clang_version}} \
             clangd-${{matrix.config.installed_clang_version}} \
             clang-tidy-${{matrix.config.installed_clang_version}} \
             clang-format-${{matrix.config.installed_clang_version}} \
@@ -42,20 +42,25 @@ jobs:
             lld-${{matrix.config.installed_clang_version}} \
             lldb-${{matrix.config.installed_clang_version}} \
             llvm-${{matrix.config.installed_clang_version}}-tools \
-            libomp-${{matrix.config.installed_clang_version}}-dev \
             libc++-${{matrix.config.installed_clang_version}}-dev \
             libc++abi-${{matrix.config.installed_clang_version}}-dev \
             libclang-common-${{matrix.config.installed_clang_version}}-dev \
             libclang-${{matrix.config.installed_clang_version}}-dev \
             libclang-cpp${{matrix.config.installed_clang_version}}-dev \
-            libunwind-${{matrix.config.installed_clang_version}}-dev
+            libomp-${{matrix.config.installed_clang_version}}-dev \
+            libunwind-${{matrix.config.installed_clang_version}}-dev \
+            libc++-dev libc++1 libc++abi-dev libc++abi1
           # Install LLVM+Clang.
+          CLANG_VERSION=$(echo ${{matrix.config.toolchain}} | cut -d '-' -f2)
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh ${{matrix.config.clang_version}} all
-          sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
-          find /usr/lib -name libc++.so*
-          ${{matrix.config.toolchain}} --version
+          sudo ./llvm.sh ${CLANG_VERSION} all
+          # Link Clang libraries (if not done by llvm.sh - some links are already set).
+          sudo ln -fs /usr/lib/llvm-${CLANG_VERSION}/lib/lib* /usr/lib/x86_64-linux-gnu/ || true
+          # If Clang 17, install a newer version of libc++ and libc++abi.
+          [[ ${CLANG_VERSION} = 17 ]] && sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
+          find /usr/lib/x86_64-linux-gnu/ -name libc++.so* || true
+          clang++-${CLANG_VERSION} --version
       - name: Install GCC
         if: startsWith(matrix.config.name, 'Ubuntu GCC')
         run: |
@@ -67,8 +72,8 @@ jobs:
           GCC_VERSION=$(echo ${{matrix.config.toolchain}} | cut -d '-' -f2)
           echo "GCC_VERSION=$GCC_VERSION"
           sudo apt-get install g++-${GCC_VERSION} gcc-${GCC_VERSION}
-          find /usr/lib -name libstdc++.so*
-          ${{matrix.config.toolchain}} --version
+          find /usr/lib/x86_64-linux-gnu/ -name libstdc++.so*
+          g++-${GCC_VERSION} --version
       - name: CMake Configure
         run: |
           set -x
@@ -82,7 +87,7 @@ jobs:
         run: |
           set -x
           cmake --build .build --config Asan --target all -- -k 0
-      - name: CTest
+      - name: CMake Test
         run: |
           set -x
           cd .build
