@@ -10,13 +10,11 @@ project(
   VERSION 0.0.0
   LANGUAGES CXX)
 
-cmake_policy(VERSION 3.27)
-
-set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
-
 # Includes
 include(CTest)
 include(FetchContent)
+
+set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
 # Build the tests only if enabled via the CLI flag: BUILD_TESTING.
 if(BUILD_TESTING)

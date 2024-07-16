@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # cmake-format: on
 
-add_library(beman_optional26 STATIC "")
-
-target_sources(beman_optional26 PRIVATE optional.cpp detail/iterator.cpp)
+add_library(beman_optional26 STATIC
+  optional.cpp
+  detail/iterator.cpp
+)
 
 include(GNUInstallDirs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
