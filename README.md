@@ -13,6 +13,26 @@ This repository implements `std::optional` extensions targeting C++26. The `Bema
 * [Give *std::optional* Range Support (P3168R2)](https://wg21.link/P3168R2)
 * [`std::optional<T&>` (P2988R5)](https://wg21.link/P2988R5)
 
+
+## Table of Contents
+
+- [Beman.Optional26: C++26 Extensions for std::optional](#bemanoptional26-c26-extensions-for-stdoptional)
+  - [Table of Contents](#table-of-contents)
+  - [License](#license)
+  - [Examples](#examples)
+    - [range\_loop](#range_loop)
+    - [optional\_ref](#optional_ref)
+  - [How to Build](#how-to-build)
+    - [Compiler Support](#compiler-support)
+    - [Dependencies](#dependencies)
+    - [Instructions](#instructions)
+      - [Default Build and Test Flow](#default-build-and-test-flow)
+      - [More Complex Cases](#more-complex-cases)
+      - [Step by Step Build: Build and Run Tests](#step-by-step-build-build-and-run-tests)
+      - [Step by Step Build: Build Production and Skip Tests](#step-by-step-build-build-production-and-skip-tests)
+  - [Papers](#papers)
+
+
 ## License
 
 Source is licensed with the Apache 2.0 license with LLVM exceptions
@@ -123,7 +143,7 @@ apt-get install                           \
 
 Full set of supported toolchains can be found in [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
-#### Basic Build
+#### Default Build and Test Flow
 
 This project strives to be as normal and simple a CMake project as possible. This build workflow in particular will work, producing a static `beman_optional26` library, ready to package:
 
@@ -168,7 +188,7 @@ Total Test time (real) =   0.09 sec
 
 This should build and run the tests with GCC 14 with the address and undefined behavior sanitizers enabled.
 
-#### More complex cases
+#### More Complex Cases
 
 The CMake preset system suffers from combinitorial explosion. There is a makefile in the root of the repository to aid in running more configurations.
 
@@ -177,6 +197,63 @@ make -k TOOLCHAIN=clang-18  CONFIG=Tsan  VERBOSE=1
 ```
 
 The makefile will use your system compiler, `c++`, if no toolchain name is provided, otherwise it will use the toolchain in the etc/ directory to perform the build. The Ninja multi config generator is used, with configurations for `RelWithDebugInfo`, `Debug`, `Tsan`, and `Asan` configured by default.
+
+#### Step by Step Build: Build and Run Tests
+
+CI current build and test flows:
+
+```shell
+# Configure build: default build production code + tests (BUILD_TESTING=ON by default).
+$ rm -rf .build/
+$ mkdir -p .build
+$ cd .build
+$ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -B . -S ..
+-- The CXX compiler identification is Clang 19.0.0
+...
+-- Build files have been written to: /home/dariusn/git/Beman/Beman.Optional26/.build
+
+# Build.
+$ cd ..
+$ cmake --build .build --config Asan --target all -- -k 0
+...
+[30/30] Linking CXX executable examples/Asan/sample
+
+# Run tests.
+$ cd .build
+$ ctest --build-config Asan --output-on-failure
+Test project /home/dariusn/git/Beman/Beman.Optional26/.build
+...
+100% tests passed, 0 tests failed out of 82
+
+Total Test time (real) =   0.67 sec
+```
+
+#### Step by Step Build: Build Production and Skip Tests
+
+By default, we build and run tests. You can provide `-DBUILD_TESTING=OFF` and completely disable building tests:
+
+```shell
+# Configure build: build production code, skip tests (BUILD_TESTING=OFF).
+$ rm -rf .build/
+$ mkdir -p .build
+$ cd .build
+$ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -DBUILD_TESTING=OFF -B . -S ..
+-- The CXX compiler identification is Clang 19.0.0
+...
+-- Build files have been written to: /home/dariusn/git/Beman/Beman.Optional26/.build
+
+# Build.
+$ cd ..
+$ cmake --build .build --config Asan --target all -- -k 0
+...
+[15/15] Linking CXX executable examples/Asan/sample
+
+# Check that tests are not built/installed.
+$ cd .build
+$ ctest --build-config Asan --output-on-failure
+Test project /home/dariusn/git/Beman/Beman.Optional26/.build
+No tests were found!!!
+```
 
 ## Papers
 
