@@ -12,12 +12,12 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {name: "Ubuntu Clang 17", os: ubuntu-24.04, toolchain: "clang-17-toolchain.cmake", clang_version: 17, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
-          - {name: "Ubuntu Clang 18", os: ubuntu-24.04, toolchain: "clang-18-toolchain.cmake", clang_version: 18, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu Clang 17", os: ubuntu-24.04, toolchain: "clang-17", clang_version: 17, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu Clang 18", os: ubuntu-24.04, toolchain: "clang-18", clang_version: 18, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
           # Note: clang-19 + Asan setup causes errors on some platforms. Temporary skip some checks via .asan_options.
-          - {name: "Ubuntu Clang 19", os: ubuntu-24.04, toolchain: "clang-19-toolchain.cmake", clang_version: 19, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" ", asan_options: "new_delete_type_mismatch=0"}
-          - {name: "Ubuntu GCC 13", os: ubuntu-24.04, toolchain: "gcc-13-toolchain.cmake", clang_version: 17, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
-          - {name: "Ubuntu GCC 14", os: ubuntu-24.04, toolchain: "gcc-14-toolchain.cmake", clang_version: 17, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu Clang 19", os: ubuntu-24.04, toolchain: "clang-19", clang_version: 19, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" ", asan_options: "new_delete_type_mismatch=0"}
+          - {name: "Ubuntu GCC 13", os: ubuntu-24.04, toolchain: "gcc-13",  cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu GCC 14", os: ubuntu-24.04, toolchain: "gcc-14", cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,10 +26,11 @@ jobs:
       - name: Activate verbose shell
         run: set -x
       - name: Install LLVM+Clang
-        if: startsWith(matrix.config.os, 'ubuntu-')
+        if: startsWith(matrix.config.name, 'Ubuntu Clang')
         run: |
           set -x
           cat /etc/lsb-release
+          # Remove existing Clang installations.
           sudo apt-get remove clang-${{matrix.config.installed_clang_version}} \
             lldb-${{matrix.config.installed_clang_version}} \
             lld-${{matrix.config.installed_clang_version}} \
@@ -48,17 +49,27 @@ jobs:
             libclang-${{matrix.config.installed_clang_version}}-dev \
             libclang-cpp${{matrix.config.installed_clang_version}}-dev \
             libunwind-${{matrix.config.installed_clang_version}}-dev
+          # Install LLVM+Clang.
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh ${{matrix.config.clang_version}} all
           sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
-      - name: Install GCC 14
-        if: matrix.config.name == 'Ubuntu GCC 14'
+          find /usr/lib -name libc++.so*
+          ${{matrix.config.toolchain}} --version
+      - name: Install GCC
+        if: startsWith(matrix.config.name, 'Ubuntu GCC')
         run: |
           set -x
+          # Remove existing GCC installations.
+          sudo apt-get remove gcc-13 g++-13 gcc-14 g++-14 gcc g++
           sudo apt update
-          sudo apt-get install g++-14
-      - name: Configure
+          # Install GCC.
+          GCC_VERSION=$(echo ${{matrix.config.toolchain}} | cut -d '-' -f2)
+          echo "GCC_VERSION=$GCC_VERSION"
+          sudo apt-get install g++-${GCC_VERSION} gcc-${GCC_VERSION}
+          find /usr/lib -name libstdc++.so*
+          ${{matrix.config.toolchain}} --version
+      - name: CMake Configure
         run: |
           set -x
           rm -rf .build
@@ -66,12 +77,12 @@ jobs:
           cd .build
           echo ${{ matrix.config.cmake_args }}
           echo ${{ matrix.config.toolchain }}
-          cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE=etc/${{ matrix.config.toolchain }} -B . -S ..
-      - name: Build
+          cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE="etc/${{ matrix.config.toolchain }}-toolchain.cmake" -B . -S ..
+      - name: CMake Build
         run: |
           set -x
           cmake --build .build --config Asan --target all -- -k 0
-      - name: Test
+      - name: CTest
         run: |
           set -x
           cd .build
