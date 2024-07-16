@@ -17,6 +17,7 @@ add_executable(optional_test
 
 target_link_libraries(optional_test beman_optional26 GTest::gtest GTest::gtest_main)
 
+# Issue #32: Re-enable ASAN run CI/clang-19
 # Note: clang-19 + gtest_discover_tests + Asan setup causes errors on some platforms.
-# Temporary switch to gtest_add_tests and skip some Asan checks.
+# Temporary switch to gtest_add_tests and skip some Asan checks. Change also applied for CI flows.
 gtest_add_tests(optional_test "" AUTO)
