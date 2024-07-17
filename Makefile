@@ -60,16 +60,17 @@ $(_build_path)/CMakeCache.txt: | $(_build_path) .gitmodules
 	ln -s $(_build_path)/compile_commands.json
 
 compile: $(_build_path)/CMakeCache.txt ## Compile the project
+	cmake $(CMAKE_FLAGS) -DCMAKE_TOOLCHAIN_FILE=etc/$(TOOLCHAIN)-toolchain.cmake -B $(_build_path) -S .
 	cmake --build $(_build_path)  --config $(CONFIG) --target all -- -k 0
 
 install: $(_build_path)/CMakeCache.txt ## Install the project
 	DESTDIR=$(abspath $(DEST)) ninja -C $(_build_path) -k 0  install
 
 ctest: $(_build_path)/CMakeCache.txt ## Run CTest on current build
-	cd $(_build_path) && ctest --output-on-failure
+	ctest --build-config $(CONFIG) --output-on-failure --test-dir $(_build_path)
 
 ctest_ : compile
-	cd $(_build_path) && ctest --output-on-failure
+	ctest --build-config $(CONFIG) --output-on-failure --test-dir $(_build_path)
 
 test: ctest_ ## Rebuild and run tests
 
