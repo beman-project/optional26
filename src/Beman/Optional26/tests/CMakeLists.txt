@@ -6,16 +6,16 @@
 include(GoogleTest)
 
 # Tests
-add_executable(optional_test
-  optional.t.cpp
-  optional_ref.t.cpp
+add_executable(beman_optional26_test
+  detail/iterator.t.cpp
   optional_monadic.t.cpp
   optional_range_support.t.cpp
   optional_ref_monadic.t.cpp
-  detail/iterator.t.cpp
+  optional_ref.t.cpp
+  optional.t.cpp
 )
 
-target_link_libraries(optional_test
+target_link_libraries(beman_optional26_test
   beman_optional26
   GTest::gtest
   GTest::gtest_main
@@ -24,7 +24,7 @@ target_link_libraries(optional_test
 # Issue #32: Re-enable ASAN run CI/clang-19
 # Note: clang-19 + gtest_discover_tests + Asan setup causes errors on some platforms.
 # Temporary switch to gtest_add_tests and skip some Asan checks. Change also applied for CI flows.
-gtest_add_tests(TARGET optional_test
+gtest_add_tests(TARGET beman_optional26_test
   ""
   AUTO
 )
