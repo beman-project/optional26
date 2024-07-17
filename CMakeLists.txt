@@ -3,19 +3,31 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # cmake-format: on
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.27)
 
 project(
   beman_optional26
   VERSION 0.0.0
   LANGUAGES CXX)
 
-enable_testing()
+# Includes
+include(CTest)
+include(FetchContent)
 
 set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
-add_subdirectory(extern)
-add_subdirectory(src)
+# Build the tests only if enabled via the CLI flag: BUILD_TESTING.
+if(BUILD_TESTING)
+  # Fetch GoogleTest
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG f8d7d77c06936315286eb55f8de22cd23c188571 # release-1.14.0
+  )
+  FetchContent_MakeAvailable(googletest)
+endif()
+
+add_subdirectory(src/Beman/Optional26)
 add_subdirectory(examples)
 
 include(GNUInstallDirs)

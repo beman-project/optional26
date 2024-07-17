@@ -68,26 +68,32 @@
     },
     {
       "name": "system",
+      "inherits": "common",
       "configurePreset": "system"
     },
     {
       "name": "gcc-14",
+      "inherits": "common",
       "configurePreset": "gcc-14"
     },
     {
       "name": "gcc-13",
+      "inherits": "common",
       "configurePreset": "gcc-13"
     },
     {
       "name": "clang-19",
+      "inherits": "common",
       "configurePreset": "clang-19"
     },
     {
       "name": "clang-18",
+      "inherits": "common",
       "configurePreset": "clang-18"
     },
     {
       "name": "clang-17",
+      "inherits": "common",
       "configurePreset": "clang-17"
     }
   ],
@@ -95,6 +101,7 @@
     {
       "name": "common",
       "hidden": true,
+      "configuration": "Asan",
       "output": {
         "outputOnFailure": true
       },
