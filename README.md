@@ -25,10 +25,10 @@ This repository implements `std::optional` extensions targeting C++26. The `Bema
     * [Compiler Support](#compiler-support)
     * [Dependencies](#dependencies)
     * [Instructions](#instructions)
-      * [Default Build and Test Flow](#default-build-and-test-flow)
-      * [More Complex Cases](#more-complex-cases)
-      * [Step by Step Build: Build and Run Tests](#step-by-step-build-build-and-run-tests)
-      * [Step by Step Build: Build Production and Skip Tests](#step-by-step-build-build-production-and-skip-tests)
+      * [Preset CMake Flows](#preset-cmake-flows)
+      * [Custom CMake Flows](#custom-cmake-flows)
+        * [Build and Run Tests](#build-and-run-tests)
+        * [Build Production, but Skip Tests](#build-production-but-skip-tests)
   * [Papers](#papers)
 
 ## License
@@ -141,7 +141,7 @@ apt-get install                           \
 
 Full set of supported toolchains can be found in [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
-#### Default Build and Test Flow
+#### Preset CMake Flows
 
 This project strives to be as normal and simple a CMake project as possible. This build workflow in particular will work, producing a static `beman_optional26` library, ready to package:
 
@@ -186,17 +186,9 @@ Total Test time (real) =   0.09 sec
 
 This should build and run the tests with GCC 14 with the address and undefined behavior sanitizers enabled.
 
-#### More Complex Cases
+#### Custom CMake Flows
 
-The CMake preset system suffers from combinitorial explosion. There is a makefile in the root of the repository to aid in running more configurations.
-
-```shell
-make -k TOOLCHAIN=clang-18 CONFIG=Tsan VERBOSE=1
-```
-
-The makefile will use your system compiler, `c++`, if no toolchain name is provided, otherwise it will use the toolchain in the etc/ directory to perform the build. The Ninja multi config generator is used, with configurations for `RelWithDebugInfo`, `Debug`, `Tsan`, and `Asan` configured by default.
-
-#### Step by Step Build: Build and Run Tests
+##### Build and Run Tests
 
 CI current build and test flows:
 
@@ -222,7 +214,7 @@ Test project /path/to/Optional26/.build
 Total Test time (real) =   0.67 sec
 ```
 
-#### Step by Step Build: Build Production and Skip Tests
+##### Build Production, but Skip Tests
 
 By default, we build and run tests. You can provide `-DBUILD_TESTING=OFF` and completely disable building tests:
 
@@ -240,8 +232,8 @@ $ cmake --build .build --config Asan --target all -- -k 0
 
 # Check that tests are not built/installed.
 $ ctest --build-config Asan --output-on-failure --test-dir .build
-Internal ctest changing into directory: /home/dariusn/git/Beman/Beman.Optional26/.build
-Test project /home/dariusn/git/Beman/Beman.Optional26/.build
+Internal ctest changing into directory: /path/to/Beman.Optional26/.build
+Test project /path/to/Beman.Optional26/.build
 No tests were found!!!
 ```
 
