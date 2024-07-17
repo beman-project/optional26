@@ -204,24 +204,20 @@ CI current build and test flows:
 
 ```shell
 # Configure build: default build production code + tests (BUILD_TESTING=ON by default).
-$ rm -rf .build/
-$ mkdir -p .build
-$ cd .build
-$ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -B . -S ..
+$ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...
--- Build files have been written to: /home/dariusn/git/Beman/Beman.Optional26/.build
+-- Build files have been written to: /path/to/Optional26/.build
 
 # Build.
-$ cd ..
 $ cmake --build .build --config Asan --target all -- -k 0
 ...
-[30/30] Linking CXX executable examples/Asan/sample
+[30/30] Linking CXX executable ...
 
 # Run tests.
-$ cd .build
-$ ctest --build-config Asan --output-on-failure
-Test project /home/dariusn/git/Beman/Beman.Optional26/.build
+$ ctest --build-config Asan --output-on-failure --test-dir .build
+Internal ctest changing into directory: /path/to/Optional26/.build
+Test project /path/to/Optional26/.build
 ...
 100% tests passed, 0 tests failed out of 82
 
@@ -234,23 +230,19 @@ By default, we build and run tests. You can provide `-DBUILD_TESTING=OFF` and co
 
 ```shell
 # Configure build: build production code, skip tests (BUILD_TESTING=OFF).
-$ rm -rf .build/
-$ mkdir -p .build
-$ cd .build
-$ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -DBUILD_TESTING=OFF -B . -S ..
+$ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -DBUILD_TESTING=OFF -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...
--- Build files have been written to: /home/dariusn/git/Beman/Beman.Optional26/.build
+-- Build files have been written to: /path/to/Optional26/.build
 
 # Build.
-$ cd ..
 $ cmake --build .build --config Asan --target all -- -k 0
 ...
 [15/15] Linking CXX executable examples/Asan/sample
 
 # Check that tests are not built/installed.
-$ cd .build
-$ ctest --build-config Asan --output-on-failure
+$ ctest --build-config Asan --output-on-failure --test-dir .build
+Internal ctest changing into directory: /home/dariusn/git/Beman/Beman.Optional26/.build
 Test project /home/dariusn/git/Beman/Beman.Optional26/.build
 No tests were found!!!
 ```

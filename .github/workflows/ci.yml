@@ -77,12 +77,10 @@ jobs:
       - name: CMake Configure
         run: |
           set -x
-          rm -rf .build
-          mkdir -p .build
-          cd .build
           echo ${{ matrix.config.cmake_args }}
           echo ${{ matrix.config.toolchain }}
-          cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE="etc/${{ matrix.config.toolchain }}-toolchain.cmake" -B . -S ..
+          rm -rf .build
+          cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE="etc/${{ matrix.config.toolchain }}-toolchain.cmake" -B .build -S .
       - name: CMake Build
         run: |
           set -x
@@ -90,6 +88,5 @@ jobs:
       - name: CMake Test
         run: |
           set -x
-          cd .build
           [[ ! -z "${{ matrix.config.asan_options }}" ]]  && export ASAN_OPTIONS="${{ matrix.config.asan_options }}"
-          ctest --build-config Asan --output-on-failure
+          ctest --build-config Asan --output-on-failure --test-dir .build
