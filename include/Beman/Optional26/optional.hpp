@@ -245,54 +245,54 @@ using is_optional = is_optional_impl<std::decay_t<T>>;
 
 template <typename T>
 constexpr optional<std::decay_t<T>>
-make_optional(T&& __t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
+make_optional(T&& t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
     requires std::is_constructible_v<std::decay_t<T>, T>
 {
-    return optional<std::decay_t<T>>{std::forward<T>(__t)};
+    return optional<std::decay_t<T>>{std::forward<T>(t)};
 }
 
-template <typename T, typename... _Args>
-constexpr optional<T> make_optional(_Args&&... __args) noexcept(std::is_nothrow_constructible_v<T, _Args...>)
-    requires std::is_constructible_v<T, _Args...>
+template <typename T, typename... Args>
+constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
+    requires std::is_constructible_v<T, Args...>
 {
-    return optional<T>{in_place, std::forward<_Args>(__args)...};
+    return optional<T>{in_place, std::forward<Args>(args)...};
 }
 
-template <typename T, typename _Up, typename... _Args>
+template <typename T, typename _Up, typename... Args>
 constexpr optional<T>
-make_optional(std::initializer_list<_Up> __il,
-              _Args&&... __args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<_Up>&, _Args...>)
-    requires std::is_constructible_v<T, std::initializer_list<_Up>&, _Args...>
+make_optional(std::initializer_list<_Up> init_list,
+              Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<_Up>&, Args...>)
+    requires std::is_constructible_v<T, std::initializer_list<_Up>&, Args...>
 {
-    return optional<T>{in_place, __il, std::forward<_Args>(__args)...};
+    return optional<T>{in_place, init_list, std::forward<Args>(args)...};
 }
 
-template <class T_, class U_>
-concept enable_forward_value = std::is_constructible_v<T_, U_&&> && !std::is_same_v<std::decay_t<U_>, in_place_t> &&
-                               !std::is_same_v<optional<T_>, std::decay_t<U_>>;
+template <class T, class U>
+concept enable_forward_value = std::is_constructible_v<T, U&&> && !std::is_same_v<std::decay_t<U>, in_place_t> &&
+                               !std::is_same_v<optional<T>, std::decay_t<U>>;
 
-template <class T_, class U_, class Other>
+template <class T, class U, class Other>
 concept enable_from_other =
-    std::is_constructible_v<T_, Other> && !std::is_constructible_v<T_, optional<U_>&> &&
-    !std::is_constructible_v<T_, optional<U_>&&> && !std::is_constructible_v<T_, const optional<U_>&> &&
-    !std::is_constructible_v<T_, const optional<U_>&&> && !std::is_convertible_v<optional<U_>&, T_> &&
-    !std::is_convertible_v<optional<U_>&&, T_> && !std::is_convertible_v<const optional<U_>&, T_> &&
-    !std::is_convertible_v<const optional<U_>&&, T_>;
+    std::is_constructible_v<T, Other> && !std::is_constructible_v<T, optional<U>&> &&
+    !std::is_constructible_v<T, optional<U>&&> && !std::is_constructible_v<T, const optional<U>&> &&
+    !std::is_constructible_v<T, const optional<U>&&> && !std::is_convertible_v<optional<U>&, T> &&
+    !std::is_convertible_v<optional<U>&&, T> && !std::is_convertible_v<const optional<U>&, T> &&
+    !std::is_convertible_v<const optional<U>&&, T>;
 
 template <class T, class U>
 concept enable_assign_forward = !std::is_same_v<optional<T>, std::decay_t<U>> &&
                                 !std::conjunction_v<std::is_scalar<T>, std::is_same<T, std::decay_t<U>>> &&
                                 std::is_constructible_v<T, U> && std::is_assignable_v<T&, U>;
 
-template <class T_, class U_, class Other>
+template <class T, class U, class Other>
 concept enable_assign_from_other =
-    std::is_constructible_v<T_, Other> && std::is_assignable_v<T_&, Other> &&
-    !std::is_constructible_v<T_, optional<U_>&> && !std::is_constructible_v<T_, optional<U_>&&> &&
-    !std::is_constructible_v<T_, const optional<U_>&> && !std::is_constructible_v<T_, const optional<U_>&&> &&
-    !std::is_convertible_v<optional<U_>&, T_> && !std::is_convertible_v<optional<U_>&&, T_> &&
-    !std::is_convertible_v<const optional<U_>&, T_> && !std::is_convertible_v<const optional<U_>&&, T_> &&
-    !std::is_assignable_v<T_&, optional<U_>&> && !std::is_assignable_v<T_&, optional<U_>&&> &&
-    !std::is_assignable_v<T_&, const optional<U_>&> && !std::is_assignable_v<T_&, const optional<U_>&&>;
+    std::is_constructible_v<T, Other> && std::is_assignable_v<T&, Other> &&
+    !std::is_constructible_v<T, optional<U>&> && !std::is_constructible_v<T, optional<U>&&> &&
+    !std::is_constructible_v<T, const optional<U>&> && !std::is_constructible_v<T, const optional<U>&&> &&
+    !std::is_convertible_v<optional<U>&, T> && !std::is_convertible_v<optional<U>&&, T> &&
+    !std::is_convertible_v<const optional<U>&, T> && !std::is_convertible_v<const optional<U>&&, T> &&
+    !std::is_assignable_v<T&, optional<U>&> && !std::is_assignable_v<T&, optional<U>&&> &&
+    !std::is_assignable_v<T&, const optional<U>&> && !std::is_assignable_v<T&, const optional<U>&&>;
 
 template <class T>
     requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
