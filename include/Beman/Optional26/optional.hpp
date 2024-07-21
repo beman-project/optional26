@@ -444,7 +444,7 @@ class optional {
                      std::is_trivially_copy_constructible_v<T> && std::is_trivially_copy_assignable_v<T>
     = default;
 
-    optional& operator=(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
+    constexpr optional& operator=(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
                  (!std::is_trivially_move_assignable_v<T>)
     {
@@ -645,7 +645,7 @@ class optional {
     /// Constructs the value in-place, destroying the current one if there is
     /// one.
     template <class... Args>
-    T& emplace(Args&&... args)
+    constexpr T& emplace(Args&&... args)
         requires std::is_constructible<T, Args&&...>::value
     {
         *this = nullopt;
@@ -654,7 +654,7 @@ class optional {
     }
 
     template <class U, class... Args>
-    T& emplace(std::initializer_list<U> il, Args&&... args)
+    constexpr T& emplace(std::initializer_list<U> il, Args&&... args)
         requires std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>
     {
         *this = nullopt;
@@ -668,8 +668,8 @@ class optional {
     /// If both have a value, the values are swapped.
     /// If one has a value, it is moved to the other and the movee is left
     /// valueless.
-    void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
-                                      std::is_nothrow_swappable<T>::value) {
+    constexpr void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
+                                                std::is_nothrow_swappable<T>::value) {
         using std::swap;
         if (has_value()) {
             if (rhs.has_value()) {
@@ -712,7 +712,7 @@ class optional {
 
     constexpr explicit operator bool() const noexcept { return engaged_; }
 
-    void reset() noexcept {
+    constexpr void reset() noexcept {
         if constexpr (!std::is_trivially_destructible_v<T>) {
             if (has_value())
                 value_.~T();
