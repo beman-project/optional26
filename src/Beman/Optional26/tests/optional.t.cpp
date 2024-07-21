@@ -177,7 +177,10 @@ TEST(OptionalTest, AssignmentValue) {
 
     struct not_trivial_copy_assignable {
         int i_;
-        not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable&);
+        not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable& rhs) {
+            i_ = rhs.i_;
+            return *this;
+        }
     };
 
 

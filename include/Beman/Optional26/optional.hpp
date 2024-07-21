@@ -566,7 +566,7 @@ class optional {
 
     /// Calls `f` if the optional is empty
     template <class F>
-    constexpr optional<T> or_else(F&& f) & {
+    constexpr optional<T> or_else(F&& f) const & {
         if (has_value())
             return value_;
 
@@ -574,7 +574,7 @@ class optional {
     }
 
     template <class F>
-    optional<T> or_else(F&& f) && {
+    constexpr optional<T> or_else(F&& f) && {
         if (has_value())
             return std::move(value_);
 
