@@ -1614,3 +1614,52 @@ TEST(OptionalConstexprTest, RangeTest) {
         EXPECT_EQ(k, 42);
     }
 }
+
+consteval bool testSwap() {
+    beman::optional26::optional<int> o1 = 42;
+    beman::optional26::optional<int> o2 = 12;
+    o1.swap(o2);
+    return (o1.value() ==  12) && (o2.value() == 42);
+}
+static_assert(testSwap());
+
+consteval bool testSwapWNull() {
+    beman::optional26::optional<int> o1 = 42;
+    beman::optional26::optional<int> o2 = beman::optional26::nullopt;
+    o1.swap(o2);
+    return
+    (!o1.has_value()) &&
+    (o2.value(), 42);
+}
+static_assert(testSwapWNull());
+
+consteval bool testSwapNullIntializedWithValue() {
+    beman::optional26::optional<int> o1 = beman::optional26::nullopt;
+    beman::optional26::optional<int> o2 = 42;
+    o1.swap(o2);
+    return
+    (o1.value() ==  42) &&
+    (!o2.has_value());
+}
+static_assert(testSwapNullIntializedWithValue());
+
+consteval bool testEmplace() {
+    beman::optional26::optional<std::pair<std::pair<int, int>, std::pair<double, double>>> i;
+    i.emplace(std::piecewise_construct, std::make_tuple(0, 2), std::make_tuple(3, 4));
+    return
+    (i->first.first == 0) &&
+    (i->first.second == 2) &&
+    (i->second.first == 3) &&
+    (i->second.second == 4);
+}
+static_assert(testEmplace());
+
+consteval bool testEmplaceInitList() {
+    beman::optional26::optional<takes_init_and_variadic> o;
+    o.emplace({0, 1}, 2, 3);
+    return
+        (o->v0 == 0) &&
+    (std::get<0>(o->t) == 2) &&
+    (std::get<1>(o->t) == 3);
+}
+static_assert(testEmplaceInitList());
