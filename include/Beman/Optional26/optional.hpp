@@ -332,7 +332,7 @@ class optional {
             value_.~T();
     }
 
-    ~optional()
+    constexpr ~optional()
         requires std::is_trivially_destructible_v<T>
     = default;
 
@@ -426,7 +426,7 @@ class optional {
         }
     }
 
-    optional& operator=(const optional& rhs)
+    constexpr optional& operator=(const optional& rhs)
         requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
                  (!std::is_trivially_copy_assignable_v<T>)
     {
@@ -435,11 +435,11 @@ class optional {
         else if (has_value())
             value_ = rhs.value_;
         else
-            std::construct_at(std::addressof(&value_), rhs.value_);
+            std::construct_at(std::addressof(value_), rhs.value_);
         return *this;
     }
 
-    optional& operator=(const optional&)
+    constexpr optional& operator=(const optional&)
         requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
                      std::is_trivially_copy_constructible_v<T> && std::is_trivially_copy_assignable_v<T>
     = default;
@@ -457,7 +457,7 @@ class optional {
         return *this;
     }
 
-    optional& operator=(optional&&)
+    constexpr optional& operator=(optional&&)
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
                      std::is_trivially_move_constructible_v<T> && std::is_trivially_move_assignable_v<T>
     = default;
@@ -584,7 +584,7 @@ class optional {
     /// Assigns the stored value from `u`, destroying the old value if there
     /// was one.
     template <class U = T>
-    optional& operator=(U&& u)
+    constexpr optional& operator=(U&& u)
         requires enable_assign_forward<T, U>
     {
         if (has_value()) {
@@ -601,7 +601,7 @@ class optional {
     /// Copies the value from `rhs` if there is one. Otherwise resets the
     /// stored value in `*this`.
     template <class U>
-    optional& operator=(const optional<U>& rhs)
+    constexpr optional& operator=(const optional<U>& rhs)
         requires enable_assign_from_other<T, U, const U&>
     {
         if (has_value()) {
@@ -624,7 +624,7 @@ class optional {
     /// Moves the value from `rhs` if there is one. Otherwise resets the stored
     /// value in `*this`.
     template <class U>
-    optional& operator=(optional<U>&& rhs)
+    constexpr optional& operator=(optional<U>&& rhs)
         requires enable_assign_from_other<T, U, U>
     {
         if (has_value()) {

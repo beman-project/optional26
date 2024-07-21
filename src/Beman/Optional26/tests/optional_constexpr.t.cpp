@@ -1663,3 +1663,82 @@ consteval bool testEmplaceInitList() {
     (std::get<1>(o->t) == 3);
 }
 static_assert(testEmplaceInitList());
+
+consteval bool testAssignment() {
+    beman::optional26::optional<int> o1 = 42;
+    beman::optional26::optional<int> o2 = 12;
+    beman::optional26::optional<int> o3;
+
+    bool retval = true;
+
+    o1 = std::move(o1);
+    retval &= (*o1 == 42);
+
+    o1 = {};
+
+    return retval;
+}
+static_assert(testAssignment());
+
+consteval bool testAssignmentValue() {
+    beman::optional26::optional<int> o1 = 42;
+    beman::optional26::optional<int> o2 = 12;
+    beman::optional26::optional<int> o3;
+
+    bool retval = true;
+
+    o1 = o1;
+    retval &= (*o1 == 42);
+
+    o1 = o2;
+    retval &= (*o1 == 12);
+
+    o1 = o3;
+    retval &= (!o1);
+
+    o1 = 42;
+    retval &= (*o1 == 42);
+
+    o1 = beman::optional26::nullopt;
+    retval &= (!o1);
+
+    o1 = std::move(o2);
+    retval &= (*o1 == 12);
+
+    beman::optional26::optional<short> o4 = 42;
+
+    o1 = o4;
+    retval &= (*o1 == 42);
+
+    o1 = std::move(o4);
+    retval &= (*o1 == 42);
+
+    /*
+      template <class U = T>
+      constexpr optional& operator=(U&& u)
+    */
+
+    short s = 54;
+    o1      = s;
+    retval &= (*o1 == 54);
+
+    struct not_trivial_copy_assignable {
+        int i_;
+        not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable&);
+    };
+
+    /*
+      optional& operator=(const optional& rhs)
+      requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
+      (!std::is_trivially_copy_assignable_v<T>)
+    */
+    beman::optional26::optional<not_trivial_copy_assignable> o5{5};
+    beman::optional26::optional<not_trivial_copy_assignable> o6;
+    o6 = o5;
+    retval &= (o5->i_ == 5);
+
+    return retval;
+
+}
+
+static_assert(testAssignmentValue());
