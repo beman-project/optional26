@@ -971,28 +971,640 @@ TEST(OptionalConstexprTest, RelationalOps) {
     }
 }
 
+consteval bool testComparisons() {
+    constexpr beman::optional26::optional<int> o1{4};
+    constexpr beman::optional26::optional<int> o2{42};
+    constexpr beman::optional26::optional<int> o3{};
 
-TEST(OptionalConstexprTest, Emplace) {
-    beman::optional26::optional<std::pair<std::pair<int, int>, std::pair<double, double>>> i;
-    i.emplace(std::piecewise_construct, std::make_tuple(0, 2), std::make_tuple(3, 4));
-    EXPECT_TRUE(i->first.first == 0);
-    EXPECT_TRUE(i->first.second == 2);
-    EXPECT_TRUE(i->second.first == 3);
-    EXPECT_TRUE(i->second.second == 4);
+    //  SECTION("self simple")
+    {
+        {
+            constexpr auto b = !(o1 == o2);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 == o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = !(o1 == o2);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = !(o1 != o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 < o2);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = !(o1 < o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = !(o1 > o2);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = !(o1 > o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 <= o2);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 <= o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = !(o1 >= o2);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = o1 >= o1;
+            static_assert(b);
+        }
+    }
+    //  SECTION("nullopt simple")
+    {
+        {
+            constexpr auto b = (!(o1 == beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt == o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 != beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt != o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o1 < beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt < o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 > beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt > o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o1 <= beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt <= o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 >= beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt >= o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o3 == beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt == o3);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o3 != beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt != o3));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o3 < beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt < o3));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o3 > beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt > o3));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o3 <= beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt <= o3);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o3 >= beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt >= o3);
+            static_assert(b);
+        }
+    }
+    //  SECTION("with T simple")
+    {
+        {
+            constexpr auto b = (!(o1 == 1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(1 == o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 != 1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (1 != o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o1 < 1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (1 < o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 > 1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(1 > o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o1 <= 1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (1 <= o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 >= 1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(1 >= o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 == 4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (4 == o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o1 != 4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(4 != o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o1 < 4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(4 < o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o1 > 4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(4 > o1));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 <= 4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (4 <= o1);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o1 >= 4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (4 >= o1);
+            static_assert(b);
+        }
+    }
+
+    constexpr Point p4{2, 3};
+    constexpr Point p5{3, 4};
+
+    constexpr beman::optional26::optional<Point> o4{p4};
+    constexpr beman::optional26::optional<Point> o5{p5};
+
+    //  SECTION("self complex")
+    {
+        {
+            constexpr auto b = (!(o4 == o5));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 == o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 != o5);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 != o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 < o5);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 < o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 > o5));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 > o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 <= o5);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 <= o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 >= o5));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 >= o4);
+            static_assert(b);
+        }
+    }
+    //  SECTION("nullopt complex")
+    {
+        {
+            constexpr auto b = (!(o4 == beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt == o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 != beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt != o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 < beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt < o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 > beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt > o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 <= beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt <= o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 >= beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt >= o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o3 == beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt == o3);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o3 != beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt != o3));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o3 < beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt < o3));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o3 > beman::optional26::nullopt));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(beman::optional26::nullopt > o3));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o3 <= beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt <= o3);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o3 >= beman::optional26::nullopt);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (beman::optional26::nullopt >= o3);
+            static_assert(b);
+        }
+    }
+
+    //  SECTION("with T complex")
+    {
+        {
+            constexpr auto b = (!(o4 == Point{}));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(Point{} == o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 != Point{});
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (Point{} != o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 < Point{}));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (Point{} < o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 > Point{});
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(Point{} > o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 <= Point{}));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (Point{} <= o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 >= Point{});
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(Point{} >= o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 == p4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (p4 == o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 != p4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(p4 != o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 < p4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(p4 < o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(o4 > p4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (!(p4 > o4));
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 <= p4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (p4 <= o4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (o4 >= p4);
+            static_assert(b);
+        }
+
+        {
+            constexpr auto b = (p4 >= o4);
+            static_assert(b);
+        }
+    }
+    return true;
 }
 
-struct A {
-    A() { throw std::exception(); }
-};
-
-TEST(OptionalConstexprTest, EmplaceWithExceptionThrown) {
-    beman::optional26::optional<A> a;
-    EXPECT_ANY_THROW(a.emplace());
-}
+constexpr bool checkTestComparison = testComparisons();
+static_assert(checkTestComparison);
 
 TEST(OptionalConstexprTest, RangeTest) {
-    beman::optional26::optional<int> o1 = beman::optional26::nullopt;
-    beman::optional26::optional<int> o2 = 42;
+    constexpr beman::optional26::optional<int> o1 = beman::optional26::nullopt;
+    constexpr beman::optional26::optional<int> o2 = 42;
     EXPECT_EQ(*o2, 42);
     for (auto k : o1) {
         (void)k;
