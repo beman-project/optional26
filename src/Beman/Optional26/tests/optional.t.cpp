@@ -166,6 +166,31 @@ TEST(OptionalTest, AssignmentValue) {
 
     o1 = std::move(o4);
     EXPECT_TRUE(*o1 == 42);
+
+    /*
+      template <class U = T>
+      constexpr optional& operator=(U&& u)
+    */
+    short s = 54;
+    o1      = s;
+    EXPECT_TRUE(*o1 == 54);
+
+    struct not_trivial_copy_assignable {
+        int i_;
+        not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable&);
+    };
+
+
+    /*
+      optional& operator=(const optional& rhs)
+      requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
+      (!std::is_trivially_copy_assignable_v<T>)
+     */
+    beman::optional26::optional<not_trivial_copy_assignable> o5{5};
+    beman::optional26::optional<not_trivial_copy_assignable> o6;
+    o6 = o5;
+    EXPECT_TRUE(o5->i_ == 5);
+
 }
 
 TEST(OptionalTest, Triviality) {
@@ -648,6 +673,7 @@ TEST(ViewMaybeTest, BreathingTest) {
     ASSERT_EQ(*std::begin(m), 1);
 
     m = {};
+    ASSERT_FALSE(m);
     // ASSERT_TRUE(m.size() == 0);
     // ASSERT_TRUE(m1.size() == 1);
 
