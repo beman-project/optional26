@@ -303,17 +303,17 @@ class optional {
         empty _{};
         T     value_;
     };
-    bool engaged = false;
+    bool engaged_ = false;
 
     template <class... Args>
-    void construct(Args&&... args) {
-        new (std::addressof(value_)) T(std::forward<Args>(args)...);
-        engaged = true;
+    constexpr void construct(Args&&... args) {
+        std::construct_at(std::addressof(value_), std::forward<Args>(args)...);
+        engaged_ = true;
     }
 
-    void hard_reset() noexcept {
+    constexpr void hard_reset() noexcept {
         value_.~T();
-        engaged = false;
+        engaged_ = false;
     }
 
   public:
@@ -323,14 +323,9 @@ class optional {
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
 
     constexpr optional() noexcept
-        requires std::is_default_constructible_v<T>
-    = default;
+        : _(), engaged_(false) {}
 
-    constexpr optional() noexcept
-        requires(!std::is_default_constructible_v<T>)
-        : _(), engaged(false) {}
-
-    ~optional()
+    constexpr ~optional()
         requires(!std::is_trivially_destructible_v<T>)
     {
         if (has_value())
@@ -347,8 +342,9 @@ class optional {
         requires std::is_copy_constructible_v<T> && (!std::is_trivially_copy_constructible_v<T>)
     {
         if (rhs.has_value()) {
-            ::new (&value_) T(rhs.value_);
-            engaged = true;
+
+            std::construct_at(std::addressof(value_), rhs.value_);
+            engaged_ = true;
         }
     }
 
@@ -360,8 +356,8 @@ class optional {
         requires std::is_move_constructible_v<T> && (!std::is_trivially_move_constructible_v<T>)
     {
         if (rhs.has_value()) {
-            ::new (&value_) T(std::move(rhs.value_));
-            engaged = true;
+            std::construct_at(std::addressof(value_), std::move(rhs.value()));
+            engaged_ = true;
         }
     }
 
@@ -373,12 +369,12 @@ class optional {
     template <class... Args>
     constexpr explicit optional(in_place_t, Args&&... args)
         requires std::is_constructible_v<T, Args...>
-        : value_(std::forward<Args>(args)...), engaged(true) {}
+        : value_(std::forward<Args>(args)...), engaged_(true) {}
 
     template <class U, class... Args>
     constexpr explicit optional(in_place_t, std::initializer_list<U> il, Args&&... args)
         requires std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>
-        : value_(il, std::forward<Args>(args)...), engaged(true) {}
+        : value_(il, std::forward<Args>(args)...), engaged_(true) {}
 
     /// Constructs the stored value with `u`.
     template <class U = T>
@@ -397,7 +393,8 @@ class optional {
         requires enable_from_other<T, U, const U&> && std::is_convertible_v<const U&, T>
     {
         if (rhs.has_value()) {
-            construct(*rhs);
+            std::construct_at(std::addressof(value_), rhs.value());
+            engaged_ = true;
         }
     }
 
@@ -438,7 +435,7 @@ class optional {
         else if (has_value())
             value_ = rhs.value_;
         else
-            ::new (&value_) T(rhs.value_);
+            std::construct_at(std::addressof(&value_), rhs.value_);
         return *this;
     }
 
@@ -456,7 +453,7 @@ class optional {
         else if (has_value())
             value_ = std::move(rhs.value_);
         else
-            ::new (&value_) T(std::move(rhs.value_));
+            std::construct_at(std::addressof(value_), std::move(rhs.value_));
         return *this;
     }
 
@@ -678,14 +675,15 @@ class optional {
             if (rhs.has_value()) {
                 swap(value(), *rhs);
             } else {
-                new (std::addressof(rhs.value_)) T(std::move(value_));
+                std::construct_at(std::addressof(rhs.value_), std::move(value_));
                 value_.T::~T();
             }
         } else if (rhs.has_value()) {
-            new (std::addressof(value_)) T(std::move(rhs.value_));
+
+            std::construct_at(std::addressof(value_), std::move(rhs.value_));
             rhs.value_.T::~T();
         }
-        swap(engaged, rhs.engaged);
+        swap(engaged_, rhs.engaged_);
     }
 
     // Since P3168R2: Give std::optional Range Support.
@@ -710,16 +708,16 @@ class optional {
     constexpr T&& operator*() && { return std::move(value_); }
 
     /// Returns whether or not the optional has a value
-    constexpr bool has_value() const noexcept { return engaged; }
+    constexpr bool has_value() const noexcept { return engaged_; }
 
-    constexpr explicit operator bool() const noexcept { return engaged; }
+    constexpr explicit operator bool() const noexcept { return engaged_; }
 
     void reset() noexcept {
         if constexpr (!std::is_trivially_destructible_v<T>) {
             if (has_value())
                 value_.~T();
         }
-        engaged = false;
+        engaged_ = false;
     }
 };
 
