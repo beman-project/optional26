@@ -206,7 +206,6 @@ class bad_optional_access : public std::exception {
 };
 
 template <class T>
-    requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional;
 
 } // namespace beman::optional26
@@ -295,8 +294,8 @@ concept enable_assign_from_other =
     !std::is_assignable_v<T&, const optional<U>&> && !std::is_assignable_v<T&, const optional<U>&&>;
 
 template <class T>
-    requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional {
+    static_assert((!std::is_same_v<T, std::remove_cv_t<in_place_t>>) && (!std::is_same_v<std::remove_cv_t<T>, nullopt_t>));
 
     struct empty {};
     union {
