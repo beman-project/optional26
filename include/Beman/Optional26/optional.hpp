@@ -482,15 +482,15 @@ class optional {
     /// Returns the stored value if there is one, otherwise returns `u`
     template <class U>
     constexpr T value_or(U&& u) const&
-        requires std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>
     {
+        static_assert(std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>);
         return has_value() ? value() : static_cast<T>(std::forward<U>(u));
     }
 
     template <class U>
     constexpr T value_or(U&& u) &&
-        requires std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>
     {
+        static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>);
         return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
     }
 
@@ -542,30 +542,47 @@ class optional {
     template <class F>
     constexpr auto transform(F&& f) & {
         using U = std::invoke_result_t<F, T&>;
+        static_assert(!std::is_array_v<U>);
+        static_assert(!std::is_same_v<U, std::in_place_t>);
+        static_assert(!std::is_same_v<U, std::nullopt_t>);
+        //        static_assert(std::is_object_v<U>); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
     template <class F>
     constexpr auto transform(F&& f) && {
         using U = std::invoke_result_t<F, T&&>;
+        static_assert(!std::is_array_v<U>);
+        static_assert(!std::is_same_v<U, std::in_place_t>);
+        static_assert(!std::is_same_v<U, std::nullopt_t>);
+        //        static_assert(std::is_object_v<U>); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), std::move(value_))} : optional<U>{};
     }
 
     template <class F>
     constexpr auto transform(F&& f) const& {
         using U = std::invoke_result_t<F, const T&>;
+        static_assert(!std::is_array_v<U>);
+        static_assert(!std::is_same_v<U, std::in_place_t>);
+        static_assert(!std::is_same_v<U, std::nullopt_t>);
+        //        static_assert(std::is_object_v<U>); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
     template <class F>
     constexpr auto transform(F&& f) const&& {
         using U = std::invoke_result_t<F, const T&>;
+        static_assert(!std::is_array_v<U>);
+        static_assert(!std::is_same_v<U, std::in_place_t>);
+        static_assert(!std::is_same_v<U, std::nullopt_t>);
+        //        static_assert(std::is_object_v<U>); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
     /// Calls `f` if the optional is empty
     template <class F>
-    constexpr optional<T> or_else(F&& f) const & {
+    constexpr optional<T> or_else(F&& f) const& {
+        static_assert(std::is_same_v<std::remove_cvref_t<std::invoke_result_t<F>>, optional>);
         if (has_value())
             return value_;
 
@@ -574,6 +591,7 @@ class optional {
 
     template <class F>
     constexpr optional<T> or_else(F&& f) && {
+        static_assert(std::is_same_v<std::remove_cvref_t<std::invoke_result_t<F>>, optional>);
         if (has_value())
             return std::move(value_);
 
@@ -645,8 +663,8 @@ class optional {
     /// one.
     template <class... Args>
     constexpr T& emplace(Args&&... args)
-        requires std::is_constructible<T, Args&&...>::value
     {
+        static_assert(std::is_constructible_v<T, Args&&...>);
         *this = nullopt;
         construct(std::forward<Args>(args)...);
         return value();
@@ -654,8 +672,8 @@ class optional {
 
     template <class U, class... Args>
     constexpr T& emplace(std::initializer_list<U> il, Args&&... args)
-        requires std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>
     {
+        static_assert(std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>);
         *this = nullopt;
         construct(il, std::forward<Args>(args)...);
         return value();
@@ -669,6 +687,7 @@ class optional {
     /// valueless.
     constexpr void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
                                                 std::is_nothrow_swappable<T>::value) {
+        static_assert(std::is_move_constructible_v<T>);
         using std::swap;
         if (has_value()) {
             if (rhs.has_value()) {

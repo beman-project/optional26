@@ -78,7 +78,7 @@ TEST(OptionalMonadicTest, Transform) {
 
     // callable which returns a reference
     beman::optional26::optional<int> o38  = 42;
-    auto                             o38r = o38.transform([](int& i) -> const int& { return i; });
+    beman::optional26::optional<const int&> o38r = o38.transform([](int& i) -> const int& { return i; });
     EXPECT_TRUE(o38r);
     EXPECT_TRUE(*o38r == 42);
 }
