@@ -197,7 +197,7 @@ struct in_place_t {
     explicit in_place_t() = default;
 };
 
-static constexpr in_place_t in_place{};
+inline constexpr in_place_t in_place{};
 
 class bad_optional_access : public std::exception {
   public:
