@@ -232,14 +232,10 @@ template <class T>
 concept is_derived_from_optional = requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
 
 namespace detail {
-
 template <class T>
-struct is_optional_impl : std::false_type {};
+inline constexpr bool is_optional = false;
 template <class T>
-struct is_optional_impl<optional<T>> : std::true_type {};
-template <class T>
-using is_optional = is_optional_impl<std::decay_t<T>>;
-
+inline constexpr bool is_optional<optional<T>> = true;
 } // namespace detail
 
 template <typename T>
@@ -497,7 +493,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) & {
         using U = std::invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
         if (has_value()) {
             return std::invoke(std::forward<F>(f), value_);
         } else {
@@ -508,7 +504,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) && {
         using U = std::invoke_result_t<F, T&&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
         if (has_value()) {
             return std::invoke(std::forward<F>(f), std::move(value_));
         } else {
@@ -519,7 +515,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) const& {
         using U = std::invoke_result_t<F, const T&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
         if (has_value()) {
             return std::invoke(std::forward<F>(f), value_);
         } else {
@@ -530,7 +526,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) const&& {
         using U = std::invoke_result_t<F, const T&&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
         if (has_value()) {
             return std::invoke(std::forward<F>(f), std::move(value_));
         } else {
@@ -1041,7 +1037,7 @@ class optional<T&> {
     constexpr optional(optional&& rhs) noexcept      = default;
 
     template <class U = T>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
+        requires(!detail::is_optional<std::decay_t<U>>)
     constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u) noexcept : value_(std::addressof(u)) {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
@@ -1065,7 +1061,7 @@ class optional<T&> {
     constexpr optional& operator=(optional&& rhs) noexcept      = default;
 
     template <class U = T>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
+        requires(!detail::is_optional<std::decay_t<U>>)
     constexpr optional& operator=(U&& u) {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
@@ -1081,7 +1077,7 @@ class optional<T&> {
     }
 
     template <class U>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
+        requires(!detail::is_optional<std::decay_t<U>>)
     constexpr optional& emplace(U&& u) noexcept {
         return *this = std::forward<U>(u);
     }
@@ -1125,7 +1121,7 @@ class optional<T&> {
     template <class F>
     constexpr auto and_then(F&& f) const {
         using U = std::invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<U>::value, "F must return an optional");
+        static_assert(detail::is_optional<U>, "F must return an optional");
         return (has_value()) ? std::invoke(std::forward<F>(f), *value_) : std::remove_cvref_t<U>();
     }
 
