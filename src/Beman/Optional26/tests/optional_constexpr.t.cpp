@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <Beman/Optional26/optional.hpp>
+#include <Beman/Optional26/tests/test_types.hpp>
 
 #include <functional>
 #include <ranges>
@@ -11,29 +12,6 @@
 
 TEST(OptionalConstexprTest, TestGTest) { ASSERT_EQ(1, 1); }
 
-namespace {
-struct empty {};
-struct no_default {
-    no_default()                             = delete;
-    no_default(const no_default&)            = default;
-    no_default(no_default&&)                 = default;
-    no_default& operator=(const no_default&) = default;
-    no_default& operator=(no_default&&)      = default;
-    no_default(empty) {};
-};
-
-struct base {
-    int i_;
-    constexpr base() : i_(0) {}
-    constexpr base(int i) : i_(i) {}
-};
-
-struct derived : public base {
-    int j_;
-    constexpr derived() : base(0), j_(0) {}
-    constexpr derived(int i, int j) : base(i), j_(j) {}
-};
-} // namespace
 
 TEST(OptionalConstexprTest, Constructors) {
     constexpr beman::optional26::optional<int> i1;
@@ -43,11 +21,11 @@ TEST(OptionalConstexprTest, Constructors) {
     constexpr beman::optional26::optional<int> i3 = i;
     (void)i3;
 
-    constexpr beman::optional26::optional<empty> e1;
+    constexpr beman::optional26::optional<beman::optional26::tests::empty> e1;
     constexpr beman::optional26::optional<int>   e2{beman::optional26::nullopt};
 
-    constexpr empty                              e{};
-    constexpr beman::optional26::optional<empty> e3 = e;
+    constexpr beman::optional26::tests::empty                              e{};
+    constexpr beman::optional26::optional<beman::optional26::tests::empty> e3 = e;
     (void)e3;
 }
 
@@ -104,6 +82,9 @@ TEST(OptionalConstexprTest, Constructors3) {
     constexpr beman::optional26::optional<int> ie;
     constexpr beman::optional26::optional<int> i4 = ie;
     EXPECT_FALSE(i4);
+
+    using beman::optional26::tests::base;
+    using beman::optional26::tests::derived;
 
     constexpr base                              b{1};
     constexpr derived                           d(1, 2);

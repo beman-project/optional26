@@ -4,7 +4,7 @@
 #ifndef BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP
 #define BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP
 
-namespace beman::optional26::test {
+namespace beman::optional26::tests {
 // Classes used in the tests.
 
 // Empty class helper.
@@ -20,18 +20,24 @@ struct no_default_ctor {
     no_default_ctor(empty) {};
 };
 
+struct int_ctor {
+    int i_;
+    int_ctor()                                  = delete;
+    int_ctor(int i) : i_(i){}
+};
+
 // Base class helper.
 struct base {
     int m_i;
-    base() : m_i(0) {}
-    base(int i) : m_i(i) {}
+    constexpr base() : m_i(0) {}
+    constexpr base(int i) : m_i(i) {}
 };
 
 // Derived class helper.
 struct derived : public base {
     int m_j;
-    derived() : base(), m_j(0) {}
-    derived(int i, int j) : base(i), m_j(j) {}
+    constexpr derived() : base(), m_j(0) {}
+    constexpr derived(int i, int j) : base(i), m_j(j) {}
 };
 
 } // namespace beman::optional26::test

@@ -2,34 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <Beman/Optional26/optional.hpp>
+#include <Beman/Optional26/tests/test_types.hpp>
 
 #include <gtest/gtest.h>
 
 TEST(OptionalRefTest, TestGTest) { ASSERT_EQ(1, 1); }
 
-namespace {
-struct empty {};
-struct no_default {
-    no_default()                             = delete;
-    no_default(const no_default&)            = default;
-    no_default(no_default&&)                 = default;
-    no_default& operator=(const no_default&) = default;
-    no_default& operator=(no_default&&)      = default;
-    no_default(empty) {};
-};
-
-struct base {
-    int i_;
-    base() : i_(0) {}
-    base(int i) : i_(i) {}
-};
-
-struct derived : public base {
-    int j_;
-    derived() : base(0), j_(0) {}
-    derived(int i, int j) : base(i), j_(j) {}
-};
-} // namespace
 
 TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<int&> i1;
@@ -41,6 +19,8 @@ TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<int&> i3 = i;
     (void)i3;
 
+    using beman::optional26::tests::empty;
+
     beman::optional26::optional<empty&> e1;
     beman::optional26::optional<empty&> e2{beman::optional26::nullopt};
     (void)e1;
@@ -50,19 +30,24 @@ TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<empty&> e3 = e;
     (void)e3;
 
-    beman::optional26::optional<no_default&> nd1;
-    beman::optional26::optional<no_default&> nd2{beman::optional26::nullopt};
+    using beman::optional26::tests::no_default_ctor;
+
+    beman::optional26::optional<no_default_ctor&> nd1;
+    beman::optional26::optional<no_default_ctor&> nd2{beman::optional26::nullopt};
     (void)nd1;
     (void)nd2;
 
-    no_default nd{e};
+    no_default_ctor nd{e};
 
-    beman::optional26::optional<no_default&> nd3 = nd;
+    beman::optional26::optional<no_default_ctor&> nd3 = nd;
     (void)nd3;
 
     beman::optional26::optional<int&> ie;
     beman::optional26::optional<int&> i4 = ie;
     EXPECT_FALSE(i4);
+
+    using beman::optional26::tests::base;
+    using beman::optional26::tests::derived;
 
     base                               b{1};
     derived                            d(1, 2);
