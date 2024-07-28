@@ -16,17 +16,22 @@ TEST(OptionalConstexprTest, TestGTest) { ASSERT_EQ(1, 1); }
 TEST(OptionalConstexprTest, Constructors) {
     constexpr beman::optional26::optional<int> i1;
     constexpr beman::optional26::optional<int> i2{beman::optional26::nullopt};
+    std::ignore = i1;
+    std::ignore = i2;
 
     constexpr int                              i  = 0;
     constexpr beman::optional26::optional<int> i3 = i;
-    (void)i3;
+    std::ignore = i3;
 
     constexpr beman::optional26::optional<beman::optional26::tests::empty> e1;
     constexpr beman::optional26::optional<int>   e2{beman::optional26::nullopt};
 
     constexpr beman::optional26::tests::empty                              e{};
     constexpr beman::optional26::optional<beman::optional26::tests::empty> e3 = e;
-    (void)e3;
+    std::ignore = e1;
+    std::ignore = e2;
+    std::ignore = e;
+    std::ignore = e3;
 }
 
 TEST(OptionalConstexprTest, Constructors2) {
@@ -94,6 +99,12 @@ TEST(OptionalConstexprTest, Constructors3) {
     constexpr beman::optional26::optional<derived> d2{d};
     constexpr beman::optional26::optional<base>    b3 = d2;
     constexpr beman::optional26::optional<base>    b4{d2};
+    std::ignore = b1;
+    std::ignore = b2;
+    std::ignore = b3;
+    std::ignore = b4;
+    std::ignore = d2;
+
 }
 
 namespace {
@@ -109,6 +120,8 @@ TEST(OptionalConstexprTest, NonDefaultConstruct) {
     constexpr NoDefault                              i = 7;
     constexpr beman::optional26::optional<NoDefault> v1{};
     constexpr beman::optional26::optional<NoDefault> v2{i};
+    std::ignore = v1;
+    std::ignore = v2;
 }
 
 TEST(OptionalConstexprTest, Triviality) {
@@ -1588,7 +1601,7 @@ TEST(OptionalConstexprTest, RangeTest) {
     constexpr beman::optional26::optional<int> o2 = 42;
     EXPECT_EQ(*o2, 42);
     for (auto k : o1) {
-        (void)k;
+        std::ignore = k;
         EXPECT_TRUE(false);
     }
     for (auto k : o2) {
@@ -1648,11 +1661,10 @@ static_assert(testEmplaceInitList());
 consteval bool testAssignment() {
     beman::optional26::optional<int> o1 = 42;
     beman::optional26::optional<int> o2 = 12;
-    beman::optional26::optional<int> o3;
 
     bool retval = true;
 
-    o1 = std::move(o1);
+    o2 = std::move(o1);
     retval &= (*o1 == 42);
 
     o1 = {};
@@ -1668,7 +1680,6 @@ consteval bool testAssignmentValue() {
 
     bool retval = true;
 
-    o1 = o1;
     retval &= (*o1 == 42);
 
     o1 = o2;
@@ -1705,13 +1716,19 @@ consteval bool testAssignmentValue() {
 
     struct not_trivial_copy_assignable {
         int i_;
-        not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable&);
+        constexpr not_trivial_copy_assignable(int i) : i_(i) {}
+        constexpr not_trivial_copy_assignable(const not_trivial_copy_assignable&) = default;
+        constexpr not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable& rhs) {
+            i_ = rhs.i_;
+            return *this;
+        }
     };
+    static_assert(!std::is_trivially_copy_assignable_v<not_trivial_copy_assignable>);
 
     /*
       optional& operator=(const optional& rhs)
-      requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
-      (!std::is_trivially_copy_assignable_v<T>)
+        requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
+        (!std::is_trivially_copy_assignable_v<T>)
     */
     beman::optional26::optional<not_trivial_copy_assignable> o5{5};
     beman::optional26::optional<not_trivial_copy_assignable> o6;

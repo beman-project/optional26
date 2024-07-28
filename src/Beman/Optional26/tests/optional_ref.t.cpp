@@ -12,35 +12,35 @@ TEST(OptionalRefTest, TestGTest) { ASSERT_EQ(1, 1); }
 TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<int&> i1;
     beman::optional26::optional<int&> i2{beman::optional26::nullopt};
-    (void)i1;
-    (void)i2;
+    std::ignore = i1;
+    std::ignore = i2;
 
     int                               i  = 0;
     beman::optional26::optional<int&> i3 = i;
-    (void)i3;
+    std::ignore = i3;
 
     using beman::optional26::tests::empty;
 
     beman::optional26::optional<empty&> e1;
     beman::optional26::optional<empty&> e2{beman::optional26::nullopt};
-    (void)e1;
-    (void)e2;
+    std::ignore = e1;
+    std::ignore = e2;
 
     empty                               e{};
     beman::optional26::optional<empty&> e3 = e;
-    (void)e3;
+    std::ignore = e3;
 
     using beman::optional26::tests::no_default_ctor;
 
     beman::optional26::optional<no_default_ctor&> nd1;
     beman::optional26::optional<no_default_ctor&> nd2{beman::optional26::nullopt};
-    (void)nd1;
-    (void)nd2;
+    std::ignore = nd1;
+    std::ignore = nd2;
 
     no_default_ctor nd{e};
 
     beman::optional26::optional<no_default_ctor&> nd3 = nd;
-    (void)nd3;
+    std::ignore = nd3;
 
     beman::optional26::optional<int&> ie;
     beman::optional26::optional<int&> i4 = ie;

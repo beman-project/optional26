@@ -15,14 +15,15 @@
 
 TEST(OptionalTest, TestGTest) { ASSERT_EQ(1, 1); }
 
-
 TEST(OptionalTest, Constructors) {
     beman::optional26::optional<int> i1;
     beman::optional26::optional<int> i2{beman::optional26::nullopt};
+    std::ignore = i1;
+    std::ignore = i2;
 
     int                              i  = 0;
     beman::optional26::optional<int> i3 = i;
-    (void)i3;
+    std::ignore                         = i3;
 
     using beman::optional26::tests::empty;
 
@@ -31,7 +32,9 @@ TEST(OptionalTest, Constructors) {
 
     empty                              e{};
     beman::optional26::optional<empty> e3 = e;
-    (void)e3;
+    std::ignore                           = e1;
+    std::ignore                           = e2;
+    std::ignore                           = e3;
 }
 
 TEST(OptionalTest, Constructors2) {
@@ -107,13 +110,14 @@ TEST(OptionalTest, Constructors3) {
     beman::optional26::optional<base>    b4{d2};
 }
 
-
 TEST(OptionalTest, NonDefaultConstruct) {
     using beman::optional26::tests::int_ctor;
 
     int_ctor                              i = 7;
     beman::optional26::optional<int_ctor> v1{};
     beman::optional26::optional<int_ctor> v2{i};
+    std::ignore = v1;
+    std::ignore = v2;
 }
 
 TEST(OptionalTest, AssignmentValue) {
@@ -157,12 +161,13 @@ TEST(OptionalTest, AssignmentValue) {
 
     struct not_trivial_copy_assignable {
         int i_;
-        not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable& rhs) {
+        constexpr not_trivial_copy_assignable(int i) : i_(i) {}
+        constexpr not_trivial_copy_assignable(const not_trivial_copy_assignable&) = default;
+        constexpr not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable& rhs) {
             i_ = rhs.i_;
             return *this;
         }
     };
-
 
     /*
       optional& operator=(const optional& rhs)
@@ -173,7 +178,6 @@ TEST(OptionalTest, AssignmentValue) {
     beman::optional26::optional<not_trivial_copy_assignable> o6;
     o6 = o5;
     EXPECT_TRUE(o5->i_ == 5);
-
 }
 
 TEST(OptionalTest, Triviality) {
@@ -586,7 +590,7 @@ TEST(OptionalTest, RangeTest) {
     beman::optional26::optional<int> o2 = 42;
     EXPECT_EQ(*o2, 42);
     for (auto k : o1) {
-        (void)k;
+        std::ignore = k;
         EXPECT_TRUE(false);
     }
     for (auto k : o2) {
@@ -598,10 +602,14 @@ TEST(ViewMaybeTest, Constructors) {
     std::ranges::single_view<std::optional<int>> s;
     std::ranges::single_view<std::optional<int>> s2{s};
     std::ranges::single_view<std::optional<int>> s3{std::optional<int>{}};
+    std::ignore = s2;
+    std::ignore = s3;
 
     beman::optional26::optional<std::optional<int>> n;
     beman::optional26::optional<std::optional<int>> n2{n};
     beman::optional26::optional<std::optional<int>> n3{std::optional<int>{}};
+    std::ignore = n2;
+    std::ignore = n3;
 }
 
 TEST(ViewMaybeTest, ConceptCheckRef) {
@@ -666,7 +674,6 @@ TEST(ViewMaybeTest, BreathingTestRef) {
 
     m = m1;
     ASSERT_EQ(*std::begin(m), 1);
-
 
     double                               zero = 0.0;
     beman::optional26::optional<double&> d0{zero};
@@ -735,7 +742,7 @@ inline constexpr auto and_then = [](auto&& r, auto fun) {
 // "yield_if" takes a bool and a value and
 // returns a view of zero or one elements.
 inline constexpr auto yield_if = []<class T>(bool b, T x) {
-    return b ? beman::optional26::optional<T>{move(x)} : beman::optional26::nullopt;
+    return b ? beman::optional26::optional<T>{std::move(x)} : beman::optional26::nullopt;
 };
 
 TEST(ViewMaybeTest, PythTripleTest) {
@@ -762,8 +769,6 @@ TEST(ViewMaybeTest, ValueBase) {
 
     for (auto i : v2)
         ASSERT_EQ(i, 7);
-
-
 }
 
 TEST(ViewMaybeTest, RefWrapper) {
@@ -773,7 +778,6 @@ TEST(ViewMaybeTest, RefWrapper) {
 
     for (auto i : v2)
         ASSERT_EQ(i, 7);
-
 }
 
 TEST(ViewMaybeTest, ValueNonDefaultConstruct) {
@@ -781,6 +785,8 @@ TEST(ViewMaybeTest, ValueNonDefaultConstruct) {
     int_ctor                              i = 7;
     beman::optional26::optional<int_ctor> v1{};
     beman::optional26::optional<int_ctor> v2{i};
+    std::ignore = v1;
+    std::ignore = v2;
 }
 
 TEST(ViewMaybeTest, RefBase) {
