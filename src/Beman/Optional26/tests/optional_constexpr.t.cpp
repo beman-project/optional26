@@ -124,103 +124,70 @@ TEST(OptionalConstexprTest, NonDefaultConstruct) {
     std::ignore = v2;
 }
 
-TEST(OptionalConstexprTest, Triviality) {
-    EXPECT_TRUE(std::is_trivially_copy_constructible<beman::optional26::optional<int>>::value);
-    EXPECT_TRUE(std::is_trivially_copy_assignable<beman::optional26::optional<int>>::value);
-    EXPECT_TRUE(std::is_trivially_move_constructible<beman::optional26::optional<int>>::value);
-    EXPECT_TRUE(std::is_trivially_move_assignable<beman::optional26::optional<int>>::value);
-    EXPECT_TRUE(std::is_trivially_destructible<beman::optional26::optional<int>>::value);
+consteval bool testConstexprAssignmentValue() {
+    bool retval = true;
+    beman::optional26::optional<int> o1 = 42;
+    beman::optional26::optional<int> o2 = 12;
+    beman::optional26::optional<int> o3;
 
-    {
-        struct T {
-            T(const T&)            = default;
-            T(T&&)                 = default;
-            T& operator=(const T&) = default;
-            T& operator=(T&&)      = default;
-            ~T()                   = default;
-        };
-        EXPECT_TRUE(std::is_trivially_copy_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_trivially_copy_assignable<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_trivially_move_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_trivially_move_assignable<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_trivially_destructible<beman::optional26::optional<T>>::value);
-    }
+    o1 = o1;
+    retval &= (*o1 == 42);
 
-    {
-        struct T {
-            T(const T&) {}
-            T(T&&) {};
-            T& operator=(const T&) { return *this; }
-            T& operator=(T&&) { return *this; };
-            ~T() {}
-        };
-        EXPECT_TRUE(!std::is_trivially_copy_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(!std::is_trivially_copy_assignable<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(!std::is_trivially_move_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(!std::is_trivially_move_assignable<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(!std::is_trivially_destructible<beman::optional26::optional<T>>::value);
-    }
+    o1 = o2;
+    retval &= (*o1 == 12);
+
+    o1 = o3;
+    retval &= (!o1);
+
+    o1 = 42;
+    retval &= (*o1 == 42);
+
+    o1 = beman::optional26::nullopt;
+    retval &= (!o1);
+
+    o1 = std::move(o2);
+    retval &= (*o1 == 12);
+
+    beman::optional26::optional<short> o4 = 42;
+
+    o1 = o4;
+    retval &= (*o1 == 42);
+
+    o1 = std::move(o4);
+    retval &= (*o1 == 42);
+
+    /*
+      template <class U = T>
+      constexpr optional& operator=(U&& u)
+    */
+    short s = 54;
+    o1      = s;
+    retval &= (*o1 == 54);
+
+    struct not_trivial_copy_assignable {
+        int i_;
+        constexpr not_trivial_copy_assignable(int i) : i_(i) {}
+        constexpr not_trivial_copy_assignable(const not_trivial_copy_assignable&) = default;
+        constexpr not_trivial_copy_assignable& operator=(const not_trivial_copy_assignable& rhs) {
+            i_ = rhs.i_;
+            return *this;
+        }
+    };
+
+    /*
+      optional& operator=(const optional& rhs)
+      requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
+      (!std::is_trivially_copy_assignable_v<T>)
+    */
+    beman::optional26::optional<not_trivial_copy_assignable> o5{5};
+    beman::optional26::optional<not_trivial_copy_assignable> o6;
+    o6 = o5;
+    retval &= (o5->i_ == 5);
+    return retval;
 }
 
-TEST(OptionalConstexprTest, Deletion) {
-    EXPECT_TRUE(std::is_copy_constructible<beman::optional26::optional<int>>::value);
-    EXPECT_TRUE(std::is_copy_assignable<beman::optional26::optional<int>>::value);
-    EXPECT_TRUE(std::is_move_constructible<beman::optional26::optional<int>>::value);
-    EXPECT_TRUE(std::is_move_assignable<beman::optional26::optional<int>>::value);
-    EXPECT_TRUE(std::is_destructible<beman::optional26::optional<int>>::value);
+static_assert(testConstexprAssignmentValue());
 
-    {
-        struct T {
-            T(const T&)            = default;
-            T(T&&)                 = default;
-            T& operator=(const T&) = default;
-            T& operator=(T&&)      = default;
-            ~T()                   = default;
-        };
-        EXPECT_TRUE(std::is_copy_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_copy_assignable<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_move_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_move_assignable<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_destructible<beman::optional26::optional<T>>::value);
-    }
-
-    {
-        struct T {
-            T(const T&)            = delete;
-            T(T&&)                 = delete;
-            T& operator=(const T&) = delete;
-            T& operator=(T&&)      = delete;
-        };
-        EXPECT_TRUE(!std::is_copy_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(!std::is_copy_assignable<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(!std::is_move_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(!std::is_move_assignable<beman::optional26::optional<T>>::value);
-    }
-
-    {
-        struct T {
-            T(const T&)            = delete;
-            T(T&&)                 = default;
-            T& operator=(const T&) = delete;
-            T& operator=(T&&)      = default;
-        };
-        EXPECT_TRUE(!std::is_copy_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(!std::is_copy_assignable<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_move_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_move_assignable<beman::optional26::optional<T>>::value);
-    }
-
-    {
-        struct T {
-            T(const T&)            = default;
-            T(T&&)                 = delete;
-            T& operator=(const T&) = default;
-            T& operator=(T&&)      = delete;
-        };
-        EXPECT_TRUE(std::is_copy_constructible<beman::optional26::optional<T>>::value);
-        EXPECT_TRUE(std::is_copy_assignable<beman::optional26::optional<T>>::value);
-    }
-}
 
 struct takes_init_and_variadic {
     int     v0;
@@ -229,26 +196,34 @@ struct takes_init_and_variadic {
     constexpr takes_init_and_variadic(std::initializer_list<int>& l, Args&&... args) : v0{*std::begin(l)}, t(std::forward<Args>(args)...) {}
 };
 
-TEST(OptionalConstexprTest, InPlace) {
+consteval bool testConstexprInPlace() {
+    bool retval = true;
     constexpr beman::optional26::optional<int> o1{beman::optional26::in_place};
     constexpr beman::optional26::optional<int> o2(beman::optional26::in_place);
-    EXPECT_TRUE(o1);
-    EXPECT_TRUE(o1 == 0);
-    EXPECT_TRUE(o2);
-    EXPECT_TRUE(o2 == 0);
+    retval &= (bool(o1));
+    retval &= (o1 == 0);
+    retval &= (bool(o2));
+    retval &= (o2 == 0);
 
     constexpr beman::optional26::optional<int> o3(beman::optional26::in_place, 42);
-    EXPECT_TRUE(o3 == 42);
+    retval &= (o3 == 42);
 
     constexpr beman::optional26::optional<std::tuple<int, int>> o4(beman::optional26::in_place, 0, 1);
-    EXPECT_TRUE(o4);
-    EXPECT_TRUE(std::get<0>(*o4) == 0);
-    EXPECT_TRUE(std::get<1>(*o4) == 1);
+    retval &= (bool(o4));
+    retval &= (std::get<0>(*o4) == 0);
+    retval &= (std::get<1>(*o4) == 1);
 
     constexpr beman::optional26::optional<takes_init_and_variadic> o6(beman::optional26::in_place, {0, 1}, 2, 3);
-    EXPECT_TRUE(o6->v0 == 0);
-    EXPECT_TRUE(std::get<0>(o6->t) == 2);
-    EXPECT_TRUE(std::get<1>(o6->t) == 3);
+    retval &= (o6->v0 == 0);
+    retval &= (std::get<0>(o6->t) == 2);
+    retval &= (std::get<1>(o6->t) == 3);
+    return retval;
+}
+
+auto consteval constify(auto expr) { return (expr); }
+
+TEST(OptionalConstexprTest, InPlace) {
+    EXPECT_TRUE(constify(testConstexprInPlace()));
 }
 
 TEST(OptionalConstexprTest, MakeOptional) {
@@ -285,10 +260,10 @@ TEST(OptionalConstexprTest, Nullopt) {
     constexpr beman::optional26::optional<int> o3(beman::optional26::nullopt);
     constexpr beman::optional26::optional<int> o4 = {beman::optional26::nullopt};
 
-    EXPECT_TRUE(!o1);
-    EXPECT_TRUE(!o2);
-    EXPECT_TRUE(!o3);
-    EXPECT_TRUE(!o4);
+    EXPECT_TRUE(constify(!o1));
+    EXPECT_TRUE(constify(!o2));
+    EXPECT_TRUE(constify(!o3));
+    EXPECT_TRUE(constify(!o4));
 
     EXPECT_TRUE(!std::is_default_constructible<beman::optional26::nullopt_t>::value);
 }
@@ -337,311 +312,80 @@ TEST(OptionalConstexprTest, RelationalOps) {
 
     //  SECTION("self simple")
     {
-        {
-        constexpr auto b = !(o1 == o2);
-        EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 == o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = !(o1 == o2);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = !(o1 != o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 < o2);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = !(o1 < o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = !(o1 > o2);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = !(o1 > o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 <= o2);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 <= o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = !(o1 >= o2);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = o1 >= o1;
-            EXPECT_TRUE(b);
-        }
+        EXPECT_TRUE(constify(!(o1 == o2)));
+        EXPECT_TRUE(constify((o1 == o1)));
+        EXPECT_TRUE(constify(!(o1 == o2)));
+        EXPECT_TRUE(constify(!(o1 != o1)));
+        EXPECT_TRUE(constify((o1 < o2)));
+        EXPECT_TRUE(constify(!(o1 < o1)));
+        EXPECT_TRUE(constify(!(o1 > o2)));
+        EXPECT_TRUE(constify(!(o1 > o1)));
+        EXPECT_TRUE(constify((o1 <= o2)));
+        EXPECT_TRUE(constify((o1 <= o1)));
+        EXPECT_TRUE(constify(!(o1 >= o2)));
+        EXPECT_TRUE(constify(o1 >= o1));
     }
     //  SECTION("nullopt simple")
     {
         {
-            constexpr auto b =(!(o1 == beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt == o1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 != beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt != o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o1 < beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt < o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 > beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt > o1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o1 <= beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt <= o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 >= beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt >= o1));
-            EXPECT_TRUE(b);
-        }
-
-
-        {
-            constexpr auto b = (o3 == beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt == o3);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o3 != beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt != o3));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o3 < beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt < o3));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o3 > beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt > o3));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o3 <= beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt <= o3);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o3 >= beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt >= o3);
-            EXPECT_TRUE(b);
+            EXPECT_TRUE(constify((!(o1 == beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt == o1))));
+            EXPECT_TRUE(constify((o1 != beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((beman::optional26::nullopt != o1)));
+            EXPECT_TRUE(constify((!(o1 < beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((beman::optional26::nullopt < o1)));
+            EXPECT_TRUE(constify((o1 > beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt > o1))));
+            EXPECT_TRUE(constify((!(o1 <= beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((beman::optional26::nullopt <= o1)));
+            EXPECT_TRUE(constify((o1 >= beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt >= o1))));
+            EXPECT_TRUE(constify((o3 == beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((beman::optional26::nullopt == o3)));
+            EXPECT_TRUE(constify((!(o3 != beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt != o3))));
+            EXPECT_TRUE(constify((!(o3 < beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt < o3))));
+            EXPECT_TRUE(constify((!(o3 > beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt > o3))));
+            EXPECT_TRUE(constify((o3 <= beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((beman::optional26::nullopt <= o3)));
+            EXPECT_TRUE(constify((o3 >= beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((beman::optional26::nullopt >= o3)));
         }
 
     }
     //  SECTION("with T simple")
     {
         {
-            constexpr auto b = (!(o1 == 1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(1 == o1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 != 1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (1 != o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o1 < 1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (1 < o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 > 1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(1 > o1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o1 <= 1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (1 <= o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 >= 1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(1 >= o1));
-            EXPECT_TRUE(b);
+            EXPECT_TRUE(constify((!(o1 == 1))));
+            EXPECT_TRUE(constify((!(1 == o1))));
+            EXPECT_TRUE(constify((o1 != 1)));
+            EXPECT_TRUE(constify((1 != o1)));
+            EXPECT_TRUE(constify((!(o1 < 1))));
+            EXPECT_TRUE(constify((1 < o1)));
+            EXPECT_TRUE(constify((o1 > 1)));
+            EXPECT_TRUE(constify((!(1 > o1))));
+            EXPECT_TRUE(constify((!(o1 <= 1))));
+            EXPECT_TRUE(constify((1 <= o1)));
+            EXPECT_TRUE(constify((o1 >= 1)));
+            EXPECT_TRUE(constify((!(1 >= o1))));
         }
 
 
         {
-            constexpr auto b = (o1 == 4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (4 == o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o1 != 4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(4 != o1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o1 < 4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(4 < o1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o1 > 4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(4 > o1));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 <= 4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (4 <= o1);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o1 >= 4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (4 >= o1);
-            EXPECT_TRUE(b);
+            EXPECT_TRUE(constify((o1 == 4)));
+            EXPECT_TRUE(constify((4 == o1)));
+            EXPECT_TRUE(constify((!(o1 != 4))));
+            EXPECT_TRUE(constify((!(4 != o1))));
+            EXPECT_TRUE(constify((!(o1 < 4))));
+            EXPECT_TRUE(constify((!(4 < o1))));
+            EXPECT_TRUE(constify((!(o1 > 4))));
+            EXPECT_TRUE(constify((!(4 > o1))));
+            EXPECT_TRUE(constify((o1 <= 4)));
+            EXPECT_TRUE(constify((4 <= o1)));
+            EXPECT_TRUE(constify((o1 >= 4)));
+            EXPECT_TRUE(constify((4 >= o1)));
         }
     }
 
@@ -654,187 +398,52 @@ TEST(OptionalConstexprTest, RelationalOps) {
     //  SECTION("self complex")
     {
         {
-            constexpr auto b = (!(o4 == o5));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 == o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 != o5);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 != o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 < o5);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 < o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 > o5));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 > o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 <= o5);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 <= o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 >= o5));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 >= o4);
-            EXPECT_TRUE(b);
+            EXPECT_TRUE(constify((!(o4 == o5))));
+            EXPECT_TRUE(constify((o4 == o4)));
+            EXPECT_TRUE(constify((o4 != o5)));
+            EXPECT_TRUE(constify((!(o4 != o4))));
+            EXPECT_TRUE(constify((o4 < o5)));
+            EXPECT_TRUE(constify((!(o4 < o4))));
+            EXPECT_TRUE(constify((!(o4 > o5))));
+            EXPECT_TRUE(constify((!(o4 > o4))));
+            EXPECT_TRUE(constify((o4 <= o5)));
+            EXPECT_TRUE(constify((o4 <= o4)));
+            EXPECT_TRUE(constify((!(o4 >= o5))));
+            EXPECT_TRUE(constify((o4 >= o4)));
         }
 
     }
     //  SECTION("nullopt complex")
     {
         {
-            constexpr auto b = (!(o4 == beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt == o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 != beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt != o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 < beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt < o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 > beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt > o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 <= beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt <= o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 >= beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt >= o4));
-            EXPECT_TRUE(b);
+            EXPECT_TRUE(constify((!(o4 == beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt == o4))));
+            EXPECT_TRUE(constify((o4 != beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((beman::optional26::nullopt != o4)));
+            EXPECT_TRUE(constify((!(o4 < beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((beman::optional26::nullopt < o4)));
+            EXPECT_TRUE(constify((o4 > beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt > o4))));
+            EXPECT_TRUE(constify((!(o4 <= beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((beman::optional26::nullopt <= o4)));
+            EXPECT_TRUE(constify((o4 >= beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt >= o4))));
         }
 
 
         {
-            constexpr auto b = (o3 == beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt == o3);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o3 != beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt != o3));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o3 < beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt < o3));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o3 > beman::optional26::nullopt));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(beman::optional26::nullopt > o3));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o3 <= beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt <= o3);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o3 >= beman::optional26::nullopt);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (beman::optional26::nullopt >= o3);
-            EXPECT_TRUE(b);
+            EXPECT_TRUE(constify((o3 == beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((beman::optional26::nullopt == o3)));
+            EXPECT_TRUE(constify((!(o3 != beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt != o3))));
+            EXPECT_TRUE(constify((!(o3 < beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt < o3))));
+            EXPECT_TRUE(constify((!(o3 > beman::optional26::nullopt))));
+            EXPECT_TRUE(constify((!(beman::optional26::nullopt > o3))));
+            EXPECT_TRUE(constify((o3 <= beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((beman::optional26::nullopt <= o3)));
+            EXPECT_TRUE(constify((o3 >= beman::optional26::nullopt)));
+            EXPECT_TRUE(constify((beman::optional26::nullopt >= o3)));
         }
 
     }
@@ -842,124 +451,34 @@ TEST(OptionalConstexprTest, RelationalOps) {
     //  SECTION("with T complex")
     {
         {
-            constexpr auto b = (!(o4 == Point{}));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(Point{} == o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 != Point{});
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (Point{} != o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 < Point{}));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (Point{} < o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 > Point{});
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(Point{} > o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 <= Point{}));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (Point{} <= o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 >= Point{});
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(Point{} >= o4));
-            EXPECT_TRUE(b);
+            EXPECT_TRUE(constify((!(o4 == Point{}))));
+            EXPECT_TRUE(constify((!(Point{} == o4))));
+            EXPECT_TRUE(constify((o4 != Point{})));
+            EXPECT_TRUE(constify((Point{} != o4)));
+            EXPECT_TRUE(constify((!(o4 < Point{}))));
+            EXPECT_TRUE(constify((Point{} < o4)));
+            EXPECT_TRUE(constify((o4 > Point{})));
+            EXPECT_TRUE(constify((!(Point{} > o4))));
+            EXPECT_TRUE(constify((!(o4 <= Point{}))));
+            EXPECT_TRUE(constify((Point{} <= o4)));
+            EXPECT_TRUE(constify((o4 >= Point{})));
+            EXPECT_TRUE(constify((!(Point{} >= o4))));
         }
 
 
         {
-            constexpr auto b = (o4 == p4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (p4 == o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 != p4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(p4 != o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 < p4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(p4 < o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(o4 > p4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (!(p4 > o4));
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 <= p4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (p4 <= o4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (o4 >= p4);
-            EXPECT_TRUE(b);
-        }
-
-        {
-            constexpr auto b = (p4 >= o4);
-            EXPECT_TRUE(b);
+            EXPECT_TRUE(constify((o4 == p4)));
+            EXPECT_TRUE(constify((p4 == o4)));
+            EXPECT_TRUE(constify((!(o4 != p4))));
+            EXPECT_TRUE(constify((!(p4 != o4))));
+            EXPECT_TRUE(constify((!(o4 < p4))));
+            EXPECT_TRUE(constify((!(p4 < o4))));
+            EXPECT_TRUE(constify((!(o4 > p4))));
+            EXPECT_TRUE(constify((!(p4 > o4))));
+            EXPECT_TRUE(constify((o4 <= p4)));
+            EXPECT_TRUE(constify((p4 <= o4)));
+            EXPECT_TRUE(constify((o4 >= p4)));
+            EXPECT_TRUE(constify((p4 >= o4)));
         }
 
     }
