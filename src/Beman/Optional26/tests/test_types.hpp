@@ -22,8 +22,8 @@ struct no_default_ctor {
 
 struct int_ctor {
     int i_;
-    int_ctor()                                  = delete;
-    int_ctor(int i) : i_(i){}
+    int_ctor() = delete;
+    int_ctor(int i) : i_(i) {}
 };
 
 // Base class helper.
@@ -40,6 +40,6 @@ struct derived : public base {
     constexpr derived(int i, int j) : base(i), m_j(j) {}
 };
 
-} // namespace beman::optional26::test
+} // namespace beman::optional26::tests
 
 #endif // BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP
