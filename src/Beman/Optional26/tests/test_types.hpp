@@ -4,6 +4,8 @@
 #ifndef BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP
 #define BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP
 
+#include <compare>
+
 namespace beman::optional26::tests {
 // Classes used in the tests.
 
@@ -31,6 +33,10 @@ struct base {
     int m_i;
     constexpr base() : m_i(0) {}
     constexpr base(int i) : m_i(i) {}
+
+    bool operator!=(const base&) const = default;
+    auto operator<=>(const base&) const = default;
+
 };
 
 // Derived class helper.
@@ -38,6 +44,9 @@ struct derived : public base {
     int m_j;
     constexpr derived() : base(), m_j(0) {}
     constexpr derived(int i, int j) : base(i), m_j(j) {}
+
+    bool operator!=(const derived&) const = default;
+    auto operator<=>(const derived&) const = default;
 };
 
 } // namespace beman::optional26::tests

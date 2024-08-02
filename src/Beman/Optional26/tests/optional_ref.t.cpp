@@ -553,3 +553,70 @@ TEST(OptionalRefTest, SwapNullIntializedWithValue) {
     EXPECT_EQ(o1.value(), 42);
     EXPECT_TRUE(!o2.has_value());
 }
+
+TEST(OptionalRefTest, AssignFromOptional) {
+    int                               var = 42;
+    beman::optional26::optional<int&> o1  = beman::optional26::nullopt;
+    beman::optional26::optional<int&> o2  = var;
+
+    o2 = o1;
+
+    using beman::optional26::tests::base;
+    using beman::optional26::tests::derived;
+
+    base                               b{1};
+    derived                            d(1, 2);
+    beman::optional26::optional<base&> empty_base;
+    beman::optional26::optional<base&> engaged_base{b};
+
+    beman::optional26::optional<derived&> empty_derived_ref;
+    beman::optional26::optional<derived&> engaged_derived_ref{d};
+
+    beman::optional26::optional<base&> optional_base_ref;
+    optional_base_ref = empty_base;
+    EXPECT_FALSE(optional_base_ref.has_value());
+    optional_base_ref = engaged_base;
+    EXPECT_TRUE(optional_base_ref.has_value());
+
+    optional_base_ref = empty_derived_ref;
+    EXPECT_FALSE(optional_base_ref.has_value());
+
+    optional_base_ref = engaged_derived_ref;
+    EXPECT_TRUE(optional_base_ref.has_value());
+
+    beman::optional26::optional<derived> empty_derived;
+    beman::optional26::optional<derived> engaged_derived{d};
+
+    static_assert(std::is_constructible_v<const base&, derived>);
+
+    beman::optional26::optional<const base&> optional_base_const_ref;
+    optional_base_const_ref = empty_derived;
+    EXPECT_FALSE(optional_base_const_ref.has_value());
+
+    optional_base_const_ref = engaged_derived;
+    EXPECT_TRUE(optional_base_const_ref.has_value());
+
+    if (empty_derived) {
+        optional_base_ref = empty_derived.value();
+    } else {
+        optional_base_ref.reset();
+    }
+    EXPECT_FALSE(optional_base_ref.has_value());
+
+    if (engaged_derived) {
+        optional_base_ref = engaged_derived.value();
+    } else {
+        optional_base_ref.reset();
+    }
+    EXPECT_TRUE(optional_base_ref.has_value());
+
+    derived d2(2, 2);
+    engaged_derived = d2;
+    EXPECT_EQ(optional_base_ref.value().m_i, static_cast<base>(d2).m_i);
+
+    // delete the rvalue ref overload
+    // optional_base_const_ref = beman::optional26::optional<derived>(derived(3, 4));
+    // EXPECT_TRUE(optional_base_ref.has_value());
+    // EXPECT_EQ(*optional_base_ref, derived(3,4));
+
+}

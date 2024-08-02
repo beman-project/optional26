@@ -1072,9 +1072,15 @@ class optional<T&> {
     template <class U>
     constexpr optional& operator=(const optional<U>& rhs) noexcept {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        value_ = std::addressof(rhs.value());
+        if (rhs.has_value())
+            value_ = std::to_address(rhs);
+        else
+            value_ = nullptr;
         return *this;
     }
+
+    template <class U>
+    constexpr optional& operator=(optional<U>&& rhs)  = delete;
 
     template <class U>
         requires(!detail::is_optional<std::decay_t<U>>)

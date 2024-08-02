@@ -18,7 +18,8 @@ target_sources(
   optional_ref_monadic.t.cpp
   optional_ref.t.cpp
   optional.t.cpp
-  optional_constexpr.t.cpp)
+  optional_constexpr.t.cpp
+  test_types.cpp)
 
 target_link_libraries(
   beman_optional26_test
