@@ -1,4 +1,4 @@
-// include/Beman/Optional26/optional.hpp -*-C++-*-
+// Beman/Optional26/optional.hpp                                     -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #ifndef BEMAN_OPTIONAL26_OPTIONAL_HPP
@@ -17,19 +17,47 @@
 #include <Beman/Optional26/detail/iterator.hpp>
 
 namespace beman::optional26 {
+namespace {
+using std::compare_three_way_result_t;
+using std::decay_t;
+using std::initializer_list;
+using std::strong_ordering;
+using std::three_way_comparable_with;
+} // namespace
 
+namespace detail {
 class monostate {};
 
-struct nullopt_t {
-    // Used for constructing nullopt.
-    enum class Tag { tag };
-
-    // Must be constexpr for nullopt_t to be literal.
-    explicit constexpr nullopt_t(Tag) noexcept {}
+template <typename T, typename U>
+concept optional_eq_rel = requires(const T& t, const U& u) {
+    { t == u } -> std::convertible_to<bool>;
 };
 
-/// Tag to disengage optional objects.
-inline constexpr nullopt_t nullopt{nullopt_t::Tag::tag};
+template <typename T, typename U>
+concept optional_ne_rel = requires(const T& t, const U& u) {
+    { t != u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_lt_rel = requires(const T& t, const U& u) {
+    { t < u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_gt_rel = requires(const T& t, const U& u) {
+    { t > u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_le_rel = requires(const T& t, const U& u) {
+    { t <= u } -> std::convertible_to<bool>;
+};
+
+template <typename T, typename U>
+concept optional_ge_rel = requires(const T& t, const U& u) {
+    { t >= u } -> std::convertible_to<bool>;
+};
+} // namespace detail
 
 struct in_place_t {
     explicit in_place_t() = default;
@@ -37,18 +65,15 @@ struct in_place_t {
 
 inline constexpr in_place_t in_place{};
 
-class bad_optional_access : public std::exception {
-  public:
-    bad_optional_access() = default;
-    const char* what() const noexcept { return "Optional has no value"; }
-};
-
-template <class T>
-class optional;
-
 } // namespace beman::optional26
 
-namespace std {
+namespace beman::optional26 {
+
+template <class T>
+class optional; // partially freestanding
+} // namespace beman::optional26
+
+namespace std { // trait specializations
 // Since P3168R2: Give std::optional Range Support.
 template <typename T>
 inline constexpr bool ranges::enable_view<beman::optional26::optional<T>> = true;
@@ -67,38 +92,112 @@ inline constexpr auto format_kind<beman::optional26::optional<T>> = range_format
 
 namespace beman::optional26 {
 template <class T>
-concept is_derived_from_optional = requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
+concept is_derived_from_optional = requires(const T& t) { // exposition only
+    []<class U>(const optional<U>&) {}(t);
+};
 
-namespace detail {
+// [optional.nullopt], no-value state indicator
+struct nullopt_t {
+    // Used for constructing nullopt.
+    enum class Tag { tag };
+
+    // Must be constexpr for nullopt_t to be literal.
+    explicit constexpr nullopt_t(Tag) noexcept {}
+};
+
+/// Tag to disengage optional objects.
+inline constexpr nullopt_t nullopt{nullopt_t::Tag::tag};
+
+// [optional.bad.access], class bad_optional_access
+class bad_optional_access;
+
+// [optional.relops], relational operators
+template <typename T, typename U>
+constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs)
+    requires detail::optional_eq_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs)
+    requires detail::optional_ne_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator<(const optional<T>& lhs, const optional<U>& rhs)
+    requires detail::optional_lt_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator>(const optional<T>& lhs, const optional<U>& rhs)
+    requires detail::optional_gt_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator<=(const optional<T>& lhs, const optional<U>& rhs)
+    requires detail::optional_le_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs)
+    requires detail::optional_ge_rel<T, U>;
+template <class T, three_way_comparable_with<T> U>
+constexpr compare_three_way_result_t<T, U> operator<=>(const optional<T>&, const optional<U>&);
+
+// [optional.nullops], comparison with nullopt
 template <class T>
-inline constexpr bool is_optional = false;
+constexpr bool operator==(const optional<T>&, nullopt_t) noexcept;
 template <class T>
-inline constexpr bool is_optional<optional<T>> = true;
-} // namespace detail
+constexpr strong_ordering operator<=>(const optional<T>&, nullopt_t) noexcept;
 
-template <typename T>
-constexpr optional<std::decay_t<T>>
-make_optional(T&& t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
-    requires std::is_constructible_v<std::decay_t<T>, T>
-{
-    return optional<std::decay_t<T>>{std::forward<T>(t)};
-}
+// [optional.comp.with.t], comparison with T
+template <typename T, typename U>
+constexpr bool operator==(const optional<T>& lhs, const U& rhs)
+    requires detail::optional_eq_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator==(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_eq_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator!=(const optional<T>& lhs, const U& rhs)
+    requires detail::optional_ne_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator!=(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_ne_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator<(const optional<T>& lhs, const U& rhs)
+    requires detail::optional_lt_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator<(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_lt_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator>(const optional<T>& lhs, const U& rhs)
+    requires detail::optional_gt_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator>(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_gt_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator<=(const optional<T>& lhs, const U& rhs)
+    requires detail::optional_le_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator<=(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_le_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator>=(const optional<T>& lhs, const U& rhs)
+    requires detail::optional_ge_rel<T, U>;
+template <typename T, typename U>
+constexpr bool operator>=(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_ge_rel<T, U>;
+template <typename T, typename U>
+    requires(!is_derived_from_optional<U>) && std::three_way_comparable_with<T, U>
+constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const U& v);
 
-template <typename T, typename... Args>
-constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
-    requires std::is_constructible_v<T, Args...>
-{
-    return optional<T>{in_place, std::forward<Args>(args)...};
-}
+// [optional.specalg], specialized algorithms
+template <class T>
+constexpr void swap(optional<T>& x, optional<T>& y) noexcept(noexcept(noexcept(x.swap(y))));
 
-template <typename T, typename _Up, typename... Args>
-constexpr optional<T>
-make_optional(std::initializer_list<_Up> init_list,
-              Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<_Up>&, Args...>)
-    requires std::is_constructible_v<T, std::initializer_list<_Up>&, Args...>
-{
-    return optional<T>{in_place, init_list, std::forward<Args>(args)...};
-}
+template <class T>
+constexpr optional<decay_t<T>> make_optional(T&&);
+template <class T, class... Args>
+constexpr optional<T> make_optional(Args&&... args);
+template <class T, class U, class... Args>
+constexpr optional<T> make_optional(initializer_list<U> il, Args&&... args);
+
+// [optional.hash], hash support
+template <class T>
+struct hash;
+template <class T>
+struct hash<optional<T>>;
+
+/// END [optional.syn]
 
 template <class T, class U>
 concept enable_forward_value = std::is_constructible_v<T, U&&> && !std::is_same_v<std::decay_t<U>, in_place_t> &&
@@ -127,9 +226,24 @@ concept enable_assign_from_other =
     !std::is_assignable_v<T&, optional<U>&> && !std::is_assignable_v<T&, optional<U>&&> &&
     !std::is_assignable_v<T&, const optional<U>&> && !std::is_assignable_v<T&, const optional<U>&&>;
 
+namespace detail {
+template <class T>
+inline constexpr bool is_optional = false;
+template <class T>
+inline constexpr bool is_optional<optional<T>> = true;
+} // namespace detail
+
+/// move between decl and def
+class bad_optional_access : public std::exception {
+  public:
+    bad_optional_access() = default;
+    const char* what() const noexcept { return "Optional has no value"; }
+};
+
 template <class T>
 class optional {
-    static_assert((!std::is_same_v<T, std::remove_cv_t<in_place_t>>) && (!std::is_same_v<std::remove_cv_t<T>, nullopt_t>));
+    static_assert((!std::is_same_v<T, std::remove_cv_t<in_place_t>>) &&
+                  (!std::is_same_v<std::remove_cv_t<T>, nullopt_t>));
 
     struct empty {};
     union {
@@ -155,8 +269,7 @@ class optional {
     using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
 
-    constexpr optional() noexcept
-        : _(), engaged_(false) {}
+    constexpr optional() noexcept : _(), engaged_(false) {}
 
     constexpr ~optional()
         requires(!std::is_trivially_destructible_v<T>)
@@ -212,13 +325,13 @@ class optional {
     /// Constructs the stored value with `u`.
     template <class U = T>
     constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u)
-        requires enable_forward_value<T, U> && std::is_convertible_v<U&&, T>
+        requires enable_forward_value<T, U> //&& std::is_convertible_v<U&&, T>
         : optional(in_place, std::forward<U>(u)) {}
 
-    template <class U = T>
-    constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u)
-        requires enable_forward_value<T, U> && (!std::is_convertible_v<U &&, T>)
-        : optional(in_place, std::forward<U>(u)) {}
+    // template <class U = T>
+    // constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u)
+    //     requires enable_forward_value<T, U> && (!std::is_convertible_v<U &&, T>)
+    //     : optional(in_place, std::forward<U>(u)) {}
 
     /// Converting copy constructor.
     template <class U>
@@ -315,15 +428,13 @@ class optional {
 
     /// Returns the stored value if there is one, otherwise returns `u`
     template <class U>
-    constexpr T value_or(U&& u) const&
-    {
+    constexpr T value_or(U&& u) const& {
         static_assert(std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>);
         return has_value() ? value() : static_cast<T>(std::forward<U>(u));
     }
 
     template <class U>
-    constexpr T value_or(U&& u) &&
-    {
+    constexpr T value_or(U&& u) && {
         static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>);
         return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
     }
@@ -379,7 +490,7 @@ class optional {
         static_assert(!std::is_array_v<U>);
         static_assert(!std::is_same_v<U, in_place_t>);
         static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U> ); /// References now allowed
+        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
@@ -389,7 +500,7 @@ class optional {
         static_assert(!std::is_array_v<U>);
         static_assert(!std::is_same_v<U, in_place_t>);
         static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U> ); /// References now allowed
+        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), std::move(value_))} : optional<U>{};
     }
 
@@ -399,7 +510,7 @@ class optional {
         static_assert(!std::is_array_v<U>);
         static_assert(!std::is_same_v<U, in_place_t>);
         static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U> ); /// References now allowed
+        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
@@ -409,7 +520,7 @@ class optional {
         static_assert(!std::is_array_v<U>);
         static_assert(!std::is_same_v<U, in_place_t>);
         static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U> ); /// References now allowed
+        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
@@ -496,8 +607,7 @@ class optional {
     /// Constructs the value in-place, destroying the current one if there is
     /// one.
     template <class... Args>
-    constexpr T& emplace(Args&&... args)
-    {
+    constexpr T& emplace(Args&&... args) {
         static_assert(std::is_constructible_v<T, Args&&...>);
         *this = nullopt;
         construct(std::forward<Args>(args)...);
@@ -505,8 +615,7 @@ class optional {
     }
 
     template <class U, class... Args>
-    constexpr T& emplace(std::initializer_list<U> il, Args&&... args)
-    {
+    constexpr T& emplace(std::initializer_list<U> il, Args&&... args) {
         static_assert(std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>);
         *this = nullopt;
         construct(il, std::forward<Args>(args)...);
@@ -573,75 +682,45 @@ class optional {
     }
 };
 
-template <typename T, typename U>
-concept optional_eq_rel = requires(const T& t, const U& u) {
-    { t == u } -> std::convertible_to<bool>;
-};
-
-template <typename T, typename U>
-concept optional_ne_rel = requires(const T& t, const U& u) {
-    { t != u } -> std::convertible_to<bool>;
-};
-
-template <typename T, typename U>
-concept optional_lt_rel = requires(const T& t, const U& u) {
-    { t < u } -> std::convertible_to<bool>;
-};
-
-template <typename T, typename U>
-concept optional_gt_rel = requires(const T& t, const U& u) {
-    { t > u } -> std::convertible_to<bool>;
-};
-
-template <typename T, typename U>
-concept optional_le_rel = requires(const T& t, const U& u) {
-    { t <= u } -> std::convertible_to<bool>;
-};
-
-template <typename T, typename U>
-concept optional_ge_rel = requires(const T& t, const U& u) {
-    { t >= u } -> std::convertible_to<bool>;
-};
-
-// Comparisons between optional values.
+// 22.5.6 Relational operators[optional.relops]
 template <typename T, typename U>
 constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs)
-    requires optional_eq_rel<T, U>
+    requires detail::optional_eq_rel<T, U>
 {
     return static_cast<bool>(lhs) == static_cast<bool>(rhs) && (!lhs || *lhs == *rhs);
 }
 
 template <typename T, typename U>
 constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs)
-    requires optional_ne_rel<T, U>
+    requires detail::optional_ne_rel<T, U>
 {
     return static_cast<bool>(lhs) != static_cast<bool>(rhs) || (static_cast<bool>(lhs) && *lhs != *rhs);
 }
 
 template <typename T, typename U>
 constexpr bool operator<(const optional<T>& lhs, const optional<U>& rhs)
-    requires optional_lt_rel<T, U>
+    requires detail::optional_lt_rel<T, U>
 {
     return static_cast<bool>(rhs) && (!lhs || *lhs < *rhs);
 }
 
 template <typename T, typename U>
 constexpr bool operator>(const optional<T>& lhs, const optional<U>& rhs)
-    requires optional_gt_rel<T, U>
+    requires detail::optional_gt_rel<T, U>
 {
     return static_cast<bool>(lhs) && (!rhs || *lhs > *rhs);
 }
 
 template <typename T, typename U>
 constexpr bool operator<=(const optional<T>& lhs, const optional<U>& rhs)
-    requires optional_le_rel<T, U>
+    requires detail::optional_le_rel<T, U>
 {
     return !lhs || (static_cast<bool>(rhs) && *lhs <= *rhs);
 }
 
 template <typename T, typename U>
 constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs)
-    requires optional_ge_rel<T, U>
+    requires detail::optional_ge_rel<T, U>
 {
     return !rhs || (static_cast<bool>(lhs) && *lhs >= *rhs);
 }
@@ -651,7 +730,7 @@ constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x
     return x && y ? *x <=> *y : bool(x) <=> bool(y);
 }
 
-// Comparisons with nullopt.
+// 22.5.7 Comparison with nullopt[optional.nullops]
 template <typename T>
 constexpr bool operator==(const optional<T>& lhs, nullopt_t) noexcept {
     return !lhs;
@@ -662,87 +741,87 @@ constexpr std::strong_ordering operator<=>(const optional<T>& x, nullopt_t) noex
     return bool(x) <=> false;
 }
 
-// Comparisons with value type.
+// 22.5.8 Comparison with T[optional.comp.with.t]
 template <typename T, typename U>
 constexpr bool operator==(const optional<T>& lhs, const U& rhs)
-    requires optional_eq_rel<T, U>
+    requires detail::optional_eq_rel<T, U>
 {
     return lhs && *lhs == rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator==(const U& lhs, const optional<T>& rhs)
-    requires optional_eq_rel<U, T>
+constexpr bool operator==(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_eq_rel<T, U>
 {
     return rhs && lhs == *rhs;
 }
 
 template <typename T, typename U>
 constexpr bool operator!=(const optional<T>& lhs, const U& rhs)
-    requires optional_ne_rel<T, U>
+    requires detail::optional_ne_rel<T, U>
 {
     return !lhs || *lhs != rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator!=(const U& lhs, const optional<T>& rhs)
-    requires optional_ne_rel<U, T>
+constexpr bool operator!=(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_ne_rel<T, U>
 {
     return !rhs || lhs != *rhs;
 }
 
 template <typename T, typename U>
 constexpr bool operator<(const optional<T>& lhs, const U& rhs)
-    requires optional_lt_rel<T, U>
+    requires detail::optional_lt_rel<T, U>
 {
     return !lhs || *lhs < rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator<(const U& lhs, const optional<T>& rhs)
-    requires optional_lt_rel<U, T>
+constexpr bool operator<(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_lt_rel<T, U>
 {
     return rhs && lhs < *rhs;
 }
 
 template <typename T, typename U>
 constexpr bool operator>(const optional<T>& lhs, const U& rhs)
-    requires optional_gt_rel<T, U>
+    requires detail::optional_gt_rel<T, U>
 {
     return lhs && *lhs > rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator>(const U& lhs, const optional<T>& rhs)
-    requires optional_gt_rel<U, T>
+constexpr bool operator>(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_gt_rel<T, U>
 {
     return !rhs || lhs > *rhs;
 }
 
 template <typename T, typename U>
 constexpr bool operator<=(const optional<T>& lhs, const U& rhs)
-    requires optional_le_rel<T, U>
+    requires detail::optional_le_rel<T, U>
 {
     return !lhs || *lhs <= rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator<=(const U& lhs, const optional<T>& rhs)
-    requires optional_le_rel<U, T>
+constexpr bool operator<=(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_le_rel<T, U>
 {
     return rhs && lhs <= *rhs;
 }
 
 template <typename T, typename U>
 constexpr bool operator>=(const optional<T>& lhs, const U& rhs)
-    requires optional_ge_rel<T, U>
+    requires detail::optional_ge_rel<T, U>
 {
     return lhs && *lhs >= rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator>=(const U& lhs, const optional<T>& rhs)
-    requires optional_ge_rel<U, T>
+constexpr bool operator>=(const T& lhs, const optional<U>& rhs)
+    requires detail::optional_ge_rel<T, U>
 {
     return !rhs || lhs >= *rhs;
 }
@@ -753,11 +832,37 @@ constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x
     return bool(x) ? *x <=> v : std::strong_ordering::less;
 }
 
+// 22.5.9 Specialized algorithms[optional.specalg]
+
 template <class T>
 void swap(optional<T>& lhs, optional<T>& rhs) noexcept(noexcept(lhs.swap(rhs)))
     requires std::is_move_constructible_v<T> && std::is_swappable_v<T>
 {
     return lhs.swap(rhs);
+}
+
+template <typename T>
+constexpr optional<std::decay_t<T>>
+make_optional(T&& t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
+    requires std::is_constructible_v<std::decay_t<T>, T>
+{
+    return optional<std::decay_t<T>>{std::forward<T>(t)};
+}
+
+template <typename T, typename... Args>
+constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
+    requires std::is_constructible_v<T, Args...>
+{
+    return optional<T>{in_place, std::forward<Args>(args)...};
+}
+
+template <typename T, typename _Up, typename... Args>
+constexpr optional<T>
+make_optional(std::initializer_list<_Up> init_list,
+              Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<_Up>&, Args...>)
+    requires std::is_constructible_v<T, std::initializer_list<_Up>&, Args...>
+{
+    return optional<T>{in_place, init_list, std::forward<Args>(args)...};
 }
 
 namespace detail {
@@ -774,10 +879,10 @@ auto optional_map_impl(Opt&& opt, F&& f)
 {
     if (opt.has_value()) {
         std::invoke(std::forward<F>(f), *std::forward<Opt>(opt));
-        return make_optional(monostate{});
+        return make_optional(detail::monostate{});
     }
 
-    return optional<monostate>{nullopt};
+    return optional<detail::monostate>{nullopt};
 }
 } // namespace detail
 
@@ -795,7 +900,6 @@ class optional<T&> {
     // [optional.iterators], iterator support
     using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
-
 
   private:
     T* value_; // exposition only
@@ -854,7 +958,7 @@ class optional<T&> {
     }
 
     template <class U>
-    constexpr optional& operator=(optional<U>&& rhs)  = delete;
+    constexpr optional& operator=(optional<U>&& rhs) = delete;
 
     template <class U>
         requires(!detail::is_optional<std::decay_t<U>>)
