@@ -1135,93 +1135,63 @@ namespace beman::optional26 {
 template <class T>
 class optional<T&> {
   public:
-    using value_type = T&;
-    // Since ${PAPER_NUMBER}: ${PAPER_TITLE}.
-    // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
-    // Implementation of the range support for optional<T&> reflects P3168R2 for now.
-    // [optional.iterators], iterator support
-    using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
-    using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
+    using value_type     = T&;
+    using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional_ref.iterators]
+    using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional_ref.iterators]
 
   private:
     T* value_; // exposition only
 
   public:
-    //  \rSec3[optional.ctor]{Constructors}
+    //  \rSec3[optional_ref.ctor]{Constructors}
 
-    constexpr optional() noexcept : value_(nullptr) {}
-
-    constexpr optional(nullopt_t) noexcept : value_(nullptr) {}
-
+    constexpr optional() noexcept;
+    constexpr optional(nullopt_t) noexcept;
     constexpr optional(const optional& rhs) noexcept = default;
     constexpr optional(optional&& rhs) noexcept      = default;
-
     template <class U = T>
         requires(!detail::is_optional<decay_t<U>>)
-    constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept : value_(addressof(u)) {
-        static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
-    }
-
+    constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
     template <class U>
-    constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
+    constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept;
 
-    //  \rSec3[optional.dtor]{Destructor}
-
+    //  \rSec3[optional_ref.dtor]{Destructor}
     constexpr ~optional() = default;
 
-    // \rSec3[optional.assign]{Assignment}
-
-    constexpr optional& operator=(nullopt_t) noexcept {
-        value_ = nullptr;
-        return *this;
-    }
+    // \rSec3[optional_ref.assign]{Assignment}
+    constexpr optional& operator=(nullopt_t) noexcept;
 
     constexpr optional& operator=(const optional& rhs) noexcept = default;
     constexpr optional& operator=(optional&& rhs) noexcept      = default;
 
     template <class U = T>
         requires(!detail::is_optional<decay_t<U>>)
-    constexpr optional& operator=(U&& u) {
-        static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
-        value_ = addressof(u);
-        return *this;
-    }
+    constexpr optional& operator=(U&& u);
 
     template <class U>
-    constexpr optional& operator=(const optional<U>& rhs) noexcept {
-        static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        if (rhs.has_value())
-            value_ = to_address(rhs);
-        else
-            value_ = nullptr;
-        return *this;
-    }
+    constexpr optional& operator=(const optional<U>& rhs) noexcept;
 
     template <class U>
     constexpr optional& operator=(optional<U>&& rhs) = delete;
 
     template <class U>
         requires(!detail::is_optional<decay_t<U>>)
-    constexpr optional& emplace(U&& u) noexcept {
-        return *this = std::forward<U>(u);
-    }
+    constexpr optional& emplace(U&& u) noexcept;
 
-    //   \rSec3[optional.swap]{Swap}
+    //   \rSec3[optional_ref.swap]{Swap}
 
     constexpr void swap(optional& rhs) noexcept { std::swap(value_, rhs.value_); }
 
     // Since ${PAPER_NUMBER}: ${PAPER_TITLE}.
     // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
     // Implementation of the range support for optional<T&> reflects P3168R2 for now.
-    // [optional.iterators], iterator support
+    // [optional_ref.iterators], iterator support
     constexpr iterator       begin() noexcept { return iterator(has_value() ? value_ : nullptr); };
     constexpr const_iterator begin() const noexcept { return const_iterator(has_value() ? value_ : nullptr); };
     constexpr iterator       end() noexcept { return begin() + has_value(); }
     constexpr const_iterator end() const noexcept { return begin() + has_value(); }
 
-    // \rSec3[optional.observe]{Observers}
+    // \rSec3[optional_ref.observe]{Observers}
     constexpr T* operator->() const noexcept { return value_; }
 
     constexpr T& operator*() const noexcept { return *value_; }
@@ -1241,7 +1211,7 @@ class optional<T&> {
         return has_value() ? *value_ : std::forward<U>(u);
     }
 
-    //   \rSec3[optional.monadic]{Monadic operations}
+    //   \rSec3[optional_ref.monadic]{Monadic operations}
 
     template <class F>
     constexpr auto and_then(F&& f) const {
@@ -1267,5 +1237,62 @@ class optional<T&> {
 };
 
 } // namespace beman::optional26
+
+//  \rSec3[optional_ref.ctor]{Constructors}
+template <typename T>
+constexpr beman::optional26::optional<T&>::optional() noexcept : value_(nullptr) {}
+
+template <typename T>
+constexpr beman::optional26::optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
+
+template <typename T>
+template <class U>
+    requires(!beman::optional26::detail::is_optional<std::decay_t<U>>)
+constexpr beman::optional26::optional<T&>::optional(U&& u) noexcept : value_(addressof(u)) {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+    static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
+}
+
+template <typename T>
+template <class U>
+constexpr beman::optional26::optional<T&>::optional(const beman::optional26::optional<U>& rhs) noexcept
+    : optional(*rhs) {}
+
+// \rSec3[optional_ref.assign]{Assignment}
+template <typename T>
+constexpr beman::optional26::optional<T&>&
+beman::optional26::optional<T&>::operator=(beman::optional26::nullopt_t) noexcept {
+    value_ = nullptr;
+    return *this;
+}
+
+template <typename T>
+template <class U>
+    requires(!beman::optional26::detail::is_optional<std::decay_t<U>>)
+constexpr beman::optional26::optional<T&>& beman::optional26::optional<T&>::operator=(U&& u) {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+    static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
+    value_ = addressof(u);
+    return *this;
+}
+
+template <typename T>
+template <class U>
+constexpr beman::optional26::optional<T&>&
+beman::optional26::optional<T&>::operator=(const beman::optional26::optional<U>& rhs) noexcept {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+    if (rhs.has_value())
+        value_ = to_address(rhs);
+    else
+        value_ = nullptr;
+    return *this;
+}
+
+template <typename T>
+template <class U>
+    requires(!beman::optional26::detail::is_optional<std::decay_t<U>>)
+constexpr beman::optional26::optional<T&>& beman::optional26::optional<T&>::emplace(U&& u) noexcept {
+    return *this = std::forward<U>(u);
+}
 
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP
