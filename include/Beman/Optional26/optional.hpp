@@ -333,8 +333,6 @@ class optional {
                      std::is_trivially_move_constructible_v<T> && std::is_trivially_move_assignable_v<T>
     = default;
 
-    /// Assigns the stored value from `u`, destroying the old value if there
-    /// was one.
     template <class U = T>
     constexpr optional& operator=(U&& u)
         requires detail::enable_assign_forward<T, U>;
@@ -346,6 +344,10 @@ class optional {
     template <class U>
     constexpr optional& operator=(optional<U>&& rhs)
         requires detail::enable_assign_from_other<T, U, U>;
+
+    // [optional.swap], swap
+    constexpr void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
+                                                std::is_nothrow_swappable<T>::value);
 
     /// Returns the contained value if there is one, otherwise throws
     /// bad_optional_access
@@ -498,31 +500,6 @@ class optional {
         *this = nullopt;
         construct(il, std::forward<Args>(args)...);
         return value();
-    }
-
-    /// Swaps this optional with the other.
-    ///
-    /// If neither optionals have a value, nothing happens.
-    /// If both have a value, the values are swapped.
-    /// If one has a value, it is moved to the other and the movee is left
-    /// valueless.
-    constexpr void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
-                                                std::is_nothrow_swappable<T>::value) {
-        static_assert(std::is_move_constructible_v<T>);
-        using std::swap;
-        if (has_value()) {
-            if (rhs.has_value()) {
-                swap(value(), *rhs);
-            } else {
-                std::construct_at(std::addressof(rhs.value_), std::move(value_));
-                value_.T::~T();
-            }
-        } else if (rhs.has_value()) {
-
-            std::construct_at(std::addressof(value_), std::move(rhs.value_));
-            rhs.value_.T::~T();
-        }
-        swap(engaged_, rhs.engaged_);
     }
 
     // Since P3168R2: Give std::optional Range Support.
@@ -681,7 +658,7 @@ inline constexpr beman::optional26::optional<T>::optional(optional<U>&& rhs)
 // 22.5.3.3 Destructor[optional.dtor]
 
 template <typename T>
-constexpr beman::optional26::optional<T>::~optional()
+inline constexpr beman::optional26::optional<T>::~optional()
     requires(!std::is_trivially_destructible_v<T>)
 {
     if (has_value())
@@ -691,7 +668,7 @@ constexpr beman::optional26::optional<T>::~optional()
 // 22.5.3.4 Assignment[optional.assign]
 
 template <typename T>
-constexpr beman::optional26::optional<T>&
+inline constexpr beman::optional26::optional<T>&
 beman::optional26::optional<T>::operator=(const beman::optional26::optional<T>& rhs)
     requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
              (!std::is_trivially_copy_assignable_v<T>)
@@ -706,7 +683,7 @@ beman::optional26::optional<T>::operator=(const beman::optional26::optional<T>& 
 }
 
 template <typename T>
-constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operator=(
+inline constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operator=(
     beman::optional26::optional<T>&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
     requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
              (!std::is_trivially_move_assignable_v<T>)
@@ -724,7 +701,7 @@ constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operat
 /// was one.
 template <typename T>
 template <class U>
-constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operator=(U&& u)
+inline constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operator=(U&& u)
     requires detail::enable_assign_forward<T, U>
 {
     if (has_value()) {
@@ -742,7 +719,7 @@ constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operat
 /// stored value in `*this`.
 template <typename T>
 template <class U>
-constexpr beman::optional26::optional<T>&
+inline constexpr beman::optional26::optional<T>&
 beman::optional26::optional<T>::operator=(const beman::optional26::optional<U>& rhs)
     requires detail::enable_assign_from_other<T, U, const U&>
 {
@@ -767,7 +744,7 @@ beman::optional26::optional<T>::operator=(const beman::optional26::optional<U>& 
 /// value in `*this`.
 template <typename T>
 template <class U>
-constexpr beman::optional26::optional<T>&
+inline constexpr beman::optional26::optional<T>&
 beman::optional26::optional<T>::operator=(beman::optional26::optional<U>&& rhs)
     requires detail::enable_assign_from_other<T, U, U>
 {
@@ -784,6 +761,32 @@ beman::optional26::optional<T>::operator=(beman::optional26::optional<U>&& rhs)
     }
 
     return *this;
+}
+
+// 22.5.3.5 Swap[optional.swap]
+/// Swaps this optional with the other.
+///
+/// If neither optionals have a value, nothing happens.
+/// If both have a value, the values are swapped.
+/// If one has a value, it is moved to the other and the movee is left
+/// valueless.
+template <typename T>
+inline constexpr void beman::optional26::optional<T>::swap(beman::optional26::optional<T>& rhs) noexcept(
+    std::is_nothrow_move_constructible<T>::value && std::is_nothrow_swappable<T>::value) {
+    static_assert(std::is_move_constructible_v<T>);
+    using std::swap;
+    if (has_value()) {
+        if (rhs.has_value()) {
+            swap(value(), *rhs);
+        } else {
+            std::construct_at(std::addressof(rhs.value_), std::move(value_));
+            value_.T::~T();
+        }
+    } else if (rhs.has_value()) {
+        std::construct_at(std::addressof(value_), std::move(rhs.value_));
+        rhs.value_.T::~T();
+    }
+    swap(engaged_, rhs.engaged_);
 }
 
 namespace beman::optional26 {
