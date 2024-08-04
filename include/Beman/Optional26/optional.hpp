@@ -402,13 +402,8 @@ class optional {
     template <class F>
     constexpr optional or_else(F&& f) &&;
 
-    constexpr void reset() noexcept {
-        if constexpr (!std::is_trivially_destructible_v<T>) {
-            if (has_value())
-                value_.~T();
-        }
-        engaged_ = false;
-    }
+    // [optional.mod], modifiers
+    constexpr void reset() noexcept;
 
   private:
     struct empty {};
@@ -895,6 +890,17 @@ constexpr beman::optional26::optional<T> beman::optional26::optional<T>::or_else
 
     return std::forward<F>(f)();
 }
+
+// 22.5.3.9 Modifiers[optional.mod]
+template <typename T>
+constexpr void beman::optional26::optional<T>::reset() noexcept {
+    if constexpr (!std::is_trivially_destructible_v<T>) {
+        if (has_value())
+            value_.~T();
+    }
+    engaged_ = false;
+}
+
 
 namespace beman::optional26 {
 
