@@ -288,11 +288,6 @@ class optional {
     constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u)
         requires detail::enable_forward_value<T, U>;
 
-    // template <class U = T>
-    // constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u)
-    //     requires enable_forward_value<T, U> && (!std::is_convertible_v<U &&, T>)
-    //     : optional(in_place, std::forward<U>(u)) {}
-
     /// Converting copy constructor.
     template <class U>
     constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs)
@@ -317,24 +312,12 @@ class optional {
     = default;
 
     constexpr ~optional()
-        requires(!std::is_trivially_destructible_v<T>)
-    {
-        if (has_value())
-            std::destroy_at(std::addressof(value_));
-    }
+        requires(!std::is_trivially_destructible_v<T>);
 
+    // [optional.assign], assignment
     constexpr optional& operator=(const optional& rhs)
         requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
-                 (!std::is_trivially_copy_assignable_v<T>)
-    {
-        if (!rhs.has_value())
-            reset();
-        else if (has_value())
-            value_ = rhs.value_;
-        else
-            std::construct_at(std::addressof(value_), rhs.value_);
-        return *this;
-    }
+                 (!std::is_trivially_copy_assignable_v<T>);
 
     constexpr optional& operator=(const optional&)
         requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
@@ -343,21 +326,26 @@ class optional {
 
     constexpr optional& operator=(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
-                 (!std::is_trivially_move_assignable_v<T>)
-    {
-        if (!rhs.has_value())
-            reset();
-        else if (has_value())
-            value_ = std::move(rhs.value_);
-        else
-            std::construct_at(std::addressof(value_), std::move(rhs.value_));
-        return *this;
-    }
+                 (!std::is_trivially_move_assignable_v<T>);
 
     constexpr optional& operator=(optional&&)
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
                      std::is_trivially_move_constructible_v<T> && std::is_trivially_move_assignable_v<T>
     = default;
+
+    /// Assigns the stored value from `u`, destroying the old value if there
+    /// was one.
+    template <class U = T>
+    constexpr optional& operator=(U&& u)
+        requires detail::enable_assign_forward<T, U>;
+
+    template <class U>
+    constexpr optional& operator=(const optional<U>& rhs)
+        requires detail::enable_assign_from_other<T, U, const U&>;
+
+    template <class U>
+    constexpr optional& operator=(optional<U>&& rhs)
+        requires detail::enable_assign_from_other<T, U, U>;
 
     /// Returns the contained value if there is one, otherwise throws
     /// bad_optional_access
@@ -494,67 +482,6 @@ class optional {
         return std::forward<F>(f)();
     }
 
-    /// Assigns the stored value from `u`, destroying the old value if there
-    /// was one.
-    template <class U = T>
-    constexpr optional& operator=(U&& u)
-        requires detail::enable_assign_forward<T, U>
-    {
-        if (has_value()) {
-            value_ = std::forward<U>(u);
-        } else {
-            construct(std::forward<U>(u));
-        }
-
-        return *this;
-    }
-
-    /// Converting copy assignment operator.
-    ///
-    /// Copies the value from `rhs` if there is one. Otherwise resets the
-    /// stored value in `*this`.
-    template <class U>
-    constexpr optional& operator=(const optional<U>& rhs)
-        requires detail::enable_assign_from_other<T, U, const U&>
-    {
-        if (has_value()) {
-            if (rhs.has_value()) {
-                value_ = *rhs;
-            } else {
-                hard_reset();
-            }
-        }
-
-        else if (rhs.has_value()) {
-            construct(*rhs);
-        }
-
-        return *this;
-    }
-
-    /// Converting move assignment operator.
-    ///
-    /// Moves the value from `rhs` if there is one. Otherwise resets the stored
-    /// value in `*this`.
-    template <class U>
-    constexpr optional& operator=(optional<U>&& rhs)
-        requires detail::enable_assign_from_other<T, U, U>
-    {
-        if (has_value()) {
-            if (rhs.has_value()) {
-                value_ = std::move(*rhs);
-            } else {
-                hard_reset();
-            }
-        }
-
-        else if (rhs.has_value()) {
-            construct(std::move(*rhs));
-        }
-
-        return *this;
-    }
-
     /// Constructs the value in-place, destroying the current one if there is
     /// one.
     template <class... Args>
@@ -673,7 +600,8 @@ inline constexpr beman::optional26::optional<T>::optional(const optional& rhs)
 }
 
 template <typename T>
-inline constexpr beman::optional26::optional<T>::optional(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
+inline constexpr beman::optional26::optional<T>::optional(optional&& rhs) noexcept(
+    std::is_nothrow_move_constructible_v<T>)
     requires std::is_move_constructible_v<T> && (!std::is_trivially_move_constructible_v<T>)
 {
     if (rhs.has_value()) {
@@ -748,6 +676,114 @@ inline constexpr beman::optional26::optional<T>::optional(optional<U>&& rhs)
     if (rhs.has_value()) {
         construct(std::move(*rhs));
     }
+}
+
+// 22.5.3.3 Destructor[optional.dtor]
+
+template <typename T>
+constexpr beman::optional26::optional<T>::~optional()
+    requires(!std::is_trivially_destructible_v<T>)
+{
+    if (has_value())
+        std::destroy_at(std::addressof(value_));
+}
+
+// 22.5.3.4 Assignment[optional.assign]
+
+template <typename T>
+constexpr beman::optional26::optional<T>&
+beman::optional26::optional<T>::operator=(const beman::optional26::optional<T>& rhs)
+    requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
+             (!std::is_trivially_copy_assignable_v<T>)
+{
+    if (!rhs.has_value())
+        reset();
+    else if (has_value())
+        value_ = rhs.value_;
+    else
+        std::construct_at(std::addressof(value_), rhs.value_);
+    return *this;
+}
+
+template <typename T>
+constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operator=(
+    beman::optional26::optional<T>&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
+    requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
+             (!std::is_trivially_move_assignable_v<T>)
+{
+    if (!rhs.has_value())
+        reset();
+    else if (has_value())
+        value_ = std::move(rhs.value_);
+    else
+        std::construct_at(std::addressof(value_), std::move(rhs.value_));
+    return *this;
+}
+
+/// Assigns the stored value from `u`, destroying the old value if there
+/// was one.
+template <typename T>
+template <class U>
+constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operator=(U&& u)
+    requires detail::enable_assign_forward<T, U>
+{
+    if (has_value()) {
+        value_ = std::forward<U>(u);
+    } else {
+        construct(std::forward<U>(u));
+    }
+
+    return *this;
+}
+
+/// Converting copy assignment operator.
+///
+/// Copies the value from `rhs` if there is one. Otherwise resets the
+/// stored value in `*this`.
+template <typename T>
+template <class U>
+constexpr beman::optional26::optional<T>&
+beman::optional26::optional<T>::operator=(const beman::optional26::optional<U>& rhs)
+    requires detail::enable_assign_from_other<T, U, const U&>
+{
+    if (has_value()) {
+        if (rhs.has_value()) {
+            value_ = *rhs;
+        } else {
+            hard_reset();
+        }
+    }
+
+    else if (rhs.has_value()) {
+        construct(*rhs);
+    }
+
+    return *this;
+}
+
+/// Converting move assignment operator.
+///
+/// Moves the value from `rhs` if there is one. Otherwise resets the stored
+/// value in `*this`.
+template <typename T>
+template <class U>
+constexpr beman::optional26::optional<T>&
+beman::optional26::optional<T>::operator=(beman::optional26::optional<U>&& rhs)
+    requires detail::enable_assign_from_other<T, U, U>
+{
+    if (has_value()) {
+        if (rhs.has_value()) {
+            value_ = std::move(*rhs);
+        } else {
+            hard_reset();
+        }
+    }
+
+    else if (rhs.has_value()) {
+        construct(std::move(*rhs));
+    }
+
+    return *this;
 }
 
 namespace beman::optional26 {
