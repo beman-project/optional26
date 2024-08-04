@@ -349,6 +349,13 @@ class optional {
     constexpr void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
                                                 std::is_nothrow_swappable<T>::value);
 
+    // [optional.iterators], iterator support
+    // Since P3168R2: Give std::optional Range Support.
+    constexpr iterator       begin() noexcept;
+    constexpr const_iterator begin() const noexcept;
+    constexpr iterator       end() noexcept;
+    constexpr const_iterator end() const noexcept;
+
     /// Returns the contained value if there is one, otherwise throws
     /// bad_optional_access
     constexpr T& value() & {
@@ -501,15 +508,6 @@ class optional {
         construct(il, std::forward<Args>(args)...);
         return value();
     }
-
-    // Since P3168R2: Give std::optional Range Support.
-    // [optional.iterators], iterator support
-    constexpr iterator       begin() noexcept { return iterator(has_value() ? std::addressof(value_) : nullptr); }
-    constexpr const_iterator begin() const noexcept {
-        return const_iterator(has_value() ? std::addressof(value_) : nullptr);
-    }
-    constexpr iterator       end() noexcept { return begin() + has_value(); }
-    constexpr const_iterator end() const noexcept { return begin() + has_value(); }
 
     /// Returns a pointer to the stored value
     constexpr const T* operator->() const { return std::addressof(value_); }
@@ -787,6 +785,28 @@ inline constexpr void beman::optional26::optional<T>::swap(beman::optional26::op
         rhs.value_.T::~T();
     }
     swap(engaged_, rhs.engaged_);
+}
+
+// 22.5.3.6 Iterator support[optional.iterators]
+// Since P3168R2: Give std::optional Range Support.
+template <typename T>
+inline constexpr beman::optional26::optional<T>::iterator beman::optional26::optional<T>::begin() noexcept {
+    return iterator(has_value() ? std::addressof(value_) : nullptr);
+}
+
+template <typename T>
+inline constexpr beman::optional26::optional<T>::const_iterator
+beman::optional26::optional<T>::begin() const noexcept {
+    return const_iterator(has_value() ? std::addressof(value_) : nullptr);
+}
+template <typename T>
+inline constexpr beman::optional26::optional<T>::iterator beman::optional26::optional<T>::end() noexcept {
+    return begin() + has_value();
+}
+
+template <typename T>
+inline constexpr beman::optional26::optional<T>::const_iterator beman::optional26::optional<T>::end() const noexcept {
+    return begin() + has_value();
 }
 
 namespace beman::optional26 {
