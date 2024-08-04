@@ -372,109 +372,27 @@ class optional {
     template <class U>
     constexpr T value_or(U&& u) &&;
 
+    // [optional.monadic], monadic operations
     template <class F>
-    constexpr auto and_then(F&& f) & {
-        using U = std::invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
-        if (has_value()) {
-            return std::invoke(std::forward<F>(f), value_);
-        } else {
-            return std::remove_cvref_t<U>();
-        }
-    }
-
+    constexpr auto and_then(F&& f) &;
     template <class F>
-    constexpr auto and_then(F&& f) && {
-        using U = std::invoke_result_t<F, T&&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
-        if (has_value()) {
-            return std::invoke(std::forward<F>(f), std::move(value_));
-        } else {
-            return std::remove_cvref_t<U>();
-        }
-    }
-
+    constexpr auto and_then(F&& f) &&;
     template <class F>
-    constexpr auto and_then(F&& f) const& {
-        using U = std::invoke_result_t<F, const T&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
-        if (has_value()) {
-            return std::invoke(std::forward<F>(f), value_);
-        } else {
-            return std::remove_cvref_t<U>();
-        }
-    }
-
+    constexpr auto and_then(F&& f) const&;
     template <class F>
-    constexpr auto and_then(F&& f) const&& {
-        using U = std::invoke_result_t<F, const T&&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
-        if (has_value()) {
-            return std::invoke(std::forward<F>(f), std::move(value_));
-        } else {
-            return std::remove_cvref_t<U>();
-        }
-    }
-
-    /// Carries out some operation on the stored object if there is one.
+    constexpr auto and_then(F&& f) const&&;
     template <class F>
-    constexpr auto transform(F&& f) & {
-        using U = std::invoke_result_t<F, T&>;
-        static_assert(!std::is_array_v<U>);
-        static_assert(!std::is_same_v<U, in_place_t>);
-        static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
-        return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
-    }
-
+    constexpr auto transform(F&& f) &;
     template <class F>
-    constexpr auto transform(F&& f) && {
-        using U = std::invoke_result_t<F, T&&>;
-        static_assert(!std::is_array_v<U>);
-        static_assert(!std::is_same_v<U, in_place_t>);
-        static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
-        return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), std::move(value_))} : optional<U>{};
-    }
-
+    constexpr auto transform(F&& f) &&;
     template <class F>
-    constexpr auto transform(F&& f) const& {
-        using U = std::invoke_result_t<F, const T&>;
-        static_assert(!std::is_array_v<U>);
-        static_assert(!std::is_same_v<U, in_place_t>);
-        static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
-        return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
-    }
-
+    constexpr auto transform(F&& f) const&;
     template <class F>
-    constexpr auto transform(F&& f) const&& {
-        using U = std::invoke_result_t<F, const T&>;
-        static_assert(!std::is_array_v<U>);
-        static_assert(!std::is_same_v<U, in_place_t>);
-        static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
-        return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
-    }
-
-    /// Calls `f` if the optional is empty
+    constexpr auto transform(F&& f) const&&;
     template <class F>
-    constexpr optional<T> or_else(F&& f) const& {
-        static_assert(std::is_same_v<std::remove_cvref_t<std::invoke_result_t<F>>, optional>);
-        if (has_value())
-            return value_;
-
-        return std::forward<F>(f)();
-    }
-
+    constexpr optional or_else(F&& f) const&;
     template <class F>
-    constexpr optional<T> or_else(F&& f) && {
-        static_assert(std::is_same_v<std::remove_cvref_t<std::invoke_result_t<F>>, optional>);
-        if (has_value())
-            return std::move(value_);
-
-        return std::forward<F>(f)();
-    }
+    constexpr optional or_else(F&& f) &&;
 
     /// Constructs the value in-place, destroying the current one if there is
     /// one.
@@ -851,6 +769,121 @@ template <class U>
 inline constexpr T beman::optional26::optional<T>::value_or(U&& u) && {
     static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>);
     return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
+}
+
+// 22.5.3.8 Monadic operations[optional.monadic]
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T>::and_then(F&& f) & {
+    using U = std::invoke_result_t<F, T&>;
+    static_assert(detail::is_optional<std::remove_cvref_t<U>>);
+    if (has_value()) {
+        return std::invoke(std::forward<F>(f), value_);
+    } else {
+        return std::remove_cvref_t<U>();
+    }
+}
+
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T>::and_then(F&& f) && {
+    using U = std::invoke_result_t<F, T&&>;
+    static_assert(detail::is_optional<std::remove_cvref_t<U>>);
+    if (has_value()) {
+        return std::invoke(std::forward<F>(f), std::move(value_));
+    } else {
+        return std::remove_cvref_t<U>();
+    }
+}
+
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T>::and_then(F&& f) const& {
+    using U = std::invoke_result_t<F, const T&>;
+    static_assert(detail::is_optional<std::remove_cvref_t<U>>);
+    if (has_value()) {
+        return std::invoke(std::forward<F>(f), value_);
+    } else {
+        return std::remove_cvref_t<U>();
+    }
+}
+
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T>::and_then(F&& f) const&& {
+    using U = std::invoke_result_t<F, const T&&>;
+    static_assert(detail::is_optional<std::remove_cvref_t<U>>);
+    if (has_value()) {
+        return std::invoke(std::forward<F>(f), std::move(value_));
+    } else {
+        return std::remove_cvref_t<U>();
+    }
+}
+
+/// Carries out some operation on the stored object if there is one.
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T>::transform(F&& f) & {
+    using U = std::invoke_result_t<F, T&>;
+    static_assert(!std::is_array_v<U>);
+    static_assert(!std::is_same_v<U, in_place_t>);
+    static_assert(!std::is_same_v<U, nullopt_t>);
+    static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+    return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
+}
+
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T>::transform(F&& f) && {
+    using U = std::invoke_result_t<F, T&&>;
+    static_assert(!std::is_array_v<U>);
+    static_assert(!std::is_same_v<U, in_place_t>);
+    static_assert(!std::is_same_v<U, nullopt_t>);
+    static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+    return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), std::move(value_))} : optional<U>{};
+}
+
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T>::transform(F&& f) const& {
+    using U = std::invoke_result_t<F, const T&>;
+    static_assert(!std::is_array_v<U>);
+    static_assert(!std::is_same_v<U, in_place_t>);
+    static_assert(!std::is_same_v<U, nullopt_t>);
+    static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+    return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
+}
+
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T>::transform(F&& f) const&& {
+    using U = std::invoke_result_t<F, const T&>;
+    static_assert(!std::is_array_v<U>);
+    static_assert(!std::is_same_v<U, in_place_t>);
+    static_assert(!std::is_same_v<U, nullopt_t>);
+    static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+    return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
+}
+
+/// Calls `f` if the optional is empty
+template <typename T>
+template <class F>
+constexpr beman::optional26::optional<T> beman::optional26::optional<T>::or_else(F&& f) const& {
+    static_assert(std::is_same_v<std::remove_cvref_t<std::invoke_result_t<F>>, optional>);
+    if (has_value())
+        return value_;
+
+    return std::forward<F>(f)();
+}
+
+template <typename T>
+template <class F>
+constexpr beman::optional26::optional<T> beman::optional26::optional<T>::or_else(F&& f) && {
+    static_assert(std::is_same_v<std::remove_cvref_t<std::invoke_result_t<F>>, optional>);
+    if (has_value())
+        return std::move(value_);
+
+    return std::forward<F>(f)();
 }
 
 namespace beman::optional26 {
