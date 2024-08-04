@@ -345,6 +345,14 @@ class optional {
     constexpr optional& operator=(optional<U>&& rhs)
         requires detail::enable_assign_from_other<T, U, U>;
 
+    /// Constructs the value in-place, destroying the current one if there is
+    /// one.
+    template <class... Args>
+    constexpr T& emplace(Args&&... args);
+
+    template <class U, class... Args>
+    constexpr T& emplace(std::initializer_list<U> il, Args&&... args);
+
     // [optional.swap], swap
     constexpr void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
                                                 std::is_nothrow_swappable<T>::value);
@@ -393,24 +401,6 @@ class optional {
     constexpr optional or_else(F&& f) const&;
     template <class F>
     constexpr optional or_else(F&& f) &&;
-
-    /// Constructs the value in-place, destroying the current one if there is
-    /// one.
-    template <class... Args>
-    constexpr T& emplace(Args&&... args) {
-        static_assert(std::is_constructible_v<T, Args&&...>);
-        *this = nullopt;
-        construct(std::forward<Args>(args)...);
-        return value();
-    }
-
-    template <class U, class... Args>
-    constexpr T& emplace(std::initializer_list<U> il, Args&&... args) {
-        static_assert(std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>);
-        *this = nullopt;
-        construct(il, std::forward<Args>(args)...);
-        return value();
-    }
 
     constexpr void reset() noexcept {
         if constexpr (!std::is_trivially_destructible_v<T>) {
@@ -645,6 +635,26 @@ beman::optional26::optional<T>::operator=(beman::optional26::optional<U>&& rhs)
     }
 
     return *this;
+}
+
+/// Constructs the value in-place, destroying the current one if there is
+/// one.
+template <typename T>
+template <class... Args>
+constexpr T& beman::optional26::optional<T>::emplace(Args&&... args) {
+    static_assert(std::is_constructible_v<T, Args&&...>);
+    *this = nullopt;
+    construct(std::forward<Args>(args)...);
+    return value();
+}
+
+template <typename T>
+template <class U, class... Args>
+constexpr T& beman::optional26::optional<T>::emplace(std::initializer_list<U> il, Args&&... args) {
+    static_assert(std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>);
+    *this = nullopt;
+    construct(il, std::forward<Args>(args)...);
+    return value();
 }
 
 // 22.5.3.5 Swap[optional.swap]
