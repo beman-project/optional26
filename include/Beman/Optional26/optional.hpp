@@ -182,14 +182,23 @@ constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x
 
 // [optional.specalg], specialized algorithms
 template <class T>
-constexpr void swap(optional<T>& x, optional<T>& y) noexcept(noexcept(noexcept(x.swap(y))));
+constexpr void swap(optional<T>& x, optional<T>& y) noexcept(noexcept(x.swap(y)))
+    requires std::is_move_constructible_v<T> && std::is_swappable_v<T>;
 
 template <class T>
-constexpr optional<decay_t<T>> make_optional(T&&);
+constexpr optional<decay_t<T>>
+make_optional(T&&) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
+    requires std::is_constructible_v<std::decay_t<T>, T>;
+
 template <class T, class... Args>
-constexpr optional<T> make_optional(Args&&... args);
+constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
+    requires std::is_constructible_v<T, Args...>;
+
 template <class T, class U, class... Args>
-constexpr optional<T> make_optional(initializer_list<U> il, Args&&... args);
+constexpr optional<T>
+make_optional(initializer_list<U> il,
+              Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
+    requires std::is_constructible_v<T, std::initializer_list<U>&, Args...>;
 
 // [optional.hash], hash support
 template <class T>
@@ -901,191 +910,205 @@ constexpr void beman::optional26::optional<T>::reset() noexcept {
     engaged_ = false;
 }
 
+// 22.5.4 No-value state indicator[optional.nullopt]
 
-namespace beman::optional26 {
+// 22.5.5 Class bad_optional_access[optional.bad.access]
 
 // 22.5.6 Relational operators[optional.relops]
 template <typename T, typename U>
-constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator==(const beman::optional26::optional<T>& lhs,
+                                             const beman::optional26::optional<U>& rhs)
     requires detail::optional_eq_rel<T, U>
 {
     return static_cast<bool>(lhs) == static_cast<bool>(rhs) && (!lhs || *lhs == *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator!=(const beman::optional26::optional<T>& lhs,
+                                             const beman::optional26::optional<U>& rhs)
     requires detail::optional_ne_rel<T, U>
 {
     return static_cast<bool>(lhs) != static_cast<bool>(rhs) || (static_cast<bool>(lhs) && *lhs != *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool operator<(const optional<T>& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator<(const beman::optional26::optional<T>& lhs,
+                                            const beman::optional26::optional<U>& rhs)
     requires detail::optional_lt_rel<T, U>
 {
     return static_cast<bool>(rhs) && (!lhs || *lhs < *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool operator>(const optional<T>& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator>(const beman::optional26::optional<T>& lhs,
+                                            const beman::optional26::optional<U>& rhs)
     requires detail::optional_gt_rel<T, U>
 {
     return static_cast<bool>(lhs) && (!rhs || *lhs > *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool operator<=(const optional<T>& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator<=(const beman::optional26::optional<T>& lhs,
+                                             const beman::optional26::optional<U>& rhs)
     requires detail::optional_le_rel<T, U>
 {
     return !lhs || (static_cast<bool>(rhs) && *lhs <= *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator>=(const beman::optional26::optional<T>& lhs,
+                                             const beman::optional26::optional<U>& rhs)
     requires detail::optional_ge_rel<T, U>
 {
     return !rhs || (static_cast<bool>(lhs) && *lhs >= *rhs);
 }
 
 template <typename T, std::three_way_comparable_with<T> U>
-constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const optional<U>& y) {
+constexpr std::compare_three_way_result_t<T, U>
+beman::optional26::operator<=>(const beman::optional26::optional<T>& x, const beman::optional26::optional<U>& y) {
     return x && y ? *x <=> *y : bool(x) <=> bool(y);
 }
 
 // 22.5.7 Comparison with nullopt[optional.nullops]
 template <typename T>
-constexpr bool operator==(const optional<T>& lhs, nullopt_t) noexcept {
+constexpr bool beman::optional26::operator==(const beman::optional26::optional<T>& lhs,
+                                             beman::optional26::nullopt_t) noexcept {
     return !lhs;
 }
 
 template <typename T>
-constexpr std::strong_ordering operator<=>(const optional<T>& x, nullopt_t) noexcept {
+constexpr std::strong_ordering beman::optional26::operator<=>(const beman::optional26::optional<T>& x,
+                                                              beman::optional26::nullopt_t) noexcept {
     return bool(x) <=> false;
 }
 
 // 22.5.8 Comparison with T[optional.comp.with.t]
 template <typename T, typename U>
-constexpr bool operator==(const optional<T>& lhs, const U& rhs)
+constexpr bool beman::optional26::operator==(const beman::optional26::optional<T>& lhs, const U& rhs)
     requires detail::optional_eq_rel<T, U>
 {
     return lhs && *lhs == rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator==(const T& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator==(const T& lhs, const beman::optional26::optional<U>& rhs)
     requires detail::optional_eq_rel<T, U>
 {
     return rhs && lhs == *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator!=(const optional<T>& lhs, const U& rhs)
+constexpr bool beman::optional26::operator!=(const beman::optional26::optional<T>& lhs, const U& rhs)
     requires detail::optional_ne_rel<T, U>
 {
     return !lhs || *lhs != rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator!=(const T& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator!=(const T& lhs, const beman::optional26::optional<U>& rhs)
     requires detail::optional_ne_rel<T, U>
 {
     return !rhs || lhs != *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator<(const optional<T>& lhs, const U& rhs)
+constexpr bool beman::optional26::operator<(const beman::optional26::optional<T>& lhs, const U& rhs)
     requires detail::optional_lt_rel<T, U>
 {
     return !lhs || *lhs < rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator<(const T& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator<(const T& lhs, const beman::optional26::optional<U>& rhs)
     requires detail::optional_lt_rel<T, U>
 {
     return rhs && lhs < *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator>(const optional<T>& lhs, const U& rhs)
+constexpr bool beman::optional26::operator>(const beman::optional26::optional<T>& lhs, const U& rhs)
     requires detail::optional_gt_rel<T, U>
 {
     return lhs && *lhs > rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator>(const T& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator>(const T& lhs, const beman::optional26::optional<U>& rhs)
     requires detail::optional_gt_rel<T, U>
 {
     return !rhs || lhs > *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator<=(const optional<T>& lhs, const U& rhs)
+constexpr bool beman::optional26::operator<=(const beman::optional26::optional<T>& lhs, const U& rhs)
     requires detail::optional_le_rel<T, U>
 {
     return !lhs || *lhs <= rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator<=(const T& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator<=(const T& lhs, const beman::optional26::optional<U>& rhs)
     requires detail::optional_le_rel<T, U>
 {
     return rhs && lhs <= *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator>=(const optional<T>& lhs, const U& rhs)
+constexpr bool beman::optional26::operator>=(const beman::optional26::optional<T>& lhs, const U& rhs)
     requires detail::optional_ge_rel<T, U>
 {
     return lhs && *lhs >= rhs;
 }
 
 template <typename T, typename U>
-constexpr bool operator>=(const T& lhs, const optional<U>& rhs)
+constexpr bool beman::optional26::operator>=(const T& lhs, const beman::optional26::optional<U>& rhs)
     requires detail::optional_ge_rel<T, U>
 {
     return !rhs || lhs >= *rhs;
 }
 
 template <typename T, typename U>
-    requires(!is_derived_from_optional<U>) && std::three_way_comparable_with<T, U>
-constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const U& v) {
+    requires(!beman::optional26::is_derived_from_optional<U>) && std::three_way_comparable_with<T, U>
+constexpr std::compare_three_way_result_t<T, U> operator<=>(const beman::optional26::optional<T>& x, const U& v) {
     return bool(x) ? *x <=> v : std::strong_ordering::less;
 }
 
 // 22.5.9 Specialized algorithms[optional.specalg]
 
 template <class T>
-void swap(optional<T>& lhs, optional<T>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+constexpr void beman::optional26::swap(beman::optional26::optional<T>& lhs,
+                                       beman::optional26::optional<T>& rhs) noexcept(noexcept(lhs.swap(rhs)))
     requires std::is_move_constructible_v<T> && std::is_swappable_v<T>
 {
     return lhs.swap(rhs);
 }
 
 template <typename T>
-constexpr optional<std::decay_t<T>>
-make_optional(T&& t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
+constexpr beman::optional26::optional<std::decay_t<T>>
+beman::optional26::make_optional(T&& t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
     requires std::is_constructible_v<std::decay_t<T>, T>
 {
     return optional<std::decay_t<T>>{std::forward<T>(t)};
 }
 
 template <typename T, typename... Args>
-constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
+constexpr beman::optional26::optional<T>
+beman::optional26::make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
     requires std::is_constructible_v<T, Args...>
 {
     return optional<T>{in_place, std::forward<Args>(args)...};
 }
 
-template <typename T, typename _Up, typename... Args>
-constexpr optional<T>
-make_optional(std::initializer_list<_Up> init_list,
-              Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<_Up>&, Args...>)
-    requires std::is_constructible_v<T, std::initializer_list<_Up>&, Args...>
+template <typename T, typename U, typename... Args>
+constexpr beman::optional26::optional<T> beman::optional26::make_optional(
+    std::initializer_list<U> init_list,
+    Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
+    requires std::is_constructible_v<T, std::initializer_list<U>&, Args...>
 {
     return optional<T>{in_place, init_list, std::forward<Args>(args)...};
 }
+
+namespace beman::optional26 {
 
 namespace detail {
 template <class Opt, class F, class Ret = decltype(std::invoke(std::declval<F>(), *std::declval<Opt>()))>
