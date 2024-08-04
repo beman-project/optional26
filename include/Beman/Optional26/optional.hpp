@@ -356,36 +356,21 @@ class optional {
     constexpr iterator       end() noexcept;
     constexpr const_iterator end() const noexcept;
 
-    /// Returns the contained value if there is one, otherwise throws
-    /// bad_optional_access
-    constexpr T& value() & {
-        if (has_value())
-            return value_;
-        throw bad_optional_access();
-    }
-    constexpr const T& value() const& {
-        if (has_value())
-            return value_;
-        throw bad_optional_access();
-    }
-    constexpr T&& value() && {
-        if (has_value())
-            return std::move(value_);
-        throw bad_optional_access();
-    }
-
-    /// Returns the stored value if there is one, otherwise returns `u`
+    // [optional.observe], observers
+    constexpr const T* operator->() const;
+    constexpr T*       operator->();
+    constexpr T&       operator*() &;
+    constexpr const T& operator*() const&;
+    constexpr T&&      operator*() &&;
+    constexpr explicit operator bool() const noexcept;
+    constexpr bool     has_value() const noexcept;
+    constexpr T&       value() &;
+    constexpr const T& value() const&;
+    constexpr T&&      value() &&;
     template <class U>
-    constexpr T value_or(U&& u) const& {
-        static_assert(std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>);
-        return has_value() ? value() : static_cast<T>(std::forward<U>(u));
-    }
-
+    constexpr T value_or(U&& u) const&;
     template <class U>
-    constexpr T value_or(U&& u) && {
-        static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>);
-        return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
-    }
+    constexpr T value_or(U&& u) &&;
 
     template <class F>
     constexpr auto and_then(F&& f) & {
@@ -508,23 +493,6 @@ class optional {
         construct(il, std::forward<Args>(args)...);
         return value();
     }
-
-    /// Returns a pointer to the stored value
-    constexpr const T* operator->() const { return std::addressof(value_); }
-
-    constexpr T* operator->() { return std::addressof(value_); }
-
-    /// Returns the stored value
-    constexpr T& operator*() & { return value_; }
-
-    constexpr const T& operator*() const& { return value_; }
-
-    constexpr T&& operator*() && { return std::move(value_); }
-
-    /// Returns whether or not the optional has a value
-    constexpr bool has_value() const noexcept { return engaged_; }
-
-    constexpr explicit operator bool() const noexcept { return engaged_; }
 
     constexpr void reset() noexcept {
         if constexpr (!std::is_trivially_destructible_v<T>) {
@@ -807,6 +775,82 @@ inline constexpr beman::optional26::optional<T>::iterator beman::optional26::opt
 template <typename T>
 inline constexpr beman::optional26::optional<T>::const_iterator beman::optional26::optional<T>::end() const noexcept {
     return begin() + has_value();
+}
+
+// 22.5.3.7 Observers[optional.observe]
+
+/// Returns a pointer to the stored value
+template <typename T>
+inline constexpr const T* beman::optional26::optional<T>::operator->() const {
+    return std::addressof(value_);
+}
+
+template <typename T>
+inline constexpr T* beman::optional26::optional<T>::operator->() {
+    return std::addressof(value_);
+}
+
+/// Returns the stored value
+template <typename T>
+inline constexpr T& beman::optional26::optional<T>::operator*() & {
+    return value_;
+}
+
+template <typename T>
+inline constexpr const T& beman::optional26::optional<T>::operator*() const& {
+    return value_;
+}
+
+template <typename T>
+inline constexpr T&& beman::optional26::optional<T>::operator*() && {
+    return std::move(value_);
+}
+
+template <typename T>
+inline constexpr beman::optional26::optional<T>::operator bool() const noexcept {
+    return engaged_;
+}
+
+/// Returns whether or not the optional has a value
+template <typename T>
+inline constexpr bool beman::optional26::optional<T>::has_value() const noexcept {
+    return engaged_;
+}
+
+/// Returns the contained value if there is one, otherwise throws
+/// bad_optional_access
+template <typename T>
+inline constexpr T& beman::optional26::optional<T>::value() & {
+    if (has_value())
+        return value_;
+    throw bad_optional_access();
+}
+template <typename T>
+inline constexpr const T& beman::optional26::optional<T>::value() const& {
+    if (has_value())
+        return value_;
+    throw bad_optional_access();
+}
+template <typename T>
+inline constexpr T&& beman::optional26::optional<T>::value() && {
+    if (has_value())
+        return std::move(value_);
+    throw bad_optional_access();
+}
+
+/// Returns the stored value if there is one, otherwise returns `u`
+template <typename T>
+template <class U>
+inline constexpr T beman::optional26::optional<T>::value_or(U&& u) const& {
+    static_assert(std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>);
+    return has_value() ? value() : static_cast<T>(std::forward<U>(u));
+}
+
+template <typename T>
+template <class U>
+inline constexpr T beman::optional26::optional<T>::value_or(U&& u) && {
+    static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>);
+    return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
 }
 
 namespace beman::optional26 {
