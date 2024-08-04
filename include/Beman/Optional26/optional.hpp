@@ -26,8 +26,6 @@ using std::three_way_comparable_with;
 } // namespace
 
 namespace detail {
-class monostate {};
-
 template <typename T, typename U>
 concept optional_eq_rel = requires(const T& t, const U& u) {
     { t == u } -> std::convertible_to<bool>;
@@ -1110,26 +1108,6 @@ constexpr beman::optional26::optional<T> beman::optional26::make_optional(
 
 namespace beman::optional26 {
 
-namespace detail {
-template <class Opt, class F, class Ret = decltype(std::invoke(std::declval<F>(), *std::declval<Opt>()))>
-constexpr auto optional_map_impl(Opt&& opt, F&& f)
-    requires(!std::is_void_v<Ret>)
-{
-    return opt.has_value() ? std::invoke(std::forward<F>(f), *std::forward<Opt>(opt)) : optional<Ret>(nullopt);
-}
-
-template <class Opt, class F, class Ret = decltype(std::invoke(std::declval<F>(), *std::declval<Opt>()))>
-auto optional_map_impl(Opt&& opt, F&& f)
-    requires std::is_void_v<Ret>
-{
-    if (opt.has_value()) {
-        std::invoke(std::forward<F>(f), *std::forward<Opt>(opt));
-        return make_optional(detail::monostate{});
-    }
-
-    return optional<detail::monostate>{nullopt};
-}
-} // namespace detail
 
 /****************/
 /* optional<T&> */
