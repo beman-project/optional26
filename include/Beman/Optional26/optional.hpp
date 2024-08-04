@@ -1139,9 +1139,6 @@ class optional<T&> {
     using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional_ref.iterators]
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional_ref.iterators]
 
-  private:
-    T* value_; // exposition only
-
   public:
     //  \rSec3[optional_ref.ctor]{Constructors}
 
@@ -1208,6 +1205,9 @@ class optional<T&> {
 
     // \rSec3[optional.mod]{modifiers}
     constexpr void reset() noexcept;
+
+  private:
+    T* value_; // exposition only
 };
 
 } // namespace beman::optional26
