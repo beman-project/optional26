@@ -1180,60 +1180,34 @@ class optional<T&> {
 
     //   \rSec3[optional_ref.swap]{Swap}
 
-    constexpr void swap(optional& rhs) noexcept { std::swap(value_, rhs.value_); }
+    constexpr void swap(optional& rhs) noexcept;
 
-    // Since ${PAPER_NUMBER}: ${PAPER_TITLE}.
-    // Note: P3168 and P2988 may have different flows inside LEWG/LWG.
-    // Implementation of the range support for optional<T&> reflects P3168R2 for now.
     // [optional_ref.iterators], iterator support
-    constexpr iterator       begin() noexcept { return iterator(has_value() ? value_ : nullptr); };
-    constexpr const_iterator begin() const noexcept { return const_iterator(has_value() ? value_ : nullptr); };
-    constexpr iterator       end() noexcept { return begin() + has_value(); }
-    constexpr const_iterator end() const noexcept { return begin() + has_value(); }
+    constexpr iterator       begin() noexcept;
+    constexpr const_iterator begin() const noexcept;
+    constexpr iterator       end() noexcept;
+    constexpr const_iterator end() const noexcept;
 
     // \rSec3[optional_ref.observe]{Observers}
-    constexpr T* operator->() const noexcept { return value_; }
-
-    constexpr T& operator*() const noexcept { return *value_; }
-
-    constexpr explicit operator bool() const noexcept { return value_ != nullptr; }
-    constexpr bool     has_value() const noexcept { return value_ != nullptr; }
-
-    constexpr T& value() const {
-        if (has_value())
-            return *value_;
-        throw bad_optional_access();
-    }
-
+    constexpr T*       operator->() const noexcept;
+    constexpr T&       operator*() const noexcept;
+    constexpr explicit operator bool() const noexcept;
+    constexpr bool     has_value() const noexcept;
+    constexpr T&       value() const;
     template <class U>
-    constexpr T value_or(U&& u) const {
-        static_assert(is_constructible_v<add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
-        return has_value() ? *value_ : std::forward<U>(u);
-    }
+    constexpr T value_or(U&& u) const;
 
     //   \rSec3[optional_ref.monadic]{Monadic operations}
+    template <class F>
+    constexpr auto and_then(F&& f) const;
+    template <class F>
+    constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
 
     template <class F>
-    constexpr auto and_then(F&& f) const {
-        using U = invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<U>, "F must return an optional");
-        return (has_value()) ? invoke(std::forward<F>(f), *value_) : remove_cvref_t<U>();
-    }
+    constexpr optional or_else(F&& f) const;
 
-    template <class F>
-    constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>> {
-        using U = invoke_result_t<F, T&>;
-        return (has_value()) ? optional<U>{invoke(std::forward<F>(f), *value_)} : optional<U>{};
-    }
-
-    template <class F>
-    constexpr optional or_else(F&& f) const {
-        using U = invoke_result_t<F>;
-        static_assert(is_same_v<remove_cvref_t<U>, optional>);
-        return has_value() ? *value_ : std::forward<F>(f)();
-    }
-
-    constexpr void reset() noexcept { value_ = nullptr; }
+    // \rSec3[optional.mod]{modifiers}
+    constexpr void reset() noexcept;
 };
 
 } // namespace beman::optional26
@@ -1294,5 +1268,95 @@ template <class U>
 constexpr beman::optional26::optional<T&>& beman::optional26::optional<T&>::emplace(U&& u) noexcept {
     return *this = std::forward<U>(u);
 }
+
+//   \rSec3[optional_ref.swap]{Swap}
+
+template <typename T>
+constexpr void beman::optional26::optional<T&>::swap(beman::optional26::optional<T&>& rhs) noexcept {
+    std::swap(value_, rhs.value_);
+}
+
+// \rSec3[optional_ref.iterators]{Iterator Support}
+template <typename T>
+constexpr beman::optional26::optional<T&>::iterator beman::optional26::optional<T&>::begin() noexcept {
+    return iterator(has_value() ? value_ : nullptr);
+};
+
+template <typename T>
+constexpr beman::optional26::optional<T&>::const_iterator beman::optional26::optional<T&>::begin() const noexcept {
+    return const_iterator(has_value() ? value_ : nullptr);
+};
+
+template <typename T>
+constexpr beman::optional26::optional<T&>::iterator beman::optional26::optional<T&>::end() noexcept {
+    return begin() + has_value();
+}
+
+template <typename T>
+constexpr beman::optional26::optional<T&>::const_iterator beman::optional26::optional<T&>::end() const noexcept {
+    return begin() + has_value();
+}
+
+// \rSec3[optional_ref.observe]{Observers}
+template <typename T>
+constexpr T* beman::optional26::optional<T&>::operator->() const noexcept {
+    return value_;
+}
+
+template <typename T>
+constexpr T& beman::optional26::optional<T&>::operator*() const noexcept {
+    return *value_;
+}
+
+template <typename T>
+constexpr beman::optional26::optional<T&>::operator bool() const noexcept {
+    return value_ != nullptr;
+}
+template <typename T>
+constexpr bool beman::optional26::optional<T&>::has_value() const noexcept {
+    return value_ != nullptr;
+}
+
+template <typename T>
+constexpr T& beman::optional26::optional<T&>::value() const {
+    if (has_value())
+        return *value_;
+    throw bad_optional_access();
+}
+
+template <typename T>
+template <class U>
+constexpr T beman::optional26::optional<T&>::value_or(U&& u) const {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
+    return has_value() ? *value_ : std::forward<U>(u);
+}
+
+//   \rSec3[optional_ref.monadic]{Monadic operations}
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T&>::and_then(F&& f) const {
+    using U = invoke_result_t<F, T&>;
+    static_assert(detail::is_optional<U>, "F must return an optional");
+    return (has_value()) ? invoke(std::forward<F>(f), *value_) : remove_cvref_t<U>();
+}
+
+template <typename T>
+template <class F>
+constexpr auto beman::optional26::optional<T&>::transform(F&& f) const -> optional<invoke_result_t<F, T&>> {
+    using U = invoke_result_t<F, T&>;
+    return (has_value()) ? optional<U>{invoke(std::forward<F>(f), *value_)} : optional<U>{};
+}
+
+template <typename T>
+template <class F>
+constexpr beman::optional26::optional<T&> beman::optional26::optional<T&>::or_else(F&& f) const {
+    using U = invoke_result_t<F>;
+    static_assert(is_same_v<remove_cvref_t<U>, optional>);
+    return has_value() ? *value_ : std::forward<F>(f)();
+}
+
+// \rSec3[optional.mod]{modifiers}
+template <typename T>
+constexpr void beman::optional26::optional<T&>::reset() noexcept { value_ = nullptr; }
 
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP
