@@ -127,7 +127,7 @@ concept is_derived_from_optional = requires(const T& t) { // exposition only
     []<class U>(const optional<U>&) {}(t);
 };
 
-// [optional.nullopt], no-value state indicator
+// \ref{optional.nullopt}, no-value state indicator
 struct nullopt_t {
     // Used for constructing nullopt.
     enum class Tag { tag };
@@ -139,10 +139,10 @@ struct nullopt_t {
 /// Tag to disengage optional objects.
 inline constexpr nullopt_t nullopt{nullopt_t::Tag::tag};
 
-// [optional.bad.access], class bad_optional_access
+// \ref{optional.bad.access}, class bad_optional_access
 class bad_optional_access;
 
-// [optional.relops], relational operators
+// \ref{optional.relops}, relational operators
 template <typename T, typename U>
 constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs)
     requires detail::optional_eq_rel<T, U>;
@@ -164,13 +164,13 @@ constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs)
 template <class T, three_way_comparable_with<T> U>
 constexpr compare_three_way_result_t<T, U> operator<=>(const optional<T>&, const optional<U>&);
 
-// [optional.nullops], comparison with nullopt
+// \ref{optional.nullops}, comparison with \tcode{nullopt}
 template <class T>
 constexpr bool operator==(const optional<T>&, nullopt_t) noexcept;
 template <class T>
 constexpr strong_ordering operator<=>(const optional<T>&, nullopt_t) noexcept;
 
-// [optional.comp.with.t], comparison with T
+// \ref{optional.comp.with.t}, comparison with \tcode{T}
 template <typename T, typename U>
 constexpr bool operator==(const optional<T>& lhs, const U& rhs)
     requires detail::optional_eq_rel<T, U>;
@@ -211,7 +211,7 @@ template <typename T, typename U>
     requires(!is_derived_from_optional<U>) && three_way_comparable_with<T, U>
 constexpr compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const U& v);
 
-// [optional.specalg], specialized algorithms
+// \ref{optional.specalg}, specialized algorithms
 template <class T>
 constexpr void swap(optional<T>& x, optional<T>& y) noexcept(noexcept(x.swap(y)))
     requires is_move_constructible_v<T> && is_swappable_v<T>;
@@ -230,7 +230,7 @@ make_optional(initializer_list<U> il,
               Args&&... args) noexcept(is_nothrow_constructible_v<T, initializer_list<U>&, Args...>)
     requires is_constructible_v<T, initializer_list<U>&, Args...>;
 
-// [optional.hash], hash support
+// \ref{optional.hash}, hash support
 template <class T>
 struct hash;
 template <class T>
@@ -289,29 +289,23 @@ class optional {
   public:
     using value_type = T;
     // Since P3168R2: Give std::optional Range Support.
-    using iterator       = detail::contiguous_iterator<T, optional>;       // see [optional.iterators]
-    using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
+    using iterator       = detail::contiguous_iterator<T, optional>;       // see~\ref{optional.iterators}
+    using const_iterator = detail::contiguous_iterator<const T, optional>; // see~\ref{optional.iterators}
 
-    // [optional.ctor], constructors
+    // \ref{optional.ctor}, constructors
     constexpr optional() noexcept;
-
     constexpr optional(nullopt_t) noexcept;
-
     constexpr optional(const optional& rhs)
         requires is_copy_constructible_v<T> && (!is_trivially_copy_constructible_v<T>);
-
     constexpr optional(const optional&)
         requires is_copy_constructible_v<T> && is_trivially_copy_constructible_v<T>
     = default;
-
     constexpr optional(optional&& rhs) noexcept(is_nothrow_move_constructible_v<T>)
         requires is_move_constructible_v<T> && (!is_trivially_move_constructible_v<T>);
-
     constexpr optional(optional&&)
         requires is_move_constructible_v<T> && is_trivially_move_constructible_v<T>
     = default;
 
-    /// Constructs the stored value in-place using the given arguments.
     template <class... Args>
     constexpr explicit optional(in_place_t, Args&&... args)
         requires is_constructible_v<T, Args...>;
@@ -320,12 +314,10 @@ class optional {
     constexpr explicit optional(in_place_t, initializer_list<U> il, Args&&... args)
         requires is_constructible_v<T, initializer_list<U>&, Args&&...>;
 
-    /// Constructs the stored value with `u`.
     template <class U = T>
     constexpr explicit(!is_convertible_v<U, T>) optional(U&& u)
         requires detail::enable_forward_value<T, U>;
 
-    /// Converting copy constructor.
     template <class U>
     constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs)
         requires detail::enable_from_other<T, U, const U&> && is_convertible_v<const U&, T>;
@@ -334,7 +326,6 @@ class optional {
     constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs)
         requires detail::enable_from_other<T, U, const U&> && (!is_convertible_v<const U&, T>);
 
-    /// Converting move constructor.
     template <class U>
     constexpr explicit(!is_convertible_v<U, T>) optional(optional<U>&& rhs)
         requires detail::enable_from_other<T, U, U&&> && is_convertible_v<U&&, T>;
@@ -343,7 +334,7 @@ class optional {
     constexpr explicit(!is_convertible_v<U, T>) optional(optional<U>&& rhs)
         requires detail::enable_from_other<T, U, U&&> && (!is_convertible_v<U &&, T>);
 
-    // [optional.dtor], destructor
+    // \ref{optional.dtor}, destructor
     constexpr ~optional()
         requires is_trivially_destructible_v<T>
     = default;
@@ -351,7 +342,7 @@ class optional {
     constexpr ~optional()
         requires(!is_trivially_destructible_v<T>);
 
-    // [optional.assign], assignment
+    // \ref{optional.assign}, assignment
     constexpr optional& operator=(const optional& rhs)
         requires is_copy_constructible_v<T> && is_copy_assignable_v<T> && (!is_trivially_copy_assignable_v<T>);
 
@@ -380,26 +371,23 @@ class optional {
     constexpr optional& operator=(optional<U>&& rhs)
         requires detail::enable_assign_from_other<T, U, U>;
 
-    /// Constructs the value in-place, destroying the current one if there is
-    /// one.
     template <class... Args>
     constexpr T& emplace(Args&&... args);
 
     template <class U, class... Args>
     constexpr T& emplace(initializer_list<U> il, Args&&... args);
 
-    // [optional.swap], swap
+    // \ref{optional.swap}, swap
     constexpr void swap(optional& rhs) noexcept(is_nothrow_move_constructible<T>::value &&
                                                 is_nothrow_swappable<T>::value);
 
-    // [optional.iterators], iterator support
-    // Since P3168R2: Give std::optional Range Support.
+    // \ref{optional.iterators}, iterator support
     constexpr iterator       begin() noexcept;
     constexpr const_iterator begin() const noexcept;
     constexpr iterator       end() noexcept;
     constexpr const_iterator end() const noexcept;
 
-    // [optional.observe], observers
+    // \ref{optional.observe}, observers
     constexpr const T* operator->() const;
     constexpr T*       operator->();
     constexpr T&       operator*() &;
@@ -415,7 +403,7 @@ class optional {
     template <class U>
     constexpr T value_or(U&& u) &&;
 
-    // [optional.monadic], monadic operations
+    // \ref{optional.monadic}, monadic operations
     template <class F>
     constexpr auto and_then(F&& f) &;
     template <class F>
@@ -437,7 +425,7 @@ class optional {
     template <class F>
     constexpr optional or_else(F&& f) &&;
 
-    // [optional.mod], modifiers
+    // \ref{optional.mod}, modifiers
     constexpr void reset() noexcept;
 
   private:
@@ -462,7 +450,7 @@ class optional {
 
 } // namespace beman::optional26
 
-// 22.5.3.2 Constructors[optional.ctor]
+// \rSec3[optional.ctor]{Constructors}
 template <typename T>
 inline constexpr beman::optional26::optional<T>::optional() noexcept : _(), engaged_(false) {}
 
