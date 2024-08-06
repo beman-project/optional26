@@ -1,0 +1,45 @@
+# -*- mode: snippet -*-
+# contributor: Steve Downey <sdowney@gmail.com>
+# name: C++ Standard Semantics Description
+# key: \stdsem
+# group:
+# --
+/***
+ * \constraints
+ * ${1:the conditions for the function's participation in overload resolution.}
+ *
+ * \mandates
+ * ${2:the conditions that, if not met, render the program ill-formed.}
+ *
+ * \expects
+ * ${3:the conditions that the function assumes to hold whenever it is called; violation of any preconditions results in undefined behavior.}
+ *
+ * \effects
+ * ${4:the actions performed by the function.}
+ *
+ * \sync
+ * ${5:the synchronization operations applicable to the function.}
+ *
+ * \ensures
+ * ${6:the conditions (sometimes termed observable results) established by the function.}
+ *
+ * \result
+ * ${7:for a \grammarterm{typename-specifier}, a description of the named type; for an \grammarterm{expression}, a description of the type and value category of the expression; the expression is an lvalue if the type is an lvalue reference type, an xvalue if the type is an rvalue reference type, and a prvalue otherwise.}
+ *
+ * \returns
+ * ${8:a description of the value(s) returned by the function.}
+ *
+ * \throws
+ * ${9:any exceptions thrown by the function, and the conditions that would cause the exception.}
+ *
+ * \complexity
+ * ${10:the time and/or space complexity of the function.}
+ *
+ * \remarks
+ * ${11:additional semantic constraints on the function.}
+ *
+ * \errors
+ * ${12:the error conditions for error codes reported by the function.}
+ *
+ */
+$0
