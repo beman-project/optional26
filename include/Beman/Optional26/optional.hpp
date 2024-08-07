@@ -18,6 +18,7 @@
 
 namespace beman::optional26 {
 namespace {
+// Using declarations of traits used
 using std::add_lvalue_reference_t;
 using std::addressof;
 using std::compare_three_way_result_t;
@@ -99,7 +100,6 @@ inline constexpr in_place_t in_place{};
 } // namespace beman::optional26
 
 namespace beman::optional26 {
-
 template <class T>
 class optional; // partially freestanding
 } // namespace beman::optional26
@@ -448,17 +448,15 @@ class bad_optional_access : public std::exception {
     const char* what() const noexcept { return "Optional has no value"; }
 };
 
-} // namespace beman::optional26
-
 // \rSec3[optional.ctor]{Constructors}
 template <class T>
-inline constexpr beman::optional26::optional<T>::optional() noexcept : _(), engaged_(false) {}
+inline constexpr optional<T>::optional() noexcept : _(), engaged_(false) {}
 
 template <class T>
-inline constexpr beman::optional26::optional<T>::optional(nullopt_t) noexcept {}
+inline constexpr optional<T>::optional(nullopt_t) noexcept {}
 
 template <class T>
-inline constexpr beman::optional26::optional<T>::optional(const optional& rhs)
+inline constexpr optional<T>::optional(const optional& rhs)
     requires is_copy_constructible_v<T> && (!is_trivially_copy_constructible_v<T>)
 {
     if (rhs.has_value()) {
@@ -469,7 +467,7 @@ inline constexpr beman::optional26::optional<T>::optional(const optional& rhs)
 }
 
 template <class T>
-inline constexpr beman::optional26::optional<T>::optional(optional&& rhs) noexcept(is_nothrow_move_constructible_v<T>)
+inline constexpr optional<T>::optional(optional&& rhs) noexcept(is_nothrow_move_constructible_v<T>)
     requires is_move_constructible_v<T> && (!is_trivially_move_constructible_v<T>)
 {
     if (rhs.has_value()) {
@@ -481,27 +479,27 @@ inline constexpr beman::optional26::optional<T>::optional(optional&& rhs) noexce
 /// Constructs the stored value in-place using the given arguments.
 template <class T>
 template <class... Args>
-inline constexpr beman::optional26::optional<T>::optional(in_place_t, Args&&... args)
+inline constexpr optional<T>::optional(in_place_t, Args&&... args)
     requires is_constructible_v<T, Args...>
     : value_(std::forward<Args>(args)...), engaged_(true) {}
 
 template <class T>
 template <class U, class... Args>
-inline constexpr beman::optional26::optional<T>::optional(in_place_t, initializer_list<U> il, Args&&... args)
+inline constexpr optional<T>::optional(in_place_t, initializer_list<U> il, Args&&... args)
     requires is_constructible_v<T, initializer_list<U>&, Args&&...>
     : value_(il, std::forward<Args>(args)...), engaged_(true) {}
 
 /// Constructs the stored value with `u`.
 template <class T>
 template <class U>
-inline constexpr beman::optional26::optional<T>::optional(U&& u)
+inline constexpr optional<T>::optional(U&& u)
     requires detail::enable_forward_value<T, U> //&& is_convertible_v<U&&, T>
     : optional(in_place, std::forward<U>(u)) {}
 
 /// Converting copy constructor.
 template <class T>
 template <class U>
-inline constexpr beman::optional26::optional<T>::optional(const optional<U>& rhs)
+inline constexpr optional<T>::optional(const optional<U>& rhs)
     requires detail::enable_from_other<T, U, const U&> && is_convertible_v<const U&, T>
 {
     if (rhs.has_value()) {
@@ -512,7 +510,7 @@ inline constexpr beman::optional26::optional<T>::optional(const optional<U>& rhs
 
 template <class T>
 template <class U>
-inline constexpr beman::optional26::optional<T>::optional(const optional<U>& rhs)
+inline constexpr optional<T>::optional(const optional<U>& rhs)
     requires detail::enable_from_other<T, U, const U&> && (!is_convertible_v<const U&, T>)
 {
     if (rhs.has_value()) {
@@ -523,7 +521,7 @@ inline constexpr beman::optional26::optional<T>::optional(const optional<U>& rhs
 /// Converting move constructor.
 template <class T>
 template <class U>
-inline constexpr beman::optional26::optional<T>::optional(optional<U>&& rhs)
+inline constexpr optional<T>::optional(optional<U>&& rhs)
     requires detail::enable_from_other<T, U, U&&> && is_convertible_v<U&&, T>
 {
     if (rhs.has_value()) {
@@ -533,7 +531,7 @@ inline constexpr beman::optional26::optional<T>::optional(optional<U>&& rhs)
 
 template <class T>
 template <class U>
-inline constexpr beman::optional26::optional<T>::optional(optional<U>&& rhs)
+inline constexpr optional<T>::optional(optional<U>&& rhs)
     requires detail::enable_from_other<T, U, U&&> && (!is_convertible_v<U &&, T>)
 {
     if (rhs.has_value()) {
@@ -544,7 +542,7 @@ inline constexpr beman::optional26::optional<T>::optional(optional<U>&& rhs)
 // 22.5.3.3 Destructor[optional.dtor]
 
 template <class T>
-inline constexpr beman::optional26::optional<T>::~optional()
+inline constexpr optional<T>::~optional()
     requires(!is_trivially_destructible_v<T>)
 {
     if (has_value())
@@ -554,8 +552,7 @@ inline constexpr beman::optional26::optional<T>::~optional()
 // 22.5.3.4 Assignment[optional.assign]
 
 template <class T>
-inline constexpr beman::optional26::optional<T>&
-beman::optional26::optional<T>::operator=(const beman::optional26::optional<T>& rhs)
+inline constexpr optional<T>& optional<T>::operator=(const optional<T>& rhs)
     requires is_copy_constructible_v<T> && is_copy_assignable_v<T> && (!is_trivially_copy_assignable_v<T>)
 {
     if (!rhs.has_value())
@@ -568,8 +565,7 @@ beman::optional26::optional<T>::operator=(const beman::optional26::optional<T>& 
 }
 
 template <class T>
-inline constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operator=(
-    beman::optional26::optional<T>&& rhs) noexcept(is_nothrow_move_constructible_v<T>)
+inline constexpr optional<T>& optional<T>::operator=(optional<T>&& rhs) noexcept(is_nothrow_move_constructible_v<T>)
     requires is_move_constructible_v<T> && is_move_assignable_v<T> && (!is_trivially_move_assignable_v<T>)
 {
     if (!rhs.has_value())
@@ -585,7 +581,7 @@ inline constexpr beman::optional26::optional<T>& beman::optional26::optional<T>:
 /// was one.
 template <class T>
 template <class U>
-inline constexpr beman::optional26::optional<T>& beman::optional26::optional<T>::operator=(U&& u)
+inline constexpr optional<T>& optional<T>::operator=(U&& u)
     requires detail::enable_assign_forward<T, U>
 {
     if (has_value()) {
@@ -603,8 +599,7 @@ inline constexpr beman::optional26::optional<T>& beman::optional26::optional<T>:
 /// stored value in `*this`.
 template <class T>
 template <class U>
-inline constexpr beman::optional26::optional<T>&
-beman::optional26::optional<T>::operator=(const beman::optional26::optional<U>& rhs)
+inline constexpr optional<T>& optional<T>::operator=(const optional<U>& rhs)
     requires detail::enable_assign_from_other<T, U, const U&>
 {
     if (has_value()) {
@@ -628,8 +623,7 @@ beman::optional26::optional<T>::operator=(const beman::optional26::optional<U>& 
 /// value in `*this`.
 template <class T>
 template <class U>
-inline constexpr beman::optional26::optional<T>&
-beman::optional26::optional<T>::operator=(beman::optional26::optional<U>&& rhs)
+inline constexpr optional<T>& optional<T>::operator=(optional<U>&& rhs)
     requires detail::enable_assign_from_other<T, U, U>
 {
     if (has_value()) {
@@ -651,7 +645,7 @@ beman::optional26::optional<T>::operator=(beman::optional26::optional<U>&& rhs)
 /// one.
 template <class T>
 template <class... Args>
-constexpr T& beman::optional26::optional<T>::emplace(Args&&... args) {
+constexpr T& optional<T>::emplace(Args&&... args) {
     static_assert(is_constructible_v<T, Args&&...>);
     *this = nullopt;
     construct(std::forward<Args>(args)...);
@@ -660,7 +654,7 @@ constexpr T& beman::optional26::optional<T>::emplace(Args&&... args) {
 
 template <class T>
 template <class U, class... Args>
-constexpr T& beman::optional26::optional<T>::emplace(initializer_list<U> il, Args&&... args) {
+constexpr T& optional<T>::emplace(initializer_list<U> il, Args&&... args) {
     static_assert(is_constructible_v<T, initializer_list<U>&, Args&&...>);
     *this = nullopt;
     construct(il, std::forward<Args>(args)...);
@@ -675,8 +669,8 @@ constexpr T& beman::optional26::optional<T>::emplace(initializer_list<U> il, Arg
 /// If one has a value, it is moved to the other and the movee is left
 /// valueless.
 template <class T>
-inline constexpr void beman::optional26::optional<T>::swap(beman::optional26::optional<T>& rhs) noexcept(
-    is_nothrow_move_constructible<T>::value && is_nothrow_swappable<T>::value) {
+inline constexpr void optional<T>::swap(optional<T>& rhs) noexcept(is_nothrow_move_constructible<T>::value &&
+                                                                   is_nothrow_swappable<T>::value) {
     static_assert(is_move_constructible_v<T>);
     using std::swap;
     if (has_value()) {
@@ -696,22 +690,21 @@ inline constexpr void beman::optional26::optional<T>::swap(beman::optional26::op
 // 22.5.3.6 Iterator support[optional.iterators]
 // Since P3168R2: Give std::optional Range Support.
 template <class T>
-inline constexpr beman::optional26::optional<T>::iterator beman::optional26::optional<T>::begin() noexcept {
+inline constexpr optional<T>::iterator optional<T>::begin() noexcept {
     return iterator(has_value() ? addressof(value_) : nullptr);
 }
 
 template <class T>
-inline constexpr beman::optional26::optional<T>::const_iterator
-beman::optional26::optional<T>::begin() const noexcept {
+inline constexpr optional<T>::const_iterator optional<T>::begin() const noexcept {
     return const_iterator(has_value() ? addressof(value_) : nullptr);
 }
 template <class T>
-inline constexpr beman::optional26::optional<T>::iterator beman::optional26::optional<T>::end() noexcept {
+inline constexpr optional<T>::iterator optional<T>::end() noexcept {
     return begin() + has_value();
 }
 
 template <class T>
-inline constexpr beman::optional26::optional<T>::const_iterator beman::optional26::optional<T>::end() const noexcept {
+inline constexpr optional<T>::const_iterator optional<T>::end() const noexcept {
     return begin() + has_value();
 }
 
@@ -719,58 +712,58 @@ inline constexpr beman::optional26::optional<T>::const_iterator beman::optional2
 
 /// Returns a pointer to the stored value
 template <class T>
-inline constexpr const T* beman::optional26::optional<T>::operator->() const {
+inline constexpr const T* optional<T>::operator->() const {
     return addressof(value_);
 }
 
 template <class T>
-inline constexpr T* beman::optional26::optional<T>::operator->() {
+inline constexpr T* optional<T>::operator->() {
     return addressof(value_);
 }
 
 /// Returns the stored value
 template <class T>
-inline constexpr T& beman::optional26::optional<T>::operator*() & {
+inline constexpr T& optional<T>::operator*() & {
     return value_;
 }
 
 template <class T>
-inline constexpr const T& beman::optional26::optional<T>::operator*() const& {
+inline constexpr const T& optional<T>::operator*() const& {
     return value_;
 }
 
 template <class T>
-inline constexpr T&& beman::optional26::optional<T>::operator*() && {
+inline constexpr T&& optional<T>::operator*() && {
     return std::move(value_);
 }
 
 template <class T>
-inline constexpr beman::optional26::optional<T>::operator bool() const noexcept {
+inline constexpr optional<T>::operator bool() const noexcept {
     return engaged_;
 }
 
 /// Returns whether or not the optional has a value
 template <class T>
-inline constexpr bool beman::optional26::optional<T>::has_value() const noexcept {
+inline constexpr bool optional<T>::has_value() const noexcept {
     return engaged_;
 }
 
 /// Returns the contained value if there is one, otherwise throws
 /// bad_optional_access
 template <class T>
-inline constexpr T& beman::optional26::optional<T>::value() & {
+inline constexpr T& optional<T>::value() & {
     if (has_value())
         return value_;
     throw bad_optional_access();
 }
 template <class T>
-inline constexpr const T& beman::optional26::optional<T>::value() const& {
+inline constexpr const T& optional<T>::value() const& {
     if (has_value())
         return value_;
     throw bad_optional_access();
 }
 template <class T>
-inline constexpr T&& beman::optional26::optional<T>::value() && {
+inline constexpr T&& optional<T>::value() && {
     if (has_value())
         return std::move(value_);
     throw bad_optional_access();
@@ -779,14 +772,14 @@ inline constexpr T&& beman::optional26::optional<T>::value() && {
 /// Returns the stored value if there is one, otherwise returns `u`
 template <class T>
 template <class U>
-inline constexpr T beman::optional26::optional<T>::value_or(U&& u) const& {
+inline constexpr T optional<T>::value_or(U&& u) const& {
     static_assert(is_copy_constructible_v<T> && is_convertible_v<U&&, T>);
     return has_value() ? value() : static_cast<T>(std::forward<U>(u));
 }
 
 template <class T>
 template <class U>
-inline constexpr T beman::optional26::optional<T>::value_or(U&& u) && {
+inline constexpr T optional<T>::value_or(U&& u) && {
     static_assert(is_move_constructible_v<T> && is_convertible_v<U&&, T>);
     return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
 }
@@ -794,7 +787,7 @@ inline constexpr T beman::optional26::optional<T>::value_or(U&& u) && {
 // 22.5.3.8 Monadic operations[optional.monadic]
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T>::and_then(F&& f) & {
+constexpr auto optional<T>::and_then(F&& f) & {
     using U = invoke_result_t<F, T&>;
     static_assert(detail::is_optional<remove_cvref_t<U>>);
     if (has_value()) {
@@ -806,7 +799,7 @@ constexpr auto beman::optional26::optional<T>::and_then(F&& f) & {
 
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T>::and_then(F&& f) && {
+constexpr auto optional<T>::and_then(F&& f) && {
     using U = invoke_result_t<F, T&&>;
     static_assert(detail::is_optional<remove_cvref_t<U>>);
     if (has_value()) {
@@ -818,7 +811,7 @@ constexpr auto beman::optional26::optional<T>::and_then(F&& f) && {
 
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T>::and_then(F&& f) const& {
+constexpr auto optional<T>::and_then(F&& f) const& {
     using U = invoke_result_t<F, const T&>;
     static_assert(detail::is_optional<remove_cvref_t<U>>);
     if (has_value()) {
@@ -830,7 +823,7 @@ constexpr auto beman::optional26::optional<T>::and_then(F&& f) const& {
 
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T>::and_then(F&& f) const&& {
+constexpr auto optional<T>::and_then(F&& f) const&& {
     using U = invoke_result_t<F, const T&&>;
     static_assert(detail::is_optional<remove_cvref_t<U>>);
     if (has_value()) {
@@ -843,7 +836,7 @@ constexpr auto beman::optional26::optional<T>::and_then(F&& f) const&& {
 /// Carries out some operation on the stored object if there is one.
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T>::transform(F&& f) & {
+constexpr auto optional<T>::transform(F&& f) & {
     using U = invoke_result_t<F, T&>;
     static_assert(!is_array_v<U>);
     static_assert(!is_same_v<U, in_place_t>);
@@ -854,7 +847,7 @@ constexpr auto beman::optional26::optional<T>::transform(F&& f) & {
 
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T>::transform(F&& f) && {
+constexpr auto optional<T>::transform(F&& f) && {
     using U = invoke_result_t<F, T&&>;
     static_assert(!is_array_v<U>);
     static_assert(!is_same_v<U, in_place_t>);
@@ -865,7 +858,7 @@ constexpr auto beman::optional26::optional<T>::transform(F&& f) && {
 
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T>::transform(F&& f) const& {
+constexpr auto optional<T>::transform(F&& f) const& {
     using U = invoke_result_t<F, const T&>;
     static_assert(!is_array_v<U>);
     static_assert(!is_same_v<U, in_place_t>);
@@ -876,7 +869,7 @@ constexpr auto beman::optional26::optional<T>::transform(F&& f) const& {
 
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T>::transform(F&& f) const&& {
+constexpr auto optional<T>::transform(F&& f) const&& {
     using U = invoke_result_t<F, const T&>;
     static_assert(!is_array_v<U>);
     static_assert(!is_same_v<U, in_place_t>);
@@ -888,7 +881,7 @@ constexpr auto beman::optional26::optional<T>::transform(F&& f) const&& {
 /// Calls `f` if the optional is empty
 template <class T>
 template <class F>
-constexpr beman::optional26::optional<T> beman::optional26::optional<T>::or_else(F&& f) const& {
+constexpr optional<T> optional<T>::or_else(F&& f) const& {
     static_assert(is_same_v<remove_cvref_t<invoke_result_t<F>>, optional>);
     if (has_value())
         return value_;
@@ -898,7 +891,7 @@ constexpr beman::optional26::optional<T> beman::optional26::optional<T>::or_else
 
 template <class T>
 template <class F>
-constexpr beman::optional26::optional<T> beman::optional26::optional<T>::or_else(F&& f) && {
+constexpr optional<T> optional<T>::or_else(F&& f) && {
     static_assert(is_same_v<remove_cvref_t<invoke_result_t<F>>, optional>);
     if (has_value())
         return std::move(value_);
@@ -908,7 +901,7 @@ constexpr beman::optional26::optional<T> beman::optional26::optional<T>::or_else
 
 // 22.5.3.9 Modifiers[optional.mod]
 template <class T>
-constexpr void beman::optional26::optional<T>::reset() noexcept {
+constexpr void optional<T>::reset() noexcept {
     if constexpr (!is_trivially_destructible_v<T>) {
         if (has_value())
             value_.~T();
@@ -922,199 +915,185 @@ constexpr void beman::optional26::optional<T>::reset() noexcept {
 
 // 22.5.6 Relational operators[optional.relops]
 template <typename T, typename U>
-constexpr bool beman::optional26::operator==(const beman::optional26::optional<T>& lhs,
-                                             const beman::optional26::optional<U>& rhs)
+constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs)
     requires detail::optional_eq_rel<T, U>
 {
     return static_cast<bool>(lhs) == static_cast<bool>(rhs) && (!lhs || *lhs == *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator!=(const beman::optional26::optional<T>& lhs,
-                                             const beman::optional26::optional<U>& rhs)
+constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs)
     requires detail::optional_ne_rel<T, U>
 {
     return static_cast<bool>(lhs) != static_cast<bool>(rhs) || (static_cast<bool>(lhs) && *lhs != *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator<(const beman::optional26::optional<T>& lhs,
-                                            const beman::optional26::optional<U>& rhs)
+constexpr bool operator<(const optional<T>& lhs, const optional<U>& rhs)
     requires detail::optional_lt_rel<T, U>
 {
     return static_cast<bool>(rhs) && (!lhs || *lhs < *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator>(const beman::optional26::optional<T>& lhs,
-                                            const beman::optional26::optional<U>& rhs)
+constexpr bool operator>(const optional<T>& lhs, const optional<U>& rhs)
     requires detail::optional_gt_rel<T, U>
 {
     return static_cast<bool>(lhs) && (!rhs || *lhs > *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator<=(const beman::optional26::optional<T>& lhs,
-                                             const beman::optional26::optional<U>& rhs)
+constexpr bool operator<=(const optional<T>& lhs, const optional<U>& rhs)
     requires detail::optional_le_rel<T, U>
 {
     return !lhs || (static_cast<bool>(rhs) && *lhs <= *rhs);
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator>=(const beman::optional26::optional<T>& lhs,
-                                             const beman::optional26::optional<U>& rhs)
+constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs)
     requires detail::optional_ge_rel<T, U>
 {
     return !rhs || (static_cast<bool>(lhs) && *lhs >= *rhs);
 }
 
 template <typename T, std::three_way_comparable_with<T> U>
-constexpr std::compare_three_way_result_t<T, U>
-beman::optional26::operator<=>(const beman::optional26::optional<T>& x, const beman::optional26::optional<U>& y) {
+constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const optional<U>& y) {
     return x && y ? *x <=> *y : bool(x) <=> bool(y);
 }
 
 // 22.5.7 Comparison with nullopt[optional.nullops]
 template <class T>
-constexpr bool beman::optional26::operator==(const beman::optional26::optional<T>& lhs,
-                                             beman::optional26::nullopt_t) noexcept {
+constexpr bool operator==(const optional<T>& lhs, nullopt_t) noexcept {
     return !lhs;
 }
 
 template <class T>
-constexpr std::strong_ordering beman::optional26::operator<=>(const beman::optional26::optional<T>& x,
-                                                              beman::optional26::nullopt_t) noexcept {
+constexpr std::strong_ordering operator<=>(const optional<T>& x, nullopt_t) noexcept {
     return bool(x) <=> false;
 }
 
 // 22.5.8 Comparison with T[optional.comp.with.t]
 template <typename T, typename U>
-constexpr bool beman::optional26::operator==(const beman::optional26::optional<T>& lhs, const U& rhs)
+constexpr bool operator==(const optional<T>& lhs, const U& rhs)
     requires detail::optional_eq_rel<T, U>
 {
     return lhs && *lhs == rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator==(const T& lhs, const beman::optional26::optional<U>& rhs)
+constexpr bool operator==(const T& lhs, const optional<U>& rhs)
     requires detail::optional_eq_rel<T, U>
 {
     return rhs && lhs == *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator!=(const beman::optional26::optional<T>& lhs, const U& rhs)
+constexpr bool operator!=(const optional<T>& lhs, const U& rhs)
     requires detail::optional_ne_rel<T, U>
 {
     return !lhs || *lhs != rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator!=(const T& lhs, const beman::optional26::optional<U>& rhs)
+constexpr bool operator!=(const T& lhs, const optional<U>& rhs)
     requires detail::optional_ne_rel<T, U>
 {
     return !rhs || lhs != *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator<(const beman::optional26::optional<T>& lhs, const U& rhs)
+constexpr bool operator<(const optional<T>& lhs, const U& rhs)
     requires detail::optional_lt_rel<T, U>
 {
     return !lhs || *lhs < rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator<(const T& lhs, const beman::optional26::optional<U>& rhs)
+constexpr bool operator<(const T& lhs, const optional<U>& rhs)
     requires detail::optional_lt_rel<T, U>
 {
     return rhs && lhs < *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator>(const beman::optional26::optional<T>& lhs, const U& rhs)
+constexpr bool operator>(const optional<T>& lhs, const U& rhs)
     requires detail::optional_gt_rel<T, U>
 {
     return lhs && *lhs > rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator>(const T& lhs, const beman::optional26::optional<U>& rhs)
+constexpr bool operator>(const T& lhs, const optional<U>& rhs)
     requires detail::optional_gt_rel<T, U>
 {
     return !rhs || lhs > *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator<=(const beman::optional26::optional<T>& lhs, const U& rhs)
+constexpr bool operator<=(const optional<T>& lhs, const U& rhs)
     requires detail::optional_le_rel<T, U>
 {
     return !lhs || *lhs <= rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator<=(const T& lhs, const beman::optional26::optional<U>& rhs)
+constexpr bool operator<=(const T& lhs, const optional<U>& rhs)
     requires detail::optional_le_rel<T, U>
 {
     return rhs && lhs <= *rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator>=(const beman::optional26::optional<T>& lhs, const U& rhs)
+constexpr bool operator>=(const optional<T>& lhs, const U& rhs)
     requires detail::optional_ge_rel<T, U>
 {
     return lhs && *lhs >= rhs;
 }
 
 template <typename T, typename U>
-constexpr bool beman::optional26::operator>=(const T& lhs, const beman::optional26::optional<U>& rhs)
+constexpr bool operator>=(const T& lhs, const optional<U>& rhs)
     requires detail::optional_ge_rel<T, U>
 {
     return !rhs || lhs >= *rhs;
 }
 
 template <typename T, typename U>
-    requires(!beman::optional26::is_derived_from_optional<U>) && std::three_way_comparable_with<T, U>
-constexpr std::compare_three_way_result_t<T, U> operator<=>(const beman::optional26::optional<T>& x, const U& v) {
+    requires(!is_derived_from_optional<U>) && std::three_way_comparable_with<T, U>
+constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const U& v) {
     return bool(x) ? *x <=> v : std::strong_ordering::less;
 }
 
 // 22.5.9 Specialized algorithms[optional.specalg]
 
 template <class T>
-constexpr void beman::optional26::swap(beman::optional26::optional<T>& lhs,
-                                       beman::optional26::optional<T>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+constexpr void swap(optional<T>& lhs, optional<T>& rhs) noexcept(noexcept(lhs.swap(rhs)))
     requires is_move_constructible_v<T> && is_swappable_v<T>
 {
     return lhs.swap(rhs);
 }
 
 template <class T>
-constexpr beman::optional26::optional<std::decay_t<T>>
-beman::optional26::make_optional(T&& t) noexcept(is_nothrow_constructible_v<optional<decay_t<T>>, T>)
+constexpr optional<std::decay_t<T>> make_optional(T&& t) noexcept(is_nothrow_constructible_v<optional<decay_t<T>>, T>)
     requires is_constructible_v<decay_t<T>, T>
 {
     return optional<decay_t<T>>{std::forward<T>(t)};
 }
 
 template <typename T, typename... Args>
-constexpr beman::optional26::optional<T>
-beman::optional26::make_optional(Args&&... args) noexcept(is_nothrow_constructible_v<T, Args...>)
+constexpr optional<T> make_optional(Args&&... args) noexcept(is_nothrow_constructible_v<T, Args...>)
     requires is_constructible_v<T, Args...>
 {
     return optional<T>{in_place, std::forward<Args>(args)...};
 }
 
 template <typename T, typename U, typename... Args>
-constexpr beman::optional26::optional<T>
-beman::optional26::make_optional(initializer_list<U> init_list,
-                                 Args&&... args) noexcept(is_nothrow_constructible_v<T, initializer_list<U>&, Args...>)
+constexpr optional<T>
+make_optional(initializer_list<U> init_list,
+              Args&&... args) noexcept(is_nothrow_constructible_v<T, initializer_list<U>&, Args...>)
     requires is_constructible_v<T, initializer_list<U>&, Args...>
 {
     return optional<T>{in_place, init_list, std::forward<Args>(args)...};
 }
-
-namespace beman::optional26 {
 
 /****************/
 /* optional<T&> */
@@ -1199,40 +1178,36 @@ class optional<T&> {
     T* value_; // exposition only
 };
 
-} // namespace beman::optional26
-
 //  \rSec3[optional_ref.ctor]{Constructors}
 template <class T>
-constexpr beman::optional26::optional<T&>::optional() noexcept : value_(nullptr) {}
+constexpr optional<T&>::optional() noexcept : value_(nullptr) {}
 
 template <class T>
-constexpr beman::optional26::optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
+constexpr optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
 
 template <class T>
 template <class U>
-    requires(!beman::optional26::detail::is_optional<std::decay_t<U>>)
-constexpr beman::optional26::optional<T&>::optional(U&& u) noexcept : value_(addressof(u)) {
+    requires(!detail::is_optional<std::decay_t<U>>)
+constexpr optional<T&>::optional(U&& u) noexcept : value_(addressof(u)) {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
     static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
 }
 
 template <class T>
 template <class U>
-constexpr beman::optional26::optional<T&>::optional(const beman::optional26::optional<U>& rhs) noexcept
-    : optional(*rhs) {}
+constexpr optional<T&>::optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
 
 // \rSec3[optional_ref.assign]{Assignment}
 template <class T>
-constexpr beman::optional26::optional<T&>&
-beman::optional26::optional<T&>::operator=(beman::optional26::nullopt_t) noexcept {
+constexpr optional<T&>& optional<T&>::operator=(nullopt_t) noexcept {
     value_ = nullptr;
     return *this;
 }
 
 template <class T>
 template <class U>
-    requires(!beman::optional26::detail::is_optional<std::decay_t<U>>)
-constexpr beman::optional26::optional<T&>& beman::optional26::optional<T&>::operator=(U&& u) {
+    requires(!detail::is_optional<std::decay_t<U>>)
+constexpr optional<T&>& optional<T&>::operator=(U&& u) {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
     static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
     value_ = addressof(u);
@@ -1241,8 +1216,7 @@ constexpr beman::optional26::optional<T&>& beman::optional26::optional<T&>::oper
 
 template <class T>
 template <class U>
-constexpr beman::optional26::optional<T&>&
-beman::optional26::optional<T&>::operator=(const beman::optional26::optional<U>& rhs) noexcept {
+constexpr optional<T&>& optional<T&>::operator=(const optional<U>& rhs) noexcept {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
     if (rhs.has_value())
         value_ = to_address(rhs);
@@ -1253,61 +1227,61 @@ beman::optional26::optional<T&>::operator=(const beman::optional26::optional<U>&
 
 template <class T>
 template <class U>
-    requires(!beman::optional26::detail::is_optional<std::decay_t<U>>)
-constexpr beman::optional26::optional<T&>& beman::optional26::optional<T&>::emplace(U&& u) noexcept {
+    requires(!detail::is_optional<std::decay_t<U>>)
+constexpr optional<T&>& optional<T&>::emplace(U&& u) noexcept {
     return *this = std::forward<U>(u);
 }
 
 //   \rSec3[optional_ref.swap]{Swap}
 
 template <class T>
-constexpr void beman::optional26::optional<T&>::swap(beman::optional26::optional<T&>& rhs) noexcept {
+constexpr void optional<T&>::swap(optional<T&>& rhs) noexcept {
     std::swap(value_, rhs.value_);
 }
 
 // \rSec3[optional_ref.iterators]{Iterator Support}
 template <class T>
-constexpr beman::optional26::optional<T&>::iterator beman::optional26::optional<T&>::begin() noexcept {
+constexpr optional<T&>::iterator optional<T&>::begin() noexcept {
     return iterator(has_value() ? value_ : nullptr);
 };
 
 template <class T>
-constexpr beman::optional26::optional<T&>::const_iterator beman::optional26::optional<T&>::begin() const noexcept {
+constexpr optional<T&>::const_iterator optional<T&>::begin() const noexcept {
     return const_iterator(has_value() ? value_ : nullptr);
 };
 
 template <class T>
-constexpr beman::optional26::optional<T&>::iterator beman::optional26::optional<T&>::end() noexcept {
+constexpr optional<T&>::iterator optional<T&>::end() noexcept {
     return begin() + has_value();
 }
 
 template <class T>
-constexpr beman::optional26::optional<T&>::const_iterator beman::optional26::optional<T&>::end() const noexcept {
+constexpr optional<T&>::const_iterator optional<T&>::end() const noexcept {
     return begin() + has_value();
 }
 
 // \rSec3[optional_ref.observe]{Observers}
 template <class T>
-constexpr T* beman::optional26::optional<T&>::operator->() const noexcept {
+constexpr T* optional<T&>::operator->() const noexcept {
     return value_;
 }
 
 template <class T>
-constexpr T& beman::optional26::optional<T&>::operator*() const noexcept {
+constexpr T& optional<T&>::operator*() const noexcept {
     return *value_;
 }
 
 template <class T>
-constexpr beman::optional26::optional<T&>::operator bool() const noexcept {
+constexpr optional<T&>::operator bool() const noexcept {
     return value_ != nullptr;
 }
 template <class T>
-constexpr bool beman::optional26::optional<T&>::has_value() const noexcept {
+constexpr bool optional<T&>::has_value() const noexcept {
     return value_ != nullptr;
 }
 
 template <class T>
-constexpr T& beman::optional26::optional<T&>::value() const {
+constexpr T& optional<T&>::value() const {
     if (has_value())
         return *value_;
     throw bad_optional_access();
@@ -1315,7 +1289,7 @@ constexpr T& beman::optional26::optional<T&>::value() const {
 
 template <class T>
 template <class U>
-constexpr T beman::optional26::optional<T&>::value_or(U&& u) const {
+constexpr T optional<T&>::value_or(U&& u) const {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
     return has_value() ? *value_ : std::forward<U>(u);
 }
@@ -1323,7 +1297,7 @@ constexpr T beman::optional26::optional<T&>::value_or(U&& u) const {
 //   \rSec3[optional_ref.monadic]{Monadic operations}
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T&>::and_then(F&& f) const {
+constexpr auto optional<T&>::and_then(F&& f) const {
     using U = invoke_result_t<F, T&>;
     static_assert(detail::is_optional<U>, "F must return an optional");
     return (has_value()) ? invoke(std::forward<F>(f), *value_) : remove_cvref_t<U>();
@@ -1331,14 +1305,14 @@ constexpr auto beman::optional26::optional<T&>::and_then(F&& f) const {
 
 template <class T>
 template <class F>
-constexpr auto beman::optional26::optional<T&>::transform(F&& f) const -> optional<invoke_result_t<F, T&>> {
+constexpr auto optional<T&>::transform(F&& f) const -> optional<invoke_result_t<F, T&>> {
     using U = invoke_result_t<F, T&>;
     return (has_value()) ? optional<U>{invoke(std::forward<F>(f), *value_)} : optional<U>{};
 }
 
 template <class T>
 template <class F>
-constexpr beman::optional26::optional<T&> beman::optional26::optional<T&>::or_else(F&& f) const {
+constexpr optional<T&> optional<T&>::or_else(F&& f) const {
     using U = invoke_result_t<F>;
     static_assert(is_same_v<remove_cvref_t<U>, optional>);
     return has_value() ? *value_ : std::forward<F>(f)();
@@ -1346,8 +1320,9 @@ constexpr beman::optional26::optional<T&> beman::optional26::optional<T&>::or_el
 
 // \rSec3[optional.mod]{modifiers}
 template <class T>
-constexpr void beman::optional26::optional<T&>::reset() noexcept {
+constexpr void optional<T&>::reset() noexcept {
     value_ = nullptr;
 }
+} // namespace beman::optional26
 
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP
