@@ -20,3 +20,23 @@
   \settocdepth{section}
 
 }
+
+\newenvironment{addedcode}
+{
+\color{addclr}
+\begin{codeblock}
+}
+{
+\end{codeblock}
+\color{black}
+}
+
+\newenvironment{removedcode}
+{
+\color{remclr}
+\begin{codeblock}
+}
+{
+\end{codeblock}
+\color{black}
+}

@@ -43,6 +43,7 @@ using std::is_nothrow_constructible_v;
 using std::is_nothrow_move_constructible;
 using std::is_nothrow_move_constructible_v;
 using std::is_nothrow_swappable;
+using std::is_object_v;
 using std::is_same;
 using std::is_same_v;
 using std::is_scalar;
@@ -278,6 +279,7 @@ inline constexpr bool is_optional<optional<T>> = true;
 template <class T>
 class optional {
     static_assert((!is_same_v<T, remove_cv_t<in_place_t>>) && (!is_same_v<remove_cv_t<T>, nullopt_t>));
+    static_assert(is_object_v<T> && !is_array_v<T>);
 
   public:
     using value_type = T;
@@ -1103,12 +1105,12 @@ template <class T>
 class optional<T&> {
   public:
     using value_type     = T&;
-    using iterator       = detail::contiguous_iterator<T, optional>; // see [optional_ref.iterators]
+    using iterator       = detail::contiguous_iterator<T, optional>; // see [optionalref.iterators]
     using const_iterator = detail::contiguous_iterator<const T,
-                                                       optional>; // see [optional_ref.iterators]
+                                                       optional>; // see [optionalref.iterators]
 
   public:
-    //  \rSec3[optional_ref.ctor]{Constructors}
+    // \ref{optionalref.ctor}, constructors
 
     constexpr optional() noexcept;
     constexpr optional(nullopt_t) noexcept;
@@ -1120,10 +1122,10 @@ class optional<T&> {
     template <class U>
     constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept;
 
-    //  \rSec3[optional_ref.dtor]{Destructor}
+    // \ref{optionalref.dtor}, destructor
     constexpr ~optional() = default;
 
-    // \rSec3[optional_ref.assign]{Assignment}
+    // \ref{optionalref.assign}, assignment
     constexpr optional& operator=(nullopt_t) noexcept;
 
     constexpr optional& operator=(const optional& rhs) noexcept = default;
@@ -1143,17 +1145,16 @@ class optional<T&> {
         requires(!detail::is_optional<decay_t<U>>)
     constexpr optional& emplace(U&& u) noexcept;
 
-    //   \rSec3[optional_ref.swap]{Swap}
-
+    // \ref{optionalref.swap}, swap
     constexpr void swap(optional& rhs) noexcept;
 
-    // [optional_ref.iterators], iterator support
+    // \ref{optional.iterators}, iterator support
     constexpr iterator       begin() noexcept;
     constexpr const_iterator begin() const noexcept;
     constexpr iterator       end() noexcept;
     constexpr const_iterator end() const noexcept;
 
-    // \rSec3[optional_ref.observe]{Observers}
+    // \ref{optionalref.observe}, observers
     constexpr T*       operator->() const noexcept;
     constexpr T&       operator*() const noexcept;
     constexpr explicit operator bool() const noexcept;
@@ -1162,23 +1163,22 @@ class optional<T&> {
     template <class U>
     constexpr T value_or(U&& u) const;
 
-    //   \rSec3[optional_ref.monadic]{Monadic operations}
+    // \ref{optionalref.monadic}, monadic operations
     template <class F>
     constexpr auto and_then(F&& f) const;
     template <class F>
     constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
-
     template <class F>
     constexpr optional or_else(F&& f) const;
 
-    // \rSec3[optional.mod]{modifiers}
+    // \ref{optional.mod}, modifiers
     constexpr void reset() noexcept;
 
   private:
     T* value_; // exposition only
 };
 
-//  \rSec3[optional_ref.ctor]{Constructors}
+//  \rSec3[optionalref.ctor]{Constructors}
 template <class T>
 constexpr optional<T&>::optional() noexcept : value_(nullptr) {}
 
@@ -1195,9 +1195,15 @@ constexpr optional<T&>::optional(U&& u) noexcept : value_(addressof(u)) {
 
 template <class T>
 template <class U>
-constexpr optional<T&>::optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
+constexpr optional<T&>::optional(const optional<U>& rhs) noexcept {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+    if (rhs.has_value())
+        value_ = to_address(rhs);
+    else
+        value_ = nullptr;
+}
 
-// \rSec3[optional_ref.assign]{Assignment}
+// \rSec3[optionalref.assign]{Assignment}
 template <class T>
 constexpr optional<T&>& optional<T&>::operator=(nullopt_t) noexcept {
     value_ = nullptr;
@@ -1232,14 +1238,14 @@ constexpr optional<T&>& optional<T&>::emplace(U&& u) noexcept {
     return *this = std::forward<U>(u);
 }
 
-//   \rSec3[optional_ref.swap]{Swap}
+//   \rSec3[optionalref.swap]{Swap}
 
 template <class T>
 constexpr void optional<T&>::swap(optional<T&>& rhs) noexcept {
     std::swap(value_, rhs.value_);
 }
 
-// \rSec3[optional_ref.iterators]{Iterator Support}
+// \rSec3[optionalref.iterators]{Iterator Support}
 template <class T>
 constexpr optional<T&>::iterator optional<T&>::begin() noexcept {
     return iterator(has_value() ? value_ : nullptr);
@@ -1260,7 +1266,7 @@ constexpr optional<T&>::const_iterator optional<T&>::end() const noexcept {
     return begin() + has_value();
 }
 
-// \rSec3[optional_ref.observe]{Observers}
+// \rSec3[optionalref.observe]{Observers}
 template <class T>
 constexpr T* optional<T&>::operator->() const noexcept {
     return value_;
@@ -1294,7 +1300,7 @@ constexpr T optional<T&>::value_or(U&& u) const {
     return has_value() ? *value_ : std::forward<U>(u);
 }
 
-//   \rSec3[optional_ref.monadic]{Monadic operations}
+//   \rSec3[optionalref.monadic]{Monadic operations}
 template <class T>
 template <class F>
 constexpr auto optional<T&>::and_then(F&& f) const {
