@@ -1281,9 +1281,8 @@ namespace std {
   class optional<T&> {
     public:
       using value_type     = T&;
-      using iterator       = detail::contiguous_iterator<T, optional>; // see~\ref{optionalref.iterators}
-      using const_iterator = detail::contiguous_iterator<const T,
-                                                         optional>; // see~\ref{optionalref.iterators}
+      using iterator       = @\impdefnc@; // see~\ref{optionalref.iterators}
+      using const_iterator = @\impdefnc@; // see~\ref{optionalref.iterators}
 
     public:
       // \ref{optionalref.ctor}, constructors
@@ -1292,7 +1291,7 @@ namespace std {
       constexpr optional(const optional& rhs) noexcept = default;
       constexpr optional(optional&& rhs) noexcept      = default;
       template <class U = T>
-        requires(!detail::is_optional<decay_t<U>>)
+        requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
       constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
       template <class U>
       constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept;
@@ -1306,7 +1305,7 @@ namespace std {
       constexpr optional& operator=(optional&& rhs) noexcept      = default;
 
       template <class U = T>
-          requires(!detail::is_optional<decay_t<U>>)
+          requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
       constexpr optional& operator=(U&& u);
 
       template <class U>
@@ -1316,7 +1315,7 @@ namespace std {
       constexpr optional& operator=(optional<U>&& rhs) = delete;
 
       template <class U>
-          requires(!detail::is_optional<decay_t<U>>)
+          requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
       constexpr optional& emplace(U&& u) noexcept;
 
       // \ref{optionalref.swap}, swap
@@ -1374,7 +1373,7 @@ remarks
 
 \begin{itemdecl}
 template <class U = T>
-  requires(!detail::is_optional<decay_t<U>>)
+  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
 constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
 \end{itemdecl}
 
@@ -1428,7 +1427,7 @@ constexpr optional& operator=(nullopt_t) noexcept;
 
 \begin{itemdecl}
 template <class U = T>
-  requires(!detail::is_optional<decay_t<U>>)
+  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
 constexpr optional& operator=(U&& u);
 \end{itemdecl}
 
@@ -1480,7 +1479,7 @@ constexpr optional& operator=(const optional<U>& rhs) noexcept;
 
 \begin{itemdecl}
 template <class U>
-  requires(!detail::is_optional<decay_t<U>>)
+  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
 constexpr optional& emplace(U&& u) noexcept;
 \end{itemdecl}
 
