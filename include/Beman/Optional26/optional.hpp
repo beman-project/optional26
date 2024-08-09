@@ -1044,7 +1044,13 @@ class optional<T&> {
     }
 
     template <class U>
-    constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept {
+        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+        if (rhs.has_value())
+            value_ = std::to_address(rhs);
+        else
+            value_ = nullptr;
+    }
 
     //  \rSec3[optional.dtor]{Destructor}
 
