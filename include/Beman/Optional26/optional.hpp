@@ -784,7 +784,8 @@ inline constexpr T optional<T>::value_or(U&& u) const& {
 template <class T>
 template <class U>
 inline constexpr T optional<T>::value_or(U&& u) && {
-    static_assert(is_move_constructible_v<T> && is_convertible_v<U&&, T>);
+    static_assert(is_move_constructible_v<T>);
+    static_assert(is_convertible_v<decltype(u), T>, "Must be able to convert u to T");
     return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
 }
 
@@ -1298,7 +1299,8 @@ constexpr T& optional<T&>::value() const {
 template <class T>
 template <class U>
 constexpr T optional<T&>::value_or(U&& u) const {
-    static_assert(is_constructible_v<add_lvalue_reference_t<T>, decltype(u)>, "Must be able to bind u to T&");
+    static_assert(is_copy_constructible_v<T>, "T must be copy constructible");
+    static_assert(is_convertible_v<decltype(u), T>, "Must be able to convert u to T");
     return has_value() ? *value_ : std::forward<U>(u);
 }
 
