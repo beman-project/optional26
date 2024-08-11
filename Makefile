@@ -91,6 +91,67 @@ env:
 papers:
 	$(MAKE) -C papers papers
 
+PYEXECPATH ?= $(shell which python3.12 || which python3.11 || which python3.10 || which python3.9 || which python3.8 || which python3.7 || which python3)
+PYTHON ?= $(shell basename $(PYEXECPATH))
+VENV := .venv
+ACTIVATE := . $(VENV)/bin/activate &&
+PYEXEC := $(ACTIVATE) $(PYTHON)
+MARKER=.initialized.venv.stamp
+
+PIP := $(PYEXEC) -m pip
+PIP_SYNC := $(PYEXEC) -m piptools sync
+PIPTOOLS_COMPILE := $(PYEXEC) -m piptools compile --no-header --strip-extras
+
+PRE_COMMIT := $(ACTIVATE) pre-commit
+
+PHONY: venv
+venv: ## Create python virtual env
+venv: $(VENV)/$(MARKER)
+
+.PHONY: clean-venv
+clean-venv:
+clean-venv: ## Delete python virtual env
+	-rm -rf $(VENV)
+
+realclean: clean-venv
+
+.PHONY: show-venv
+show-venv: venv
+show-venv: ## Debugging target - show venv details
+	$(PYEXEC) -c "import sys; print('Python ' + sys.version.replace('\n',''))"
+	$(PIP) --version
+	@echo venv: $(VENV)
+
+requirements.txt: requirements.in
+	$(PIPTOOLS_COMPILE) --output-file=$@ $<
+
+requirements-dev.txt: requirements-dev.in
+	$(PIPTOOLS_COMPILE) --output-file=$@ $<
+
+$(VENV):
+	$(PYEXECPATH) -m venv $(VENV)
+	$(PIP) install --upgrade pip setuptools wheel
+	$(PIP) install pip-tools
+
+$(VENV)/$(MARKER): requirements.txt requirements-dev.txt | $(VENV)
+	$(PIP_SYNC) requirements.txt
+	$(PIP_SYNC) requirements-dev.txt
+	touch $(VENV)/$(MARKER)
+
+.PHONY: dev-shell
+dev-shell: venv
+dev-shell: ## Shell with the venv activated
+	$(ACTIVATE) $(notdir $(SHELL))
+
+.PHONY: bash zsh
+bash zsh: venv
+bash zsh: ## Run bash or zsh with the venv activated
+	$(ACTIVATE) exec $@
+
+lint: venv
+lint: ## Run all configured tools in pre-commit
+	$(PRE_COMMIT) run -a
+
 # Help target
 .PHONY: help
 help: ## Show this help.

@@ -1,0 +1,2 @@
+pre-commit
+clang-format==18.1.8

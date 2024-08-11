@@ -237,6 +237,36 @@ Test project /path/to/Beman.Optional26/.build
 No tests were found!!!
 ```
 
+#### Pre-Commit for Linting
+Various linting tools are configured and installed via the [pre-commit](https://pre-commit.com/) framework. This requires a working python environment, but also allows the tools, such as clang-format and cmake-lint, to be versioned on a per project basis rather than being installed globally. Version changes in lint checks often means differences in success or failure between the versions in CI and the versions used by a developer. By using the same configurations, this problem is avoided.
+
+In order to set up a python environment, using a python virtual environment can simplify maintaining different configurations between projects. There is no particular dependency on a particular python3 version.
+
+##### Creating and configuring a venv
+```shell
+python3 -m venv .venv
+. .venv/bin/activate && python3 -m pip install --upgrade pip setuptools wheel
+. .venv/bin/activate && python3 -m pip install pip-tools
+. .venv/bin/activate && python3 -m piptools sync requirements.txt
+. .venv/bin/activate && python3 -m piptools sync requirements-dev.txt
+. .venv/bin/activate && exec bash
+```
+
+This will create the venv, install the python and python development tools, and run bash with the PATH and other environment variables set to use the venv preferentially.
+
+##### Running the linting tools
+```shell
+pre-commit run -a
+```
+
+This will download and configure the lint tools specified in .pre-commit-config.yaml.
+
+There is also a Makefile that will automate this process and keep everything up to date.
+
+```shell
+make lint
+```
+
 ## Papers
 
 Latest revision(s) of the papers can be built / found at:
