@@ -17,6 +17,7 @@ target_sources(
   optional_range_support.t.cpp
   optional_ref_monadic.t.cpp
   optional_ref.t.cpp
+  optional_refref.t.cpp
   optional.t.cpp
   optional_constexpr.t.cpp
   test_types.cpp)
