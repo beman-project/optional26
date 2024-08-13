@@ -17,7 +17,6 @@
 #include <Beman/Optional26/detail/iterator.hpp>
 
 namespace beman::optional26 {
-namespace {
 // Using declarations of traits used
 using std::add_lvalue_reference_t;
 using std::addressof;
@@ -44,6 +43,7 @@ using std::is_nothrow_move_constructible;
 using std::is_nothrow_move_constructible_v;
 using std::is_nothrow_swappable;
 using std::is_object_v;
+using std::is_reference_v;
 using std::is_same;
 using std::is_same_v;
 using std::is_scalar;
@@ -58,7 +58,6 @@ using std::remove_cvref_t;
 using std::strong_ordering;
 using std::three_way_comparable_with;
 using std::to_address;
-} // namespace
 
 namespace detail {
 template <typename T, typename U>
@@ -843,7 +842,7 @@ constexpr auto optional<T>::transform(F&& f) & {
     static_assert(!is_array_v<U>);
     static_assert(!is_same_v<U, in_place_t>);
     static_assert(!is_same_v<U, nullopt_t>);
-    static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+    static_assert(is_object_v<U> || is_reference_v<U>); /// References now allowed
     return (has_value()) ? optional<U>{invoke(std::forward<F>(f), value_)} : optional<U>{};
 }
 
@@ -854,7 +853,7 @@ constexpr auto optional<T>::transform(F&& f) && {
     static_assert(!is_array_v<U>);
     static_assert(!is_same_v<U, in_place_t>);
     static_assert(!is_same_v<U, nullopt_t>);
-    static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+    static_assert(is_object_v<U> || is_reference_v<U>); /// References now allowed
     return (has_value()) ? optional<U>{invoke(std::forward<F>(f), std::move(value_))} : optional<U>{};
 }
 
@@ -865,7 +864,7 @@ constexpr auto optional<T>::transform(F&& f) const& {
     static_assert(!is_array_v<U>);
     static_assert(!is_same_v<U, in_place_t>);
     static_assert(!is_same_v<U, nullopt_t>);
-    static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+    static_assert(is_object_v<U> || is_reference_v<U>); /// References now allowed
     return (has_value()) ? optional<U>{invoke(std::forward<F>(f), value_)} : optional<U>{};
 }
 
@@ -876,7 +875,7 @@ constexpr auto optional<T>::transform(F&& f) const&& {
     static_assert(!is_array_v<U>);
     static_assert(!is_same_v<U, in_place_t>);
     static_assert(!is_same_v<U, nullopt_t>);
-    static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+    static_assert(is_object_v<U> || is_reference_v<U>); /// References now allowed
     return (has_value()) ? optional<U>{invoke(std::forward<F>(f), value_)} : optional<U>{};
 }
 
@@ -958,8 +957,8 @@ constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs)
     return !rhs || (static_cast<bool>(lhs) && *lhs >= *rhs);
 }
 
-template <typename T, std::three_way_comparable_with<T> U>
-constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const optional<U>& y) {
+template <typename T, three_way_comparable_with<T> U>
+constexpr compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const optional<U>& y) {
     return x && y ? *x <=> *y : bool(x) <=> bool(y);
 }
 
@@ -970,7 +969,7 @@ constexpr bool operator==(const optional<T>& lhs, nullopt_t) noexcept {
 }
 
 template <class T>
-constexpr std::strong_ordering operator<=>(const optional<T>& x, nullopt_t) noexcept {
+constexpr strong_ordering operator<=>(const optional<T>& x, nullopt_t) noexcept {
     return bool(x) <=> false;
 }
 
@@ -1060,9 +1059,9 @@ constexpr bool operator>=(const T& lhs, const optional<U>& rhs)
 }
 
 template <typename T, typename U>
-    requires(!is_derived_from_optional<U>) && std::three_way_comparable_with<T, U>
-constexpr std::compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const U& v) {
-    return bool(x) ? *x <=> v : std::strong_ordering::less;
+    requires(!is_derived_from_optional<U>) && three_way_comparable_with<T, U>
+constexpr compare_three_way_result_t<T, U> operator<=>(const optional<T>& x, const U& v) {
+    return bool(x) ? *x <=> v : strong_ordering::less;
 }
 
 // 22.5.9 Specialized algorithms[optional.specalg]
@@ -1075,7 +1074,7 @@ constexpr void swap(optional<T>& lhs, optional<T>& rhs) noexcept(noexcept(lhs.sw
 }
 
 template <class T>
-constexpr optional<std::decay_t<T>> make_optional(T&& t) noexcept(is_nothrow_constructible_v<optional<decay_t<T>>, T>)
+constexpr optional<decay_t<T>> make_optional(T&& t) noexcept(is_nothrow_constructible_v<optional<decay_t<T>>, T>)
     requires is_constructible_v<decay_t<T>, T>
 {
     return optional<decay_t<T>>{std::forward<T>(t)};
@@ -1187,7 +1186,7 @@ constexpr optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
 
 template <class T>
 template <class U>
-    requires(!detail::is_optional<std::decay_t<U>>)
+    requires(!detail::is_optional<decay_t<U>>)
 constexpr optional<T&>::optional(U&& u) noexcept : value_(addressof(u)) {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
     static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
@@ -1212,7 +1211,7 @@ constexpr optional<T&>& optional<T&>::operator=(nullopt_t) noexcept {
 
 template <class T>
 template <class U>
-    requires(!detail::is_optional<std::decay_t<U>>)
+    requires(!detail::is_optional<decay_t<U>>)
 constexpr optional<T&>& optional<T&>::operator=(U&& u) {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
     static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
@@ -1233,7 +1232,7 @@ constexpr optional<T&>& optional<T&>::operator=(const optional<U>& rhs) noexcept
 
 template <class T>
 template <class U>
-    requires(!detail::is_optional<std::decay_t<U>>)
+    requires(!detail::is_optional<decay_t<U>>)
 constexpr optional<T&>& optional<T&>::emplace(U&& u) noexcept {
     return *this = std::forward<U>(u);
 }
