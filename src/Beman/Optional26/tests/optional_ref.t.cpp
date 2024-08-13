@@ -614,9 +614,12 @@ TEST(OptionalRefTest, AssignFromOptional) {
     engaged_derived = d2;
     EXPECT_EQ(optional_base_ref.value().m_i, static_cast<base>(d2).m_i);
 
-    // delete the rvalue ref overload
+    // deleted the rvalue ref overload
+    //     template <class U>
+    //        constexpr optional& operator=(optional<U>&& rhs) = delete;
+    // -- force failures for
     // optional_base_const_ref = beman::optional26::optional<derived>(derived(3, 4));
-    // EXPECT_TRUE(optional_base_ref.has_value());
-    // EXPECT_EQ(*optional_base_ref, derived(3,4));
-
+    // and
+    // optional_base_const_ref = [](){return beman::optional26::optional<derived>(derived(3, 4));}();
+    // TODO: Add to "fail-to-compile" tests when they exist
 }
