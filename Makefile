@@ -66,10 +66,10 @@ install: $(_build_path)/CMakeCache.txt ## Install the project
 	DESTDIR=$(abspath $(DEST)) ninja -C $(_build_path) -k 0  install
 
 ctest: $(_build_path)/CMakeCache.txt ## Run CTest on current build
-	cd $(_build_path) && ctest --output-on-failure
+	cd $(_build_path) && ctest --output-on-failure -C $(CONFIG)
 
 ctest_ : compile
-	cd $(_build_path) && ctest --output-on-failure
+	cd $(_build_path) && ctest --output-on-failure -C $(CONFIG)
 
 test: ctest_ ## Rebuild and run tests
 
@@ -89,7 +89,7 @@ env:
 
 .PHONY: papers
 papers:
-	$(MAKE) -C papers papers
+	$(MAKE) -C papers/P2988 papers
 
 PYEXECPATH ?= $(shell which python3.12 || which python3.11 || which python3.10 || which python3.9 || which python3.8 || which python3.7 || which python3)
 PYTHON ?= $(shell basename $(PYEXECPATH))
