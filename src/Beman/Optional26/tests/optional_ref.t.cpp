@@ -55,9 +55,9 @@ TEST(OptionalRefTest, Constructors) {
     (void)nd1;
     (void)nd2;
 
-    no_default nd{e};
+    no_default nodef{e};
 
-    beman::optional26::optional<no_default&> nd3 = nd;
+    beman::optional26::optional<no_default&> nd3 = nodef;
     (void)nd3;
 
     beman::optional26::optional<int&> ie;

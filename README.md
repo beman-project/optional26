@@ -43,7 +43,7 @@ Documentation and associated papers are licensed with the Creative Commons Attri
 
 The intent is that the source and documentation are available for use by people implementing their own optional types as well as people using the optional presented here as-is.
 
-The README itself is licesed with CC0 1.0 Universal. Copy the contents and incorporate in your own work as you see fit.
+The README itself is licensed with CC0 1.0 Universal. Copy the contents and incorporate in your own work as you see fit.
 
 // SPDX-License-Identifier: CC0-1.0
 
