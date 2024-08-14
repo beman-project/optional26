@@ -1423,7 +1423,7 @@ constexpr optional<T&&>::optional(nullopt_t) noexcept : value_(nullptr) {}
 
 template <class T>
 template <class U>
-requires(!detail::is_optional<std::decay_t<U>>)
+requires(!detail::is_optional<decay_t<U>>)
 constexpr optional<T&&>::optional(U&& u) noexcept : value_(addressof(u)) {
     static_assert(is_constructible_v<add_rvalue_reference_t<T>, U>, "Must be able to bind U to T&&");
 }
@@ -1447,7 +1447,7 @@ constexpr optional<T&&>& optional<T&&>::operator=(nullopt_t) noexcept {
 
 template <class T>
 template <class U>
-requires(!detail::is_optional<std::decay_t<U>>)
+requires(!detail::is_optional<decay_t<U>>)
 constexpr optional<T&&>& optional<T&&>::operator=(U&& u) {
     static_assert(is_constructible_v<add_rvalue_reference_t<T>, U>, "Must be able to bind U to T&&");
     value_ = addressof(u);
@@ -1467,7 +1467,7 @@ constexpr optional<T&&>& optional<T&&>::operator=(const optional<U>& rhs) noexce
 
 template <class T>
 template <class U>
-requires(!detail::is_optional<std::decay_t<U>>)
+requires(!detail::is_optional<decay_t<U>>)
 constexpr optional<T&&>& optional<T&&>::emplace(U&& u) noexcept {
     return *this = std::forward<U>(u);
 }
