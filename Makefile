@@ -89,7 +89,7 @@ env:
 
 .PHONY: papers
 papers:
-	$(MAKE) -C papers papers
+	$(MAKE) -C papers/P2988 papers
 
 # Help target
 .PHONY: help
