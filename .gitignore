@@ -25,3 +25,5 @@ compile_commands.json
 /papers/**/_minted-optional_ref/
 /papers/**/_minted-optional_ref_wording/
 .update-submodules
+/.install/
+/.venv/
