@@ -270,9 +270,9 @@ concept enable_assign_from_other =
 
 namespace detail {
 template <class T>
-inline constexpr bool is_optional = false;
-template <class T>
-inline constexpr bool is_optional<optional<T>> = true;
+    concept is_optional = requires(const T& t) { // exposition only
+    []<class U>(const optional<U>&) {}(t);
+};
 } // namespace detail
 
 // 22.5.3.1 General[optional.optional.general]
