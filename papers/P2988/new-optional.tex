@@ -1276,7 +1276,7 @@ otherwise no effect.
 \end{itemdescr}
 
 \begin{addedblock}
-\rSec2[optional.optionalref]{Class template \tcode{optional} \added{for reference types}}
+\rSec2[optional.optionalref]{Class template \tcode{optional} for reference types}
 
 \rSec3[optional.optionalref.general]{General}
 \begin{codeblock}
@@ -1294,11 +1294,8 @@ namespace std {
       constexpr optional(nullopt_t) noexcept;
       constexpr optional(const optional& rhs) noexcept = default;
       constexpr optional(optional&& rhs) noexcept      = default;
-      template <class U = T>
-        requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-        constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
-      template <class U>
-        constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept;
+      template <class U = T> constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
+      template <class U> constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept;
 
       constexpr ~optional() = default;
 
@@ -1307,14 +1304,11 @@ namespace std {
       constexpr optional& operator=(const optional& rhs) noexcept = default;
       constexpr optional& operator=(optional&& rhs) noexcept      = default;
       template <class U = T>
-        requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
         constexpr optional& operator=(U&& u);
 
       template <class U> constexpr optional& operator=(const optional<U>& rhs) noexcept;
       template <class U> constexpr optional& operator=(optional<U>&& rhs) = delete;
-      template <class U>
-        requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-        constexpr optional& emplace(U&& u) noexcept;
+      template <class U> constexpr optional& emplace(U&& u) noexcept;
 
       // \ref{optionalref.swap}, swap
       constexpr void swap(optional& rhs) noexcept;
@@ -1366,11 +1360,15 @@ constexpr optional(nullopt_t) noexcept;
 
 \begin{itemdecl}
 template <class U = T>
-  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-  constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
+  constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
+  \pnum
+  \constraints
+  \begin{itemize}
+  \item \tcode{!\exposconcept{is-derived-from-optional}<decay_t<U>>} is \tcode{true}
+  \end{itemize}
     \pnum
     \mandates
     \begin{itemize}
@@ -1386,9 +1384,16 @@ template <class U = T>
     \ensures
     \tcode{*this} refers to a value.\end{itemdescr}
 
+  \pnum
+  \remarks
+  The expression inside \keyword{explicit} is equivalent to:
+  \begin{codeblock}
+    !is_convertible_v<U, T>
+  \end{codeblock}
+
 \begin{itemdecl}
 template <class U>
-constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept;
+constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1400,6 +1405,13 @@ constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noe
   \pnum
   \ensures
   If \tcode{rhs.has_value()} is \tcode{true}, \tcode{*this} refers to the same value, otherwise, \tcode{*this} does not refer to a value.
+  \pnum
+  \remarks
+  The expression inside \keyword{explicit} is equivalent to:
+  \begin{codeblock}
+    !is_convertible_v<U, T>
+  \end{codeblock}
+
 \end{itemdescr}
 
 \rSec3[optionalref.assign]{Assignment}
@@ -1420,7 +1432,6 @@ constexpr optional& operator=(nullopt_t) noexcept;
 
 \begin{itemdecl}
 template <class U = T>
-  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
 constexpr optional& operator=(U&& u);
 \end{itemdecl}
 
@@ -1428,8 +1439,7 @@ constexpr optional& operator=(U&& u);
   \pnum
   \constraints
   \begin{itemize}
-  \item \tcode{is_same_v<remove_cvref_t<U>, optional>} is \tcode{false}
-  \item \tcode{conjunction_v<is_scalar<T>, is_same<T, decay_t<U>>>} is \tcode{false}
+  \item \tcode{!\exposconcept{is-derived-from-optional}<decay_t<U>>} is \tcode{true}
   \end{itemize}
 
   \pnum
@@ -1472,18 +1482,23 @@ constexpr optional& operator=(const optional<U>& rhs) noexcept;
 
 \begin{itemdecl}
 template <class U>
-  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
 constexpr optional& emplace(U&& u) noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
-    \pnum
-    \effects
-    Assigns \tcode{*this} \tcode{forward<U>(u)}
+  \pnum
+  \constraints
+  \begin{itemize}
+  \item \tcode{!\exposconcept{is-derived-from-optional}<decay_t<U>>} is \tcode{true}
+  \end{itemize}
 
-    \pnum
-    \ensures
-    \tcode{*this} refers to a value.
+  \pnum
+  \effects
+  Assigns \tcode{*this} \tcode{forward<U>(u)}
+
+  \pnum
+  \ensures
+  \tcode{*this} refers to a value.
 \end{itemdescr}
 
 
@@ -1705,7 +1720,7 @@ constexpr void reset() noexcept;
   \tcode{*this} does not refer to a value.
 \end{itemdescr}
 
-\rSec2[optional.optionalrref]{Class template \tcode{optional} \added{for rvalue reference types}}
+\rSec2[optional.optionalrref]{Class template \tcode{optional} for rvalue reference types}
 
 \rSec3[optional.optionalrref.general]{General}
 \begin{codeblock}
@@ -1723,11 +1738,8 @@ namespace std {
       constexpr optional(nullopt_t) noexcept;
       constexpr optional(const optional& rhs) noexcept = default;
       constexpr optional(optional&& rhs) noexcept      = default;
-      template <class U = T>
-        requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-        constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
-      template <class U>
-        constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept;
+      template <class U = T> constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
+      template <class U> constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept;
 
       constexpr ~optional() = default;
 
@@ -1735,14 +1747,10 @@ namespace std {
       constexpr optional& operator=(nullopt_t) noexcept;
       constexpr optional& operator=(const optional& rhs) noexcept = default;
       constexpr optional& operator=(optional&& rhs) noexcept      = default;
-      template <class U = T>
-        requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-        constexpr optional& operator=(U&& u);
+      template <class U = T> constexpr optional& operator=(U&& u);
       template <class U> constexpr optional& operator=(const optional<U>& rhs) noexcept;
       template <class U> constexpr optional& operator=(optional<U>&& rhs) = delete;
-      template <class U>
-        requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-        constexpr optional& emplace(U&& u) noexcept;
+      template <class U> constexpr optional& emplace(U&& u) noexcept;
 
       // \ref{optionalrref.swap}, swap
       constexpr void swap(optional& rhs) noexcept;
@@ -1793,11 +1801,16 @@ constexpr optional(nullopt_t) noexcept;
 
 \begin{itemdecl}
 template <class U = T>
-  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-  constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
+  constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
+  \pnum
+  \constraints
+  \begin{itemize}
+  \item \tcode{!\exposconcept{is-derived-from-optional}<decay_t<U>>} is \tcode{true}
+  \end{itemize}
+
     \pnum
     \mandates
     \begin{itemize}
@@ -1812,9 +1825,16 @@ template <class U = T>
     \ensures
     \tcode{*this} refers to a value.\end{itemdescr}
 
+  \pnum
+  \remarks
+  The expression inside \keyword{explicit} is equivalent to:
+  \begin{codeblock}
+    !is_convertible_v<U, T>
+  \end{codeblock}
+
 \begin{itemdecl}
 template <class U>
-constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept;
+constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1826,6 +1846,13 @@ constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noe
   \pnum
   \ensures
   If \tcode{rhs.has_value()} is \tcode{true}, \tcode{*this} refers to the same value, otherwise, \tcode{*this} does not refer to a value.
+  \pnum
+  \remarks
+  The expression inside \keyword{explicit} is equivalent to:
+  \begin{codeblock}
+    !is_convertible_v<U, T>
+  \end{codeblock}
+
 \end{itemdescr}
 
 \rSec3[optionalrref.assign]{Assignment}
@@ -1846,7 +1873,6 @@ constexpr optional& operator=(nullopt_t) noexcept;
 
 \begin{itemdecl}
 template <class U = T>
-  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
   constexpr optional& operator=(U&& u);
 \end{itemdecl}
 
@@ -1854,8 +1880,7 @@ template <class U = T>
   \pnum
   \constraints
   \begin{itemize}
-  \item \tcode{is_same_v<remove_cvref_t<U>, optional>} is \tcode{false}
-  \item \tcode{conjunction_v<is_scalar<T>, is_same<T, decay_t<U>>>} is \tcode{false}
+  \item \tcode{!\exposconcept{is-derived-from-optional}<decay_t<U>>} is \tcode{true}
   \end{itemize}
 
   \pnum
@@ -1896,12 +1921,17 @@ constexpr optional& operator=(const optional<U>& rhs) noexcept;
 
 \begin{itemdecl}
 template <class U>
-  requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
   constexpr optional& emplace(U&& u) noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
-    \pnum
+  \pnum
+  \constraints
+  \begin{itemize}
+  \item \tcode{!\exposconcept{is-derived-from-optional}<decay_t<U>>} is \tcode{true}
+  \end{itemize}
+
+  \pnum
     \effects
     Assigns \tcode{*this} \tcode{forward<U>(u)}
 
@@ -2032,7 +2062,7 @@ constexpr T&& value() const;
   Equivalent to:
   \begin{codeblock}
     if (has_value())
-      return std::move(*value_);
+      return std::move(*val);
     throw bad_optional_access();
   \end{codeblock}
 \end{itemdescr}
@@ -2647,9 +2677,11 @@ otherwise it evaluates to an unspecified value.
 The member functions are not guaranteed to be \keyword{noexcept}.
 \end{itemdescr}
 
+\begin{addedblock}
 \Sec2[version.syn]{Feature-test macro}
 Add the following macro definition to [version.syn], header <version> synopsis, with the value selected by the editor to reflect the date of adoption of this paper:
 
 \begin{codeblock}
   #define __cpp_lib_optional_ref 20XXXXL // also in <ranges>, <tuple>, <utility>
 \end{codeblock}
+\end{addedblock}
