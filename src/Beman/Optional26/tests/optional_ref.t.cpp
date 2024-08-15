@@ -405,12 +405,6 @@ TEST(OptionalRefTest, Nullopt) {
     EXPECT_TRUE(!std::is_default_constructible<beman::optional26::nullopt_t>::value);
 }
 
-struct move_detector {
-    move_detector() = default;
-    move_detector(move_detector&& rhs) { rhs.been_moved = true; }
-    bool been_moved = false;
-};
-
 TEST(OptionalRefTest, Observers) {
     int                                     var = 42;
     beman::optional26::optional<int&>       o1  = var;
