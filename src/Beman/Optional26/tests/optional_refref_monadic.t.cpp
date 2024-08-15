@@ -86,7 +86,7 @@ TEST(OptionalRefRefMonadicTest, Transform) {
 
     // callable which returns a reference
     beman::optional26::optional<int&&> o38  = std::move(fortytwo);
-    auto                               o38r = o38.transform([](int&& i) -> const int&& { return i; });
+    auto                               o38r = o38.transform([](int&& i) -> const int&& { return std::move(i); });
     EXPECT_TRUE(o38r);
     EXPECT_TRUE(*o38r == 42);
 }
