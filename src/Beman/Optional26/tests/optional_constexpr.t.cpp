@@ -3,6 +3,7 @@
 
 #include <Beman/Optional26/optional.hpp>
 #include <Beman/Optional26/tests/test_types.hpp>
+#include <Beman/Optional26/tests/test_utilities.hpp>
 
 #include <functional>
 #include <ranges>
@@ -220,7 +221,7 @@ consteval bool testConstexprInPlace() {
     return retval;
 }
 
-auto consteval constify(auto expr) { return (expr); }
+using beman::optional26::tests::constify;
 
 TEST(OptionalConstexprTest, InPlace) {
     EXPECT_TRUE(constify(testConstexprInPlace()));

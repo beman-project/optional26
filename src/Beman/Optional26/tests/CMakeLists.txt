@@ -19,7 +19,8 @@ target_sources(
   optional_ref.t.cpp
   optional.t.cpp
   optional_constexpr.t.cpp
-  test_types.cpp)
+  test_types.cpp
+  test_utilities.cpp)
 
 target_link_libraries(
   beman_optional26_test
