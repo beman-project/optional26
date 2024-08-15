@@ -11,8 +11,6 @@
 
 #include <gtest/gtest.h>
 
-TEST(OptionalConstexprTest, TestGTest) { ASSERT_EQ(1, 1); }
-
 
 TEST(OptionalConstexprTest, Constructors) {
     constexpr beman::optional26::optional<int> i1;

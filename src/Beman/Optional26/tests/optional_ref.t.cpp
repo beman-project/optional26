@@ -6,9 +6,6 @@
 
 #include <gtest/gtest.h>
 
-TEST(OptionalRefTest, TestGTest) { ASSERT_EQ(1, 1); }
-
-
 TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<int&> i1;
     beman::optional26::optional<int&> i2{beman::optional26::nullopt};
