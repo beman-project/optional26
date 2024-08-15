@@ -25,8 +25,12 @@ namespace std {
   class optional; // partially freestanding
 
   @\added{// \ref{optional.optionalref}, class template \tcode{optional} for reference types }@
-  @\added{template <class T\&> }@
-  @\added{class optional; // partially freestanding}@
+  @\added{template <class T> }@
+  @\added{class optional<T\&>; // partially freestanding}@
+
+  @\added{// \ref{optional.optionalrref}, class template \tcode{optional} for rvalue reference types }@
+  @\added{template <class T> }@
+  @\added{class optional<T\&\&>; // partially freestanding}@
 
   template <class T>
   inline constexpr bool ranges::enable_view<optional<T>> = true;
@@ -1326,7 +1330,7 @@ namespace std {
       constexpr T&       operator*() const noexcept;
       constexpr explicit operator bool() const noexcept;
       constexpr bool     has_value() const noexcept;
-      constexpr T&       value() const;
+      constexpr T&       value() const;                                // freestanding-deleted
       template <class U> constexpr T value_or(U&& u) const;
 
       // \ref{optionalref.monadic}, monadic operations
@@ -1701,17 +1705,15 @@ constexpr void reset() noexcept;
   \tcode{*this} does not refer to a value.
 \end{itemdescr}
 
-\todo{BEGIN}
-
 \rSec2[optional.optionalrref]{Class template \tcode{optional} \added{for rvalue reference types}}
 
 \rSec3[optional.optionalrref.general]{General}
 \begin{codeblock}
 namespace std {
-  template<class T>
-  class optional<T&> {
+  template <class T>
+  class optional<T&&> {
     public:
-      using value_type     = T&;
+      using value_type     = T&&;
       using iterator       = @\impdefnc@; // see~\ref{optionalrref.iterators}
       using const_iterator = @\impdefnc@; // see~\ref{optionalrref.iterators}
 
@@ -1736,7 +1738,6 @@ namespace std {
       template <class U = T>
         requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
         constexpr optional& operator=(U&& u);
-
       template <class U> constexpr optional& operator=(const optional<U>& rhs) noexcept;
       template <class U> constexpr optional& operator=(optional<U>&& rhs) = delete;
       template <class U>
@@ -1754,15 +1755,15 @@ namespace std {
 
       // \ref{optionalrref.observe}, observers
       constexpr T*       operator->() const noexcept;
-      constexpr T&       operator*() const noexcept;
+      constexpr T&&      operator*() const noexcept;
       constexpr explicit operator bool() const noexcept;
       constexpr bool     has_value() const noexcept;
-      constexpr T&       value() const;
+      constexpr T&&      value() const;                            // freestanding-deleted
       template <class U> constexpr T value_or(U&& u) const;
 
       // \ref{optionalrref.monadic}, monadic operations
       template <class F> constexpr auto and_then(F&& f) const;
-      template <class F> constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
+      template <class F> constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&&>>;
       template <class F> constexpr optional or_else(F&& f) const;
 
       // \ref{optionalrref.mod}, modifiers
@@ -1771,7 +1772,6 @@ namespace std {
     private:
       T* val; // \expos
   };
-
 }
 \end{codeblock}
 \rSec3[optionalrref.ctor]{Constructors}
@@ -1788,7 +1788,7 @@ constexpr optional(nullopt_t) noexcept;
 
 \pnum
 \remarks
-    For all \tcode{T\&} these constructors are constexpr constructors\iref{dcl.constexpr}.
+    For all \tcode{T\&\&} these constructors are constexpr constructors\iref{dcl.constexpr}.
   \end{itemdescr}
 
 \begin{itemdecl}
@@ -1801,8 +1801,7 @@ template <class U = T>
     \pnum
     \mandates
     \begin{itemize}
-    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
-    \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
+    \item \tcode{is_constructible_v<add_rvalue_reference_t<T>, U>} is \tcode{true}
     \end{itemize}
 
     \pnum
@@ -1822,7 +1821,7 @@ constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noe
   \pnum
   \mandates
     \begin{itemize}
-    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
+    \item \tcode{is_constructible_v<add_rvalue_reference_t<T>, U>} is \tcode{true}
     \end{itemize}
   \pnum
   \ensures
@@ -1848,7 +1847,7 @@ constexpr optional& operator=(nullopt_t) noexcept;
 \begin{itemdecl}
 template <class U = T>
   requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-constexpr optional& operator=(U&& u);
+  constexpr optional& operator=(U&& u);
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1862,8 +1861,7 @@ constexpr optional& operator=(U&& u);
   \pnum
   \mandates
   \begin{itemize}
-  \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
-  \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
+  \item \tcode{is_constructible_v<add_rvalue_reference_t<T>, U>} is \tcode{true}
   \end{itemize}
 
   \pnum
@@ -1884,8 +1882,7 @@ constexpr optional& operator=(const optional<U>& rhs) noexcept;
     \pnum
     \mandates
     \begin{itemize}
-    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
-    \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
+    \item \tcode{is_constructible_v<add_rvalue_reference_t<T>, U>} is \tcode{true}
     \end{itemize}
 
     \pnum
@@ -1900,7 +1897,7 @@ constexpr optional& operator=(const optional<U>& rhs) noexcept;
 \begin{itemdecl}
 template <class U>
   requires(!@\exposconcept{is-derived-from-optional}@<decay_t<U>>)
-constexpr optional& emplace(U&& u) noexcept;
+  constexpr optional& emplace(U&& u) noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -1991,7 +1988,7 @@ constexpr T* operator->() const noexcept;
 \end{itemdescr}
 
 \begin{itemdecl}
-constexpr T& operator*() const noexcept;
+constexpr T&& operator*() const noexcept;
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2001,7 +1998,7 @@ constexpr T& operator*() const noexcept;
 
    \pnum
    \returns
-   \tcode{*val}.
+   \tcode{std::move(*val)}.
 
 \end{itemdescr}
 
@@ -2026,7 +2023,7 @@ constexpr bool has_value() const noexcept;
 \end{itemdescr}
 
 \begin{itemdecl}
-constexpr T& value() const;
+constexpr T&& value() const;
 \end{itemdecl}
 
 \begin{itemdescr}
@@ -2035,7 +2032,7 @@ constexpr T& value() const;
   Equivalent to:
   \begin{codeblock}
     if (has_value())
-      return *value_;
+      return std::move(*value_);
     throw bad_optional_access();
   \end{codeblock}
 \end{itemdescr}
@@ -2048,12 +2045,14 @@ constexpr T value_or(U&& u) const;
 \begin{itemdescr}
   \pnum
   \mandates
-  \tcode{is_constructible_v<add_lvalue_reference_t<T>, decltype(v)>} is \tcode{true}.
-
+  \begin{itemize}
+  \item \tcode{is_copy_constructible_v<T>} is \tcode{true}
+  \item \tcode{is_convertible_v<decltype(u), T>} is \tcode{true}
+  \end{itemize}
   \pnum
   \effects
   Equivalent to:
-  \tcode{return has_value() ? U(**this) : U(std::forward<Args>(u));}
+  \tcode{return has_value() ? std::move(*val) : std::forward<U>(u);}
 \end{itemdescr}
 
 
@@ -2066,7 +2065,7 @@ constexpr auto and_then(F&& f) const;
 
 \begin{itemdescr}
   \pnum
-  Let \tcode{U} be \tcode{invoke_result_t<F, T\&>}.
+  Let \tcode{U} be \tcode{invoke_result_t<F, T\&\&>}.
 
   \pnum
   \mandates
@@ -2076,25 +2075,24 @@ constexpr auto and_then(F&& f) const;
   \effects
   Equivalent to:
   \begin{codeblock}
-    return has_value() ? invoke(forward<F>(f), value()) : result(nullopt);
+    return has_value() ? invoke(forward<F>(f), value()) : remove_cvref_t<U>();
   \end{codeblock}
 \end{itemdescr}
 
 \begin{itemdecl}
 template <class F>
-constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
+constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&&>>;
 \end{itemdecl}
 
 \begin{itemdescr}
   \pnum
-  Let \tcode{U} be \tcode{remove_cv_t<invoke_result_t<F, T\&>>}.
-
+  Let \tcode{U} be \tcode{remove_cv_t<invoke_result_t<F, T\&\&>>}.
 
   \pnum
   \returns
   If \tcode{*this} refers to a value, an \tcode{optional<U>} object
   whose refered to value is the result of
-  \tcode{invoke(forward<F>(f), *val)};
+  \tcode{invoke(forward<F>(f), std::move(*val))};
   otherwise, \tcode{optional<U>()}.
 \end{itemdescr}
 
@@ -2113,7 +2111,7 @@ constexpr optional or_else(F&& f) const;
   Equivalent to:
   \begin{codeblock}
     if (has_value()))
-        return value()
+        return std::move(*val)
     else
         return forward<F>(f)();
   \end{codeblock}
@@ -2131,7 +2129,6 @@ constexpr void reset() noexcept;
   \ensures
   \tcode{*this} does not refer to a value.
 \end{itemdescr}
-\todo{END}
 \end{addedblock}
 
 \rSec2[optional.nullopt]{No-value state indicator}

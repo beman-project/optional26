@@ -13,13 +13,14 @@ add_executable(
 target_sources(
   beman_optional26_test
   PRIVATE
-  optional_monadic.t.cpp
-  optional_range_support.t.cpp
-  optional_ref_monadic.t.cpp
-  optional_ref.t.cpp
-  optional_refref.t.cpp
   optional.t.cpp
   optional_constexpr.t.cpp
+  optional_monadic.t.cpp
+  optional_range_support.t.cpp
+  optional_ref.t.cpp
+  optional_ref_monadic.t.cpp
+  optional_refref.t.cpp
+  optional_refref_monadic.t.cpp
   test_types.cpp)
 
 target_link_libraries(

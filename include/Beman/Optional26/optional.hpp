@@ -1403,7 +1403,7 @@ class optional<T&&> {
     template <class F>
     constexpr auto and_then(F&& f) const;
     template <class F>
-    constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
+    constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&&>>;
     template <class F>
     constexpr optional or_else(F&& f) const;
 
@@ -1532,23 +1532,23 @@ template <class U>
 constexpr T optional<T&&>::value_or(U&& u) const {
     static_assert(is_copy_constructible_v<T>, "T must be copy constructible");
     static_assert(is_convertible_v<decltype(u), T>, "Must be able to bind u to T");
-    return has_value() ? *value_ : std::forward<U>(u);
+    return has_value() ? std::move(*value_) : std::forward<U>(u);
 }
 
 //   \rSec3[optionalrref.monadic]{Monadic operations}
 template <class T>
 template <class F>
 constexpr auto optional<T&&>::and_then(F&& f) const {
-    using U = invoke_result_t<F, T&>;
+    using U = invoke_result_t<F, T&&>;
     static_assert(detail::is_optional<U>, "F must return an optional");
-    return (has_value()) ? invoke(std::forward<F>(f), *value_) : remove_cvref_t<U>();
+    return (has_value()) ? invoke(std::forward<F>(f), std::move(*value_)) : remove_cvref_t<U>();
 }
 
 template <class T>
 template <class F>
-constexpr auto optional<T&&>::transform(F&& f) const -> optional<invoke_result_t<F, T&>> {
-    using U = invoke_result_t<F, T&>;
-    return (has_value()) ? optional<U>{invoke(std::forward<F>(f), *value_)} : optional<U>{};
+constexpr auto optional<T&&>::transform(F&& f) const -> optional<invoke_result_t<F, T&&>> {
+    using U = invoke_result_t<F, T&&>;
+    return (has_value()) ? optional<U>{invoke(std::forward<F>(f), std::move(*value_))} : optional<U>{};
 }
 
 template <class T>
@@ -1556,7 +1556,7 @@ template <class F>
 constexpr optional<T&&> optional<T&&>::or_else(F&& f) const {
     using U = invoke_result_t<F>;
     static_assert(is_same_v<remove_cvref_t<U>, optional>);
-    return has_value() ? *value_ : std::forward<F>(f)();
+    return has_value() ? std::move(*value_) : std::forward<F>(f)();
 }
 
 // \rSec3[optional.mod]{modifiers}
