@@ -148,19 +148,23 @@ bash zsh: venv
 bash zsh: ## Run bash or zsh with the venv activated
 	$(ACTIVATE) exec $@
 
+.PHONY: lint
 lint: venv
 lint: ## Run all configured tools in pre-commit
 	$(PRE_COMMIT) run -a
 
+.PHONY: lint-manual
 lint-manual: venv
 lint-manual: ## Run all manual tools in pre-commit
 	$(PRE_COMMIT) run --hook-stage manual -a
 
+.PHONY: coverage
+coverage: ## Build and run the tests with the GCOV profile and process the results
 coverage: venv
 	$(MAKE) CONFIG=Gcov test
-	$(ACTIVATE) cmake --build $(_build_path)  --config $(CONFIG) --target process_coverage
+	$(ACTIVATE) cmake --build $(_build_path) --config Gcov --target process_coverage
 
 # Help target
 .PHONY: help
 help: ## Show this help.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST) targets.mk | sort
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST) | sort
