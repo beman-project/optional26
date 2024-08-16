@@ -21,3 +21,9 @@ set(CMAKE_CXX_FLAGS_TSAN
 set(CMAKE_CXX_FLAGS_ASAN
     "-O3 -g -DNDEBUG -fsanitize=address,undefined,leak"
     CACHE STRING "C++ ASAN Flags" FORCE)
+set(CMAKE_CXX_FLAGS_GCOV
+    "-O0 -fno-inline -g --coverage"
+    CACHE STRING "C++ GCOV Flags" FORCE)
+set(CMAKE_LINKER_FLAGS_GCOV
+    "--coverage"
+    CACHE STRING "Linker GCOV Flags" FORCE)

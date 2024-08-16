@@ -27,12 +27,12 @@ export
 ifeq ($(strip $(TOOLCHAIN)),)
 	_build_name?=build-system/
 	_build_dir?=.build/
-	_configuration_types?="RelWithDebInfo;Debug;Tsan;Asan"
+	_configuration_types?="RelWithDebInfo;Debug;Tsan;Asan;Gcov"
 	_cmake_args=-DCMAKE_TOOLCHAIN_FILE=$(CURDIR)/etc/toolchain.cmake
 else
 	_build_name?=build-$(TOOLCHAIN)
 	_build_dir?=.build/
-	_configuration_types?="RelWithDebInfo;Debug;Tsan;Asan"
+	_configuration_types?="RelWithDebInfo;Debug;Tsan;Asan;Gcov"
 	_cmake_args=-DCMAKE_TOOLCHAIN_FILE=$(CURDIR)/etc/$(TOOLCHAIN)-toolchain.cmake
 endif
 
@@ -151,6 +151,10 @@ bash zsh: ## Run bash or zsh with the venv activated
 lint: venv
 lint: ## Run all configured tools in pre-commit
 	$(PRE_COMMIT) run -a
+
+coverage: venv
+	$(MAKE) CONFIG=Gcov test
+	$(ACTIVATE) cmake --build $(_build_path)  --config $(CONFIG) --target process_coverage
 
 # Help target
 .PHONY: help
