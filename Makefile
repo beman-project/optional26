@@ -152,6 +152,10 @@ lint: venv
 lint: ## Run all configured tools in pre-commit
 	$(PRE_COMMIT) run -a
 
+lint-manual: venv
+lint-manual: ## Run all manual tools in pre-commit
+	$(PRE_COMMIT) run --hook-stage manual -a
+
 coverage: venv
 	$(MAKE) CONFIG=Gcov test
 	$(ACTIVATE) cmake --build $(_build_path)  --config $(CONFIG) --target process_coverage
