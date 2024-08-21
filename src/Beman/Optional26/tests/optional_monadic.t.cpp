@@ -78,7 +78,7 @@ TEST(OptionalMonadicTest, Transform) {
 
     // callable which returns a reference
     beman::optional26::optional<int> o38  = 42;
-    auto                             o38r = o38.transform([](int& i) -> const int& { return i; });
+    beman::optional26::optional<const int&> o38r = o38.transform([](int& i) -> const int& { return i; });
     EXPECT_TRUE(o38r);
     EXPECT_TRUE(*o38r == 42);
 }
@@ -299,4 +299,29 @@ TEST(OptionalMonadicTest, or_else) {
 
     beman::optional26::optional<int> o2;
     EXPECT_EQ(*(o2.or_else([] { return beman::optional26::make_optional(13); })), 13);
+
+    /*
+      optional<T> or_else(F&& f) && {
+    */
+    EXPECT_TRUE(*(std::move(o1).or_else([] { return beman::optional26::make_optional(13); })) == 42);
+    EXPECT_EQ(*(std::move(o2).or_else([] { return beman::optional26::make_optional(13); })), 13);
+
+}
+
+TEST(OptionalMonadicTest, Constexpr_or_else) {
+    constexpr beman::optional26::optional<int> o1 = 42;
+    constexpr auto test = (*(o1.or_else([] { return beman::optional26::make_optional(13); })) == 42);
+    EXPECT_TRUE(test);
+    constexpr beman::optional26::optional<int> o2;
+    constexpr auto test2 = *(o2.or_else([] { return beman::optional26::make_optional(13); })) == 13;
+    EXPECT_TRUE(test2);
+
+    /*
+      optional<T> or_else(F&& f) && {
+    */
+    constexpr auto test3 = (*(std::move(o1).or_else([] { return beman::optional26::make_optional(13); })) == 42);
+    EXPECT_TRUE(test3);
+    constexpr auto test4 = *(std::move(o2).or_else([] { return beman::optional26::make_optional(13); })) == 13;
+    EXPECT_TRUE(test4);
+
 }
