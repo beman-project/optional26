@@ -197,7 +197,7 @@ struct in_place_t {
     explicit in_place_t() = default;
 };
 
-static constexpr in_place_t in_place{};
+inline constexpr in_place_t in_place{};
 
 class bad_optional_access : public std::exception {
   public:
@@ -206,7 +206,6 @@ class bad_optional_access : public std::exception {
 };
 
 template <class T>
-    requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional;
 
 } // namespace beman::optional26
@@ -233,87 +232,83 @@ template <class T>
 concept is_derived_from_optional = requires(const T& t) { []<class U>(const optional<U>&) {}(t); };
 
 namespace detail {
-
 template <class T>
-struct is_optional_impl : std::false_type {};
+inline constexpr bool is_optional = false;
 template <class T>
-struct is_optional_impl<optional<T>> : std::true_type {};
-template <class T>
-using is_optional = is_optional_impl<std::decay_t<T>>;
-
+inline constexpr bool is_optional<optional<T>> = true;
 } // namespace detail
 
 template <typename T>
 constexpr optional<std::decay_t<T>>
-make_optional(T&& __t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
+make_optional(T&& t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
     requires std::is_constructible_v<std::decay_t<T>, T>
 {
-    return optional<std::decay_t<T>>{std::forward<T>(__t)};
+    return optional<std::decay_t<T>>{std::forward<T>(t)};
 }
 
-template <typename T, typename... _Args>
-constexpr optional<T> make_optional(_Args&&... __args) noexcept(std::is_nothrow_constructible_v<T, _Args...>)
-    requires std::is_constructible_v<T, _Args...>
+template <typename T, typename... Args>
+constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
+    requires std::is_constructible_v<T, Args...>
 {
-    return optional<T>{in_place, std::forward<_Args>(__args)...};
+    return optional<T>{in_place, std::forward<Args>(args)...};
 }
 
-template <typename T, typename _Up, typename... _Args>
+template <typename T, typename _Up, typename... Args>
 constexpr optional<T>
-make_optional(std::initializer_list<_Up> __il,
-              _Args&&... __args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<_Up>&, _Args...>)
-    requires std::is_constructible_v<T, std::initializer_list<_Up>&, _Args...>
+make_optional(std::initializer_list<_Up> init_list,
+              Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<_Up>&, Args...>)
+    requires std::is_constructible_v<T, std::initializer_list<_Up>&, Args...>
 {
-    return optional<T>{in_place, __il, std::forward<_Args>(__args)...};
+    return optional<T>{in_place, init_list, std::forward<Args>(args)...};
 }
 
-template <class T_, class U_>
-concept enable_forward_value = std::is_constructible_v<T_, U_&&> && !std::is_same_v<std::decay_t<U_>, in_place_t> &&
-                               !std::is_same_v<optional<T_>, std::decay_t<U_>>;
+template <class T, class U>
+concept enable_forward_value = std::is_constructible_v<T, U&&> && !std::is_same_v<std::decay_t<U>, in_place_t> &&
+                               !std::is_same_v<optional<T>, std::decay_t<U>>;
 
-template <class T_, class U_, class Other>
+template <class T, class U, class Other>
 concept enable_from_other =
-    std::is_constructible_v<T_, Other> && !std::is_constructible_v<T_, optional<U_>&> &&
-    !std::is_constructible_v<T_, optional<U_>&&> && !std::is_constructible_v<T_, const optional<U_>&> &&
-    !std::is_constructible_v<T_, const optional<U_>&&> && !std::is_convertible_v<optional<U_>&, T_> &&
-    !std::is_convertible_v<optional<U_>&&, T_> && !std::is_convertible_v<const optional<U_>&, T_> &&
-    !std::is_convertible_v<const optional<U_>&&, T_>;
+    std::is_constructible_v<T, Other> && !std::is_constructible_v<T, optional<U>&> &&
+    !std::is_constructible_v<T, optional<U>&&> && !std::is_constructible_v<T, const optional<U>&> &&
+    !std::is_constructible_v<T, const optional<U>&&> && !std::is_convertible_v<optional<U>&, T> &&
+    !std::is_convertible_v<optional<U>&&, T> && !std::is_convertible_v<const optional<U>&, T> &&
+    !std::is_convertible_v<const optional<U>&&, T>;
 
 template <class T, class U>
 concept enable_assign_forward = !std::is_same_v<optional<T>, std::decay_t<U>> &&
                                 !std::conjunction_v<std::is_scalar<T>, std::is_same<T, std::decay_t<U>>> &&
                                 std::is_constructible_v<T, U> && std::is_assignable_v<T&, U>;
 
-template <class T_, class U_, class Other>
+template <class T, class U, class Other>
 concept enable_assign_from_other =
-    std::is_constructible_v<T_, Other> && std::is_assignable_v<T_&, Other> &&
-    !std::is_constructible_v<T_, optional<U_>&> && !std::is_constructible_v<T_, optional<U_>&&> &&
-    !std::is_constructible_v<T_, const optional<U_>&> && !std::is_constructible_v<T_, const optional<U_>&&> &&
-    !std::is_convertible_v<optional<U_>&, T_> && !std::is_convertible_v<optional<U_>&&, T_> &&
-    !std::is_convertible_v<const optional<U_>&, T_> && !std::is_convertible_v<const optional<U_>&&, T_> &&
-    !std::is_assignable_v<T_&, optional<U_>&> && !std::is_assignable_v<T_&, optional<U_>&&> &&
-    !std::is_assignable_v<T_&, const optional<U_>&> && !std::is_assignable_v<T_&, const optional<U_>&&>;
+    std::is_constructible_v<T, Other> && std::is_assignable_v<T&, Other> &&
+    !std::is_constructible_v<T, optional<U>&> && !std::is_constructible_v<T, optional<U>&&> &&
+    !std::is_constructible_v<T, const optional<U>&> && !std::is_constructible_v<T, const optional<U>&&> &&
+    !std::is_convertible_v<optional<U>&, T> && !std::is_convertible_v<optional<U>&&, T> &&
+    !std::is_convertible_v<const optional<U>&, T> && !std::is_convertible_v<const optional<U>&&, T> &&
+    !std::is_assignable_v<T&, optional<U>&> && !std::is_assignable_v<T&, optional<U>&&> &&
+    !std::is_assignable_v<T&, const optional<U>&> && !std::is_assignable_v<T&, const optional<U>&&>;
 
 template <class T>
-    requires(!std::is_same_v<T, in_place_t>) && (!std::is_same_v<std::decay_t<T>, nullopt_t>)
 class optional {
+    static_assert((!std::is_same_v<T, std::remove_cv_t<in_place_t>>) && (!std::is_same_v<std::remove_cv_t<T>, nullopt_t>));
 
     struct empty {};
     union {
         empty _{};
         T     value_;
     };
-    bool engaged = false;
+    bool engaged_ = false;
 
     template <class... Args>
-    void construct(Args&&... args) {
-        new (std::addressof(value_)) T(std::forward<Args>(args)...);
-        engaged = true;
+    constexpr void construct(Args&&... args) {
+        std::construct_at(std::addressof(value_), std::forward<Args>(args)...);
+        engaged_ = true;
     }
 
-    void hard_reset() noexcept {
+    constexpr void hard_reset() noexcept {
         value_.~T();
-        engaged = false;
+        engaged_ = false;
     }
 
   public:
@@ -323,21 +318,16 @@ class optional {
     using const_iterator = detail::contiguous_iterator<const T, optional>; // see [optional.iterators]
 
     constexpr optional() noexcept
-        requires std::is_default_constructible_v<T>
-    = default;
+        : _(), engaged_(false) {}
 
-    constexpr optional() noexcept
-        requires(!std::is_default_constructible_v<T>)
-        : _(), engaged(false) {}
-
-    ~optional()
+    constexpr ~optional()
         requires(!std::is_trivially_destructible_v<T>)
     {
         if (has_value())
             value_.~T();
     }
 
-    ~optional()
+    constexpr ~optional()
         requires std::is_trivially_destructible_v<T>
     = default;
 
@@ -347,8 +337,9 @@ class optional {
         requires std::is_copy_constructible_v<T> && (!std::is_trivially_copy_constructible_v<T>)
     {
         if (rhs.has_value()) {
-            ::new (&value_) T(rhs.value_);
-            engaged = true;
+
+            std::construct_at(std::addressof(value_), rhs.value_);
+            engaged_ = true;
         }
     }
 
@@ -360,8 +351,8 @@ class optional {
         requires std::is_move_constructible_v<T> && (!std::is_trivially_move_constructible_v<T>)
     {
         if (rhs.has_value()) {
-            ::new (&value_) T(std::move(rhs.value_));
-            engaged = true;
+            std::construct_at(std::addressof(value_), std::move(rhs.value()));
+            engaged_ = true;
         }
     }
 
@@ -373,12 +364,12 @@ class optional {
     template <class... Args>
     constexpr explicit optional(in_place_t, Args&&... args)
         requires std::is_constructible_v<T, Args...>
-        : value_(std::forward<Args>(args)...), engaged(true) {}
+        : value_(std::forward<Args>(args)...), engaged_(true) {}
 
     template <class U, class... Args>
     constexpr explicit optional(in_place_t, std::initializer_list<U> il, Args&&... args)
         requires std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>
-        : value_(il, std::forward<Args>(args)...), engaged(true) {}
+        : value_(il, std::forward<Args>(args)...), engaged_(true) {}
 
     /// Constructs the stored value with `u`.
     template <class U = T>
@@ -397,7 +388,8 @@ class optional {
         requires enable_from_other<T, U, const U&> && std::is_convertible_v<const U&, T>
     {
         if (rhs.has_value()) {
-            construct(*rhs);
+            std::construct_at(std::addressof(value_), rhs.value());
+            engaged_ = true;
         }
     }
 
@@ -429,7 +421,7 @@ class optional {
         }
     }
 
-    optional& operator=(const optional& rhs)
+    constexpr optional& operator=(const optional& rhs)
         requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
                  (!std::is_trivially_copy_assignable_v<T>)
     {
@@ -438,16 +430,16 @@ class optional {
         else if (has_value())
             value_ = rhs.value_;
         else
-            ::new (&value_) T(rhs.value_);
+            std::construct_at(std::addressof(value_), rhs.value_);
         return *this;
     }
 
-    optional& operator=(const optional&)
+    constexpr optional& operator=(const optional&)
         requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
                      std::is_trivially_copy_constructible_v<T> && std::is_trivially_copy_assignable_v<T>
     = default;
 
-    optional& operator=(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
+    constexpr optional& operator=(optional&& rhs) noexcept(std::is_nothrow_move_constructible_v<T>)
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
                  (!std::is_trivially_move_assignable_v<T>)
     {
@@ -456,11 +448,11 @@ class optional {
         else if (has_value())
             value_ = std::move(rhs.value_);
         else
-            ::new (&value_) T(std::move(rhs.value_));
+            std::construct_at(std::addressof(value_), std::move(rhs.value_));
         return *this;
     }
 
-    optional& operator=(optional&&)
+    constexpr optional& operator=(optional&&)
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
                      std::is_trivially_move_constructible_v<T> && std::is_trivially_move_assignable_v<T>
     = default;
@@ -486,22 +478,22 @@ class optional {
     /// Returns the stored value if there is one, otherwise returns `u`
     template <class U>
     constexpr T value_or(U&& u) const&
-        requires std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>
     {
+        static_assert(std::is_copy_constructible_v<T> && std::is_convertible_v<U&&, T>);
         return has_value() ? value() : static_cast<T>(std::forward<U>(u));
     }
 
     template <class U>
     constexpr T value_or(U&& u) &&
-        requires std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>
     {
+        static_assert(std::is_move_constructible_v<T> && std::is_convertible_v<U&&, T>);
         return has_value() ? std::move(value()) : static_cast<T>(std::forward<U>(u));
     }
 
     template <class F>
     constexpr auto and_then(F&& f) & {
         using U = std::invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
         if (has_value()) {
             return std::invoke(std::forward<F>(f), value_);
         } else {
@@ -512,7 +504,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) && {
         using U = std::invoke_result_t<F, T&&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
         if (has_value()) {
             return std::invoke(std::forward<F>(f), std::move(value_));
         } else {
@@ -523,7 +515,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) const& {
         using U = std::invoke_result_t<F, const T&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
         if (has_value()) {
             return std::invoke(std::forward<F>(f), value_);
         } else {
@@ -534,7 +526,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) const&& {
         using U = std::invoke_result_t<F, const T&&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>::value);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
         if (has_value()) {
             return std::invoke(std::forward<F>(f), std::move(value_));
         } else {
@@ -546,30 +538,47 @@ class optional {
     template <class F>
     constexpr auto transform(F&& f) & {
         using U = std::invoke_result_t<F, T&>;
+        static_assert(!std::is_array_v<U>);
+        static_assert(!std::is_same_v<U, in_place_t>);
+        static_assert(!std::is_same_v<U, nullopt_t>);
+        static_assert(std::is_object_v<U> || std::is_reference_v<U> ); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
     template <class F>
     constexpr auto transform(F&& f) && {
         using U = std::invoke_result_t<F, T&&>;
+        static_assert(!std::is_array_v<U>);
+        static_assert(!std::is_same_v<U, in_place_t>);
+        static_assert(!std::is_same_v<U, nullopt_t>);
+        static_assert(std::is_object_v<U> || std::is_reference_v<U> ); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), std::move(value_))} : optional<U>{};
     }
 
     template <class F>
     constexpr auto transform(F&& f) const& {
         using U = std::invoke_result_t<F, const T&>;
+        static_assert(!std::is_array_v<U>);
+        static_assert(!std::is_same_v<U, in_place_t>);
+        static_assert(!std::is_same_v<U, nullopt_t>);
+        static_assert(std::is_object_v<U> || std::is_reference_v<U> ); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
     template <class F>
     constexpr auto transform(F&& f) const&& {
         using U = std::invoke_result_t<F, const T&>;
+        static_assert(!std::is_array_v<U>);
+        static_assert(!std::is_same_v<U, in_place_t>);
+        static_assert(!std::is_same_v<U, nullopt_t>);
+        static_assert(std::is_object_v<U> || std::is_reference_v<U> ); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
     /// Calls `f` if the optional is empty
     template <class F>
-    constexpr optional<T> or_else(F&& f) & {
+    constexpr optional<T> or_else(F&& f) const& {
+        static_assert(std::is_same_v<std::remove_cvref_t<std::invoke_result_t<F>>, optional>);
         if (has_value())
             return value_;
 
@@ -577,7 +586,8 @@ class optional {
     }
 
     template <class F>
-    optional<T> or_else(F&& f) && {
+    constexpr optional<T> or_else(F&& f) && {
+        static_assert(std::is_same_v<std::remove_cvref_t<std::invoke_result_t<F>>, optional>);
         if (has_value())
             return std::move(value_);
 
@@ -587,7 +597,7 @@ class optional {
     /// Assigns the stored value from `u`, destroying the old value if there
     /// was one.
     template <class U = T>
-    optional& operator=(U&& u)
+    constexpr optional& operator=(U&& u)
         requires enable_assign_forward<T, U>
     {
         if (has_value()) {
@@ -604,7 +614,7 @@ class optional {
     /// Copies the value from `rhs` if there is one. Otherwise resets the
     /// stored value in `*this`.
     template <class U>
-    optional& operator=(const optional<U>& rhs)
+    constexpr optional& operator=(const optional<U>& rhs)
         requires enable_assign_from_other<T, U, const U&>
     {
         if (has_value()) {
@@ -627,7 +637,7 @@ class optional {
     /// Moves the value from `rhs` if there is one. Otherwise resets the stored
     /// value in `*this`.
     template <class U>
-    optional& operator=(optional<U>&& rhs)
+    constexpr optional& operator=(optional<U>&& rhs)
         requires enable_assign_from_other<T, U, U>
     {
         if (has_value()) {
@@ -648,18 +658,18 @@ class optional {
     /// Constructs the value in-place, destroying the current one if there is
     /// one.
     template <class... Args>
-    T& emplace(Args&&... args)
-        requires std::is_constructible<T, Args&&...>::value
+    constexpr T& emplace(Args&&... args)
     {
+        static_assert(std::is_constructible_v<T, Args&&...>);
         *this = nullopt;
         construct(std::forward<Args>(args)...);
         return value();
     }
 
     template <class U, class... Args>
-    T& emplace(std::initializer_list<U> il, Args&&... args)
-        requires std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>
+    constexpr T& emplace(std::initializer_list<U> il, Args&&... args)
     {
+        static_assert(std::is_constructible_v<T, std::initializer_list<U>&, Args&&...>);
         *this = nullopt;
         construct(il, std::forward<Args>(args)...);
         return value();
@@ -671,21 +681,23 @@ class optional {
     /// If both have a value, the values are swapped.
     /// If one has a value, it is moved to the other and the movee is left
     /// valueless.
-    void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
-                                      std::is_nothrow_swappable<T>::value) {
+    constexpr void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
+                                                std::is_nothrow_swappable<T>::value) {
+        static_assert(std::is_move_constructible_v<T>);
         using std::swap;
         if (has_value()) {
             if (rhs.has_value()) {
                 swap(value(), *rhs);
             } else {
-                new (std::addressof(rhs.value_)) T(std::move(value_));
+                std::construct_at(std::addressof(rhs.value_), std::move(value_));
                 value_.T::~T();
             }
         } else if (rhs.has_value()) {
-            new (std::addressof(value_)) T(std::move(rhs.value_));
+
+            std::construct_at(std::addressof(value_), std::move(rhs.value_));
             rhs.value_.T::~T();
         }
-        swap(engaged, rhs.engaged);
+        swap(engaged_, rhs.engaged_);
     }
 
     // Since P3168R2: Give std::optional Range Support.
@@ -710,16 +722,16 @@ class optional {
     constexpr T&& operator*() && { return std::move(value_); }
 
     /// Returns whether or not the optional has a value
-    constexpr bool has_value() const noexcept { return engaged; }
+    constexpr bool has_value() const noexcept { return engaged_; }
 
-    constexpr explicit operator bool() const noexcept { return engaged; }
+    constexpr explicit operator bool() const noexcept { return engaged_; }
 
-    void reset() noexcept {
+    constexpr void reset() noexcept {
         if constexpr (!std::is_trivially_destructible_v<T>) {
             if (has_value())
                 value_.~T();
         }
-        engaged = false;
+        engaged_ = false;
     }
 };
 
@@ -1025,14 +1037,20 @@ class optional<T&> {
     constexpr optional(optional&& rhs) noexcept      = default;
 
     template <class U = T>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
+        requires(!detail::is_optional<std::decay_t<U>>)
     constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u) noexcept : value_(std::addressof(u)) {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
     }
 
     template <class U>
-    constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept : optional(*rhs) {}
+    constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept {
+        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+        if (rhs.has_value())
+            value_ = std::to_address(rhs);
+        else
+            value_ = nullptr;
+    }
 
     //  \rSec3[optional.dtor]{Destructor}
 
@@ -1049,7 +1067,7 @@ class optional<T&> {
     constexpr optional& operator=(optional&& rhs) noexcept      = default;
 
     template <class U = T>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
+        requires(!detail::is_optional<std::decay_t<U>>)
     constexpr optional& operator=(U&& u) {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
         static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
@@ -1060,12 +1078,18 @@ class optional<T&> {
     template <class U>
     constexpr optional& operator=(const optional<U>& rhs) noexcept {
         static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        value_ = std::addressof(rhs.value());
+        if (rhs.has_value())
+            value_ = std::to_address(rhs);
+        else
+            value_ = nullptr;
         return *this;
     }
 
     template <class U>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
+    constexpr optional& operator=(optional<U>&& rhs)  = delete;
+
+    template <class U>
+        requires(!detail::is_optional<std::decay_t<U>>)
     constexpr optional& emplace(U&& u) noexcept {
         return *this = std::forward<U>(u);
     }
@@ -1109,7 +1133,7 @@ class optional<T&> {
     template <class F>
     constexpr auto and_then(F&& f) const {
         using U = std::invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<U>::value, "F must return an optional");
+        static_assert(detail::is_optional<U>, "F must return an optional");
         return (has_value()) ? std::invoke(std::forward<F>(f), *value_) : std::remove_cvref_t<U>();
     }
 

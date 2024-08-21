@@ -2,67 +2,49 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <Beman/Optional26/optional.hpp>
+#include <Beman/Optional26/tests/test_types.hpp>
 
 #include <gtest/gtest.h>
-
-TEST(OptionalRefTest, TestGTest) { ASSERT_EQ(1, 1); }
-
-namespace {
-struct empty {};
-struct no_default {
-    no_default()                             = delete;
-    no_default(const no_default&)            = default;
-    no_default(no_default&&)                 = default;
-    no_default& operator=(const no_default&) = default;
-    no_default& operator=(no_default&&)      = default;
-    no_default(empty) {};
-};
-
-struct base {
-    int i_;
-    base() : i_(0) {}
-    base(int i) : i_(i) {}
-};
-
-struct derived : public base {
-    int j_;
-    derived() : base(0), j_(0) {}
-    derived(int i, int j) : base(i), j_(j) {}
-};
-} // namespace
 
 TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<int&> i1;
     beman::optional26::optional<int&> i2{beman::optional26::nullopt};
-    (void)i1;
-    (void)i2;
+    std::ignore = i1;
+    std::ignore = i2;
 
     int                               i  = 0;
     beman::optional26::optional<int&> i3 = i;
-    (void)i3;
+    std::ignore = i3;
+
+    using beman::optional26::tests::empty;
 
     beman::optional26::optional<empty&> e1;
     beman::optional26::optional<empty&> e2{beman::optional26::nullopt};
-    (void)e1;
-    (void)e2;
+    std::ignore = e1;
+    std::ignore = e2;
 
     empty                               e{};
     beman::optional26::optional<empty&> e3 = e;
-    (void)e3;
+    std::ignore = e3;
 
-    beman::optional26::optional<no_default&> nd1;
-    beman::optional26::optional<no_default&> nd2{beman::optional26::nullopt};
-    (void)nd1;
-    (void)nd2;
+    using beman::optional26::tests::no_default_ctor;
 
-    no_default nd{e};
+    beman::optional26::optional<no_default_ctor&> nd1;
+    beman::optional26::optional<no_default_ctor&> nd2{beman::optional26::nullopt};
+    std::ignore = nd1;
+    std::ignore = nd2;
 
-    beman::optional26::optional<no_default&> nd3 = nd;
-    (void)nd3;
+    no_default_ctor nd{e};
+
+    beman::optional26::optional<no_default_ctor&> nd3 = nd;
+    std::ignore = nd3;
 
     beman::optional26::optional<int&> ie;
     beman::optional26::optional<int&> i4 = ie;
     EXPECT_FALSE(i4);
+
+    using beman::optional26::tests::base;
+    using beman::optional26::tests::derived;
 
     base                               b{1};
     derived                            d(1, 2);
@@ -420,12 +402,6 @@ TEST(OptionalRefTest, Nullopt) {
     EXPECT_TRUE(!std::is_default_constructible<beman::optional26::nullopt_t>::value);
 }
 
-struct move_detector {
-    move_detector() = default;
-    move_detector(move_detector&& rhs) { rhs.been_moved = true; }
-    bool been_moved = false;
-};
-
 TEST(OptionalRefTest, Observers) {
     int                                     var = 42;
     beman::optional26::optional<int&>       o1  = var;
@@ -567,4 +543,101 @@ TEST(OptionalRefTest, SwapNullIntializedWithValue) {
     o1.swap(o2);
     EXPECT_EQ(o1.value(), 42);
     EXPECT_TRUE(!o2.has_value());
+}
+
+TEST(OptionalRefTest, AssignFromOptional) {
+    int                               var = 42;
+    beman::optional26::optional<int&> o1  = beman::optional26::nullopt;
+    beman::optional26::optional<int&> o2  = var;
+
+    o2 = o1;
+
+    using beman::optional26::tests::base;
+    using beman::optional26::tests::derived;
+
+    base                               b{1};
+    derived                            d(1, 2);
+    beman::optional26::optional<base&> empty_base;
+    beman::optional26::optional<base&> engaged_base{b};
+
+    beman::optional26::optional<derived&> empty_derived_ref;
+    beman::optional26::optional<derived&> engaged_derived_ref{d};
+
+    beman::optional26::optional<base&> optional_base_ref;
+    optional_base_ref = empty_base;
+    EXPECT_FALSE(optional_base_ref.has_value());
+    optional_base_ref = engaged_base;
+    EXPECT_TRUE(optional_base_ref.has_value());
+
+    optional_base_ref = empty_derived_ref;
+    EXPECT_FALSE(optional_base_ref.has_value());
+
+    optional_base_ref = engaged_derived_ref;
+    EXPECT_TRUE(optional_base_ref.has_value());
+
+    beman::optional26::optional<derived> empty_derived;
+    beman::optional26::optional<derived> engaged_derived{d};
+
+    static_assert(std::is_constructible_v<const base&, derived>);
+
+    beman::optional26::optional<const base&> optional_base_const_ref;
+    optional_base_const_ref = empty_derived;
+    EXPECT_FALSE(optional_base_const_ref.has_value());
+
+    optional_base_const_ref = engaged_derived;
+    EXPECT_TRUE(optional_base_const_ref.has_value());
+
+    if (empty_derived) {
+        optional_base_ref = empty_derived.value();
+    } else {
+        optional_base_ref.reset();
+    }
+    EXPECT_FALSE(optional_base_ref.has_value());
+
+    if (engaged_derived) {
+        optional_base_ref = engaged_derived.value();
+    } else {
+        optional_base_ref.reset();
+    }
+    EXPECT_TRUE(optional_base_ref.has_value());
+
+    derived d2(2, 2);
+    engaged_derived = d2;
+    EXPECT_EQ(optional_base_ref.value().m_i, static_cast<base>(d2).m_i);
+}
+
+TEST(OptionalRefTest, ConstructFromOptional) {
+    int                               var = 42;
+    beman::optional26::optional<int&> o1  = beman::optional26::nullopt;
+    beman::optional26::optional<int&> o2{var};
+
+
+    using beman::optional26::tests::base;
+    using beman::optional26::tests::derived;
+
+    base                               b{1};
+    derived                            d(1, 2);
+    beman::optional26::optional<base&> empty_base;
+    beman::optional26::optional<base&> engaged_base{b};
+
+    beman::optional26::optional<derived&> empty_derived_ref;
+    beman::optional26::optional<derived&> engaged_derived_ref{d};
+
+    beman::optional26::optional<base&> optional_base_ref{empty_derived_ref};
+    EXPECT_FALSE(optional_base_ref.has_value());
+
+    beman::optional26::optional<base&> optional_base_ref2{engaged_derived_ref};
+    EXPECT_TRUE(optional_base_ref2.has_value());
+
+    beman::optional26::optional<derived> empty_derived;
+    beman::optional26::optional<derived> engaged_derived{d};
+
+    static_assert(std::is_constructible_v<const base&, derived>);
+
+    beman::optional26::optional<const base&> optional_base_const_ref{empty_derived};
+    EXPECT_FALSE(optional_base_const_ref.has_value());
+
+    beman::optional26::optional<const base&> optional_base_const_ref2{engaged_derived};
+    EXPECT_TRUE(optional_base_const_ref2.has_value());
+
 }
