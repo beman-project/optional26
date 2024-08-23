@@ -6,28 +6,21 @@
 include(GoogleTest)
 
 # Tests
-add_executable(
-  beman_optional26_test
-  )
+add_executable(beman_optional26_test)
 
 target_sources(
   beman_optional26_test
-  PRIVATE
-  optional_monadic.t.cpp
-  optional_range_support.t.cpp
-  optional_ref_monadic.t.cpp
-  optional_ref.t.cpp
-  optional.t.cpp
-  optional_constexpr.t.cpp
-  test_types.cpp
-  test_utilities.cpp)
+  PRIVATE optional_monadic.t.cpp
+          optional_range_support.t.cpp
+          optional_ref_monadic.t.cpp
+          optional_ref.t.cpp
+          optional.t.cpp
+          optional_constexpr.t.cpp
+          test_types.cpp
+          test_utilities.cpp)
 
-target_link_libraries(
-  beman_optional26_test
-  PRIVATE
-  beman_optional26
-  GTest::gtest
-  GTest::gtest_main)
+target_link_libraries(beman_optional26_test
+                      PRIVATE beman_optional26 GTest::gtest GTest::gtest_main)
 
 # Issue #32: Re-enable ASAN run CI/clang-19.
 #
