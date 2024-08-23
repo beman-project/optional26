@@ -13,7 +13,7 @@
 #include <gtest/gtest.h>
 
 #include <Beman/Optional26/detail/iterator.hpp>
-#include <tests/test_types.hpp>
+#include <Beman/Optional26/tests/test_types.hpp>
 
 #include <algorithm>
 #include <concepts>
@@ -28,7 +28,7 @@
 #include <unordered_set>
 #include <vector>
 
-using namespace beman::optional26::test;
+using namespace beman::optional26::tests;
 
 TEST(RangeSupportTest, RangeConcepts) {
     const auto test = [](auto&& opt) {

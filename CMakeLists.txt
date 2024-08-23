@@ -1,7 +1,6 @@
-# cmake-format: off
-# /CMakeLists.txt -*-makefile-*-
+# CMakeLists.txt                                                    -*-CMake-*-
+#
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-# cmake-format: on
 
 cmake_minimum_required(VERSION 3.27)
 
@@ -22,7 +21,7 @@ if(BUILD_TESTING)
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG f8d7d77c06936315286eb55f8de22cd23c188571 # release-1.14.0
+    GIT_TAG e39786088138f2749d64e9e90e0f9902daa77c40 # release-1.15.0
   )
   FetchContent_MakeAvailable(googletest)
 endif()
