@@ -13,8 +13,6 @@
 
 #include <gtest/gtest.h>
 
-TEST(OptionalTest, TestGTest) { ASSERT_EQ(1, 1); }
-
 TEST(OptionalTest, Constructors) {
     beman::optional26::optional<int> i1;
     beman::optional26::optional<int> i2{beman::optional26::nullopt};

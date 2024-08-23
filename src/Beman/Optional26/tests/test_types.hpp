@@ -49,6 +49,23 @@ struct derived : public base {
     auto operator<=>(const derived&) const = default;
 };
 
+struct move_detector {
+    move_detector() = default;
+    move_detector(move_detector&& rhs) { rhs.been_moved = true; }
+    bool been_moved = false;
+};
+
+class Point {
+    int x_;
+    int y_;
+
+  public:
+    constexpr Point() : x_(0), y_(0) {}
+    constexpr Point(int x, int y) : x_(x), y_(y) {}
+    auto operator<=>(const Point&) const = default;
+    bool operator==(const Point&) const  = default;
+};
+
 } // namespace beman::optional26::tests
 
 #endif // BEMAN_OPTIONAL26_TESTS_TEST_TYPES_HPP

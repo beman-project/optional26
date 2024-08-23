@@ -21,7 +21,8 @@ target_sources(
   optional_ref_monadic.t.cpp
   optional_refref.t.cpp
   optional_refref_monadic.t.cpp
-  test_types.cpp)
+  test_types.cpp
+  test_utilities.cpp)
 
 target_link_libraries(
   beman_optional26_test

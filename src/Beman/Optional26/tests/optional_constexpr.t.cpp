@@ -3,14 +3,13 @@
 
 #include <Beman/Optional26/optional.hpp>
 #include <Beman/Optional26/tests/test_types.hpp>
+#include <Beman/Optional26/tests/test_utilities.hpp>
 
 #include <functional>
 #include <ranges>
 #include <tuple>
 
 #include <gtest/gtest.h>
-
-TEST(OptionalConstexprTest, TestGTest) { ASSERT_EQ(1, 1); }
 
 
 TEST(OptionalConstexprTest, Constructors) {
@@ -220,7 +219,7 @@ consteval bool testConstexprInPlace() {
     return retval;
 }
 
-auto consteval constify(auto expr) { return (expr); }
+using beman::optional26::tests::constify;
 
 TEST(OptionalConstexprTest, InPlace) {
     EXPECT_TRUE(constify(testConstexprInPlace()));
@@ -268,11 +267,6 @@ TEST(OptionalConstexprTest, Nullopt) {
     EXPECT_TRUE(!std::is_default_constructible<beman::optional26::nullopt_t>::value);
 }
 
-struct move_detector {
-    move_detector() = default;
-    move_detector(move_detector&& rhs) { rhs.been_moved = true; }
-    bool been_moved = false;
-};
 
 TEST(OptionalConstexprTest, Observers) {
     constexpr beman::optional26::optional<int>       o1 = 42;
@@ -292,19 +286,6 @@ TEST(OptionalConstexprTest, Observers) {
 
 }
 
-namespace {
-class Point
-{
-    int x_;
-    int y_;
-  public:
-    constexpr Point() : x_(0), y_(0) {}
-    constexpr Point(int x, int y) : x_(x), y_(y) {}
-    auto operator<=>(const Point&) const = default;
-    bool operator==(const Point&) const = default;
-};
-
-}
 TEST(OptionalConstexprTest, RelationalOps) {
     constexpr beman::optional26::optional<int> o1{4};
     constexpr beman::optional26::optional<int> o2{42};
@@ -388,6 +369,8 @@ TEST(OptionalConstexprTest, RelationalOps) {
             EXPECT_TRUE(constify((4 >= o1)));
         }
     }
+
+    using beman::optional26::tests::Point;
 
     constexpr Point p4{2, 3};
     constexpr Point p5{3, 4};
@@ -795,6 +778,8 @@ consteval bool testComparisons() {
             static_assert(b);
         }
     }
+
+    using beman::optional26::tests::Point;
 
     constexpr Point p4{2, 3};
     constexpr Point p5{3, 4};
