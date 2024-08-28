@@ -34,9 +34,9 @@ TEST(OptionalRefTest, Constructors) {
     std::ignore = nd1;
     std::ignore = nd2;
 
-    no_default_ctor nd{e};
+    no_default_ctor no_def{e};
 
-    beman::optional26::optional<no_default_ctor&> nd3 = nd;
+    beman::optional26::optional<no_default_ctor&> nd3 = no_def;
     std::ignore                                       = nd3;
 
     beman::optional26::optional<int&> ie;
