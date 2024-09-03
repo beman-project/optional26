@@ -18,7 +18,7 @@ Setup and tutorial on [nektosact.com/](https://nektosact.com/).
 ```shell
 # Check available jobs
 $ sudo act --container-architecture linux/amd64 --list
-Stage  Job ID  Job name                   Workflow name  Workflow file  Events           
+Stage  Job ID  Job name                   Workflow name  Workflow file  Events
 0      build   ${{ matrix.config.name }}  CI Tests       ci.yml         pull_request,push
 
 # Run all CI jobs

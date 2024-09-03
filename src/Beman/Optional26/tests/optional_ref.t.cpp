@@ -14,7 +14,7 @@ TEST(OptionalRefTest, Constructors) {
 
     int                               i  = 0;
     beman::optional26::optional<int&> i3 = i;
-    std::ignore = i3;
+    std::ignore                          = i3;
 
     using beman::optional26::tests::empty;
 
@@ -25,7 +25,7 @@ TEST(OptionalRefTest, Constructors) {
 
     empty                               e{};
     beman::optional26::optional<empty&> e3 = e;
-    std::ignore = e3;
+    std::ignore                            = e3;
 
     using beman::optional26::tests::no_default_ctor;
 
@@ -34,10 +34,10 @@ TEST(OptionalRefTest, Constructors) {
     std::ignore = nd1;
     std::ignore = nd2;
 
-    no_default_ctor nd{e};
+    no_default_ctor no_def{e};
 
-    beman::optional26::optional<no_default_ctor&> nd3 = nd;
-    std::ignore = nd3;
+    beman::optional26::optional<no_default_ctor&> nd3 = no_def;
+    std::ignore                                       = nd3;
 
     beman::optional26::optional<int&> ie;
     beman::optional26::optional<int&> i4 = ie;
@@ -611,7 +611,6 @@ TEST(OptionalRefTest, ConstructFromOptional) {
     beman::optional26::optional<int&> o1  = beman::optional26::nullopt;
     beman::optional26::optional<int&> o2{var};
 
-
     using beman::optional26::tests::base;
     using beman::optional26::tests::derived;
 
@@ -639,5 +638,4 @@ TEST(OptionalRefTest, ConstructFromOptional) {
 
     beman::optional26::optional<const base&> optional_base_const_ref2{engaged_derived};
     EXPECT_TRUE(optional_base_const_ref2.has_value());
-
 }

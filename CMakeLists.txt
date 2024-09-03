@@ -54,3 +54,13 @@ install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
   DESTINATION ${INSTALL_CONFIGDIR})
+
+# Coverage
+configure_file("cmake/gcovr.cfg.in" gcovr.cfg @ONLY)
+
+add_custom_target(
+  process_coverage
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Running gcovr to process coverage results"
+  COMMAND mkdir -p coverage
+  COMMAND gcovr --config gcovr.cfg .)

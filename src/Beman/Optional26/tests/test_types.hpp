@@ -34,9 +34,8 @@ struct base {
     constexpr base() : m_i(0) {}
     constexpr base(int i) : m_i(i) {}
 
-    bool operator!=(const base&) const = default;
+    bool operator!=(const base&) const  = default;
     auto operator<=>(const base&) const = default;
-
 };
 
 // Derived class helper.
@@ -45,7 +44,7 @@ struct derived : public base {
     constexpr derived() : base(), m_j(0) {}
     constexpr derived(int i, int j) : base(i), m_j(j) {}
 
-    bool operator!=(const derived&) const = default;
+    bool operator!=(const derived&) const  = default;
     auto operator<=>(const derived&) const = default;
 };
 
