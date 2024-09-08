@@ -649,3 +649,29 @@ TEST(OptionalRefTest, ConstructFromOptional) {
     beman::optional26::optional<const base&> optional_base_const_ref2{engaged_derived};
     EXPECT_TRUE(optional_base_const_ref2.has_value());
 }
+
+TEST(OptionalRefTest, InPlace) {
+    int one = 1;
+    int two = 2;
+    int fortytwo = 42;
+
+    beman::optional26::optional<int&> o1{beman::optional26::in_place, one};
+    beman::optional26::optional<int&> o2(beman::optional26::in_place, two);
+    EXPECT_TRUE(o1);
+    EXPECT_TRUE(o1 == 1);
+    EXPECT_TRUE(o2);
+    EXPECT_TRUE(o2 == 2);
+
+    beman::optional26::optional<const int&> o3(beman::optional26::in_place, fortytwo);
+    EXPECT_TRUE(o3 == 42);
+
+    // beman::optional26::optional<std::vector<int>&> o5(beman::optional26::in_place, {0, 1});
+    // EXPECT_TRUE(o5);
+    // EXPECT_TRUE((*o5)[0] == 0);
+    // EXPECT_TRUE((*o5)[1] == 1);
+
+    // beman::optional26::optional<std::tuple<int, int> const&> o4(beman::optional26::in_place, zero, one);
+    // EXPECT_TRUE(o4);
+    // EXPECT_TRUE(std::get<0>(*o4) == 0);
+    // EXPECT_TRUE(std::get<1>(*o4) == 1);
+}
