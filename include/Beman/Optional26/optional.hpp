@@ -1159,10 +1159,10 @@ class optional<T&> {
     constexpr optional& operator=(const optional<U>& rhs) noexcept;
 
     template <class U>
-    constexpr optional& operator=(optional<U>&& rhs) = delete;
+    constexpr optional& operator=(optional<U>&& rhs);
 
     template <class U>
-        requires(!detail::is_optional<decay_t<U>>)
+    requires(!detail::is_optional<decay_t<U>>)
     constexpr optional& emplace(U&& u) noexcept;
 
     // \ref{optionalref.swap}, swap
@@ -1286,6 +1286,22 @@ template <class T>
 template <class U>
 constexpr optional<T&>& optional<T&>::operator=(const optional<U>& rhs) noexcept {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+    if (rhs.has_value())
+        value_ = to_address(rhs);
+    else
+        value_ = nullptr;
+    return *this;
+}
+
+template <class T>
+template <class U>
+constexpr optional<T&>& optional<T&>::operator=(optional<U>&& rhs)
+{
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+#if (__cpp_lib_reference_from_temporary >= 202202L)
+    static_assert(!std::reference_converts_from_temporary_v<add_lvalue_reference_t<T>, U>,
+                  "Reference conversion from temporary not allowed.");
+#endif
     if (rhs.has_value())
         value_ = to_address(rhs);
     else

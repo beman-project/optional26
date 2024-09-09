@@ -60,6 +60,12 @@ TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<base&>    fromEmpty2 = empty;
 }
 
+struct Thing {};
+beman::optional26::optional<Thing&> process() {
+    static Thing t;
+    return t;
+}
+
 TEST(OptionalRefTest, Assignment) {
     beman::optional26::optional<int&> i1;
     EXPECT_FALSE(i1);
@@ -68,6 +74,7 @@ TEST(OptionalRefTest, Assignment) {
     i     = 7;
     EXPECT_TRUE(i1);
     EXPECT_TRUE(*i1 = 7);
+    EXPECT_EQ(i1, 7);
 
     double d;
     // i1 = d;  // ill-formed by mandate
@@ -85,6 +92,17 @@ TEST(OptionalRefTest, Assignment) {
     empty.emplace(eight);
     EXPECT_TRUE(empty);
     EXPECT_EQ(empty, 8);
+
+    beman::optional26::optional<const Thing&> o;
+    EXPECT_FALSE(o);
+    o = process(); // well-formed
+    EXPECT_TRUE(o);
+
+    beman::optional26::optional<const int&> o2;
+    EXPECT_FALSE(o2);
+    o2  = [&](){return i1;}();
+
+    EXPECT_EQ(*o2, 7);
 }
 
 TEST(OptionalRefTest, RelationalOps) {
