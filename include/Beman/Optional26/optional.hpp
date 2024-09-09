@@ -37,7 +37,6 @@ using std::is_convertible_v;
 using std::is_copy_assignable_v;
 using std::is_copy_constructible_v;
 using std::is_lvalue_reference;
-using std::is_rvalue_reference;
 using std::is_move_assignable_v;
 using std::is_move_constructible_v;
 using std::is_nothrow_constructible_v;
@@ -46,6 +45,7 @@ using std::is_nothrow_move_constructible_v;
 using std::is_nothrow_swappable;
 using std::is_object_v;
 using std::is_reference_v;
+using std::is_rvalue_reference;
 using std::is_same;
 using std::is_same_v;
 using std::is_scalar;
@@ -270,7 +270,7 @@ concept enable_assign_from_other =
 
 namespace detail {
 template <class T>
-    concept is_optional = requires(const T& t) { // exposition only
+concept is_optional = requires(const T& t) { // exposition only
     []<class U>(const optional<U>&) {}(t);
 };
 } // namespace detail
@@ -1120,10 +1120,10 @@ class optional<T&> {
     constexpr R make_reference(initializer_list<U> il, Args&&... args)
         requires is_constructible_v<R, initializer_list<U>&, Args...>;
 
-  public :
-        // \ref{optionalref.ctor}, constructors
+  public:
+    // \ref{optionalref.ctor}, constructors
 
-        constexpr optional() noexcept;
+    constexpr optional() noexcept;
     constexpr optional(nullopt_t) noexcept;
     constexpr optional(const optional& rhs) noexcept = default;
     constexpr optional(optional&& rhs) noexcept      = default;
@@ -1162,7 +1162,7 @@ class optional<T&> {
     constexpr optional& operator=(optional<U>&& rhs);
 
     template <class U>
-    requires(!detail::is_optional<decay_t<U>>)
+        requires(!detail::is_optional<decay_t<U>>)
     constexpr optional& emplace(U&& u) noexcept;
 
     // \ref{optionalref.swap}, swap
@@ -1239,7 +1239,7 @@ template <class T>
 template <class... Args>
 constexpr optional<T&>::optional(in_place_t, Args&&... args)
     requires is_constructible_v<T&, Args...>
-: value_(addressof(make_reference<T&>(std::forward<Args>(args)...))) {}
+    : value_(addressof(make_reference<T&>(std::forward<Args>(args)...))) {}
 
 template <class T>
 template <class U, class... Args>
@@ -1295,8 +1295,7 @@ constexpr optional<T&>& optional<T&>::operator=(const optional<U>& rhs) noexcept
 
 template <class T>
 template <class U>
-constexpr optional<T&>& optional<T&>::operator=(optional<U>&& rhs)
-{
+constexpr optional<T&>& optional<T&>::operator=(optional<U>&& rhs) {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
 #if (__cpp_lib_reference_from_temporary >= 202202L)
     static_assert(!std::reference_converts_from_temporary_v<add_lvalue_reference_t<T>, U>,
@@ -1409,7 +1408,5 @@ constexpr void optional<T&>::reset() noexcept {
     value_ = nullptr;
 }
 } // namespace beman::optional26
-
-
 
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP
