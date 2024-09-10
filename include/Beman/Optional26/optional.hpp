@@ -1112,13 +1112,9 @@ class optional<T&> {
                                                        optional>; // see [optionalref.iterators]
 
   private:
-    template <class R, class... Args>
-    constexpr R make_reference(Args&&... args)
-        requires is_constructible_v<R, Args...>;
-
-    template <class R, class U, class... Args>
-    constexpr R make_reference(initializer_list<U> il, Args&&... args)
-        requires is_constructible_v<R, initializer_list<U>&, Args...>;
+    template <class R, class Arg>
+    constexpr R make_reference(Arg&& arg) // exposition only
+        requires is_constructible_v<R, Arg>;
 
   public:
     // \ref{optionalref.ctor}, constructors
@@ -1128,13 +1124,9 @@ class optional<T&> {
     constexpr optional(const optional& rhs) noexcept = default;
     constexpr optional(optional&& rhs) noexcept      = default;
 
-    template <class... Args>
-    constexpr explicit optional(in_place_t, Args&&... args)
-        requires is_constructible_v<T&, Args...>;
-
-    template <class U, class... Args>
-    constexpr explicit optional(in_place_t, initializer_list<U> il, Args&&... args)
-        requires is_constructible_v<T&, initializer_list<U>&, Args&&...>;
+    template <class Arg>
+    constexpr explicit optional(in_place_t, Arg&& arg)
+        requires is_constructible_v<add_lvalue_reference_t<T>, Arg>;
 
     template <class U = T>
         requires(!detail::is_optional<decay_t<U>>)
@@ -1199,32 +1191,16 @@ class optional<T&> {
 };
 
 template <class T>
-template <class R, class... Args>
-constexpr R optional<T&>::make_reference(Args&&... args)
-    requires is_constructible_v<R, Args...>
+template <class R, class Arg>
+constexpr R optional<T&>::make_reference(Arg&& arg)
+    requires is_constructible_v<R, Arg>
 {
     static_assert(std::is_reference_v<R>);
 #if (__cpp_lib_reference_from_temporary >= 202202L)
-    static_assert(sizeof...(Args) == 1, "Cannot convert a temporary to a reference for optional.");
-    static_assert(!std::reference_converts_from_temporary_v<R, Args...>,
+    static_assert(!std::reference_converts_from_temporary_v<R, Arg>,
                   "Reference conversion from temporary not allowed.");
 #endif
-    R r(std::forward<Args>(args)...);
-    return r;
-}
-
-template <class T>
-template <class R, class U, class... Args>
-constexpr R optional<T&>::make_reference(initializer_list<U> il, Args&&... args)
-    requires is_constructible_v<R, initializer_list<U>&, Args...>
-{
-    static_assert(std::is_reference_v<R>);
-#if (__cpp_lib_reference_from_temporary >= 202202L)
-    static_assert(sizeof...(Args) == 1, "Cannot convert a temporary to a reference for optional.");
-    static_assert(!std::reference_converts_from_temporary_v<R, initializer_list<U>, Args...>,
-                  "Reference conversion from temporary not allowed.");
-#endif
-    R r(il, std::forward<Args>(args)...);
+    R r(std::forward<Arg>(arg));
     return r;
 }
 
@@ -1236,16 +1212,11 @@ template <class T>
 constexpr optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
 
 template <class T>
-template <class... Args>
-constexpr optional<T&>::optional(in_place_t, Args&&... args)
-    requires is_constructible_v<T&, Args...>
-    : value_(addressof(make_reference<T&>(std::forward<Args>(args)...))) {}
+template <class Arg>
+constexpr optional<T&>::optional(in_place_t, Arg&& arg)
+    requires is_constructible_v<add_lvalue_reference_t<T>, Arg>
+: value_(addressof(make_reference<add_lvalue_reference_t<T>>(std::forward<Arg>(arg)))) {}
 
-template <class T>
-template <class U, class... Args>
-constexpr optional<T&>::optional(in_place_t, initializer_list<U> il, Args&&... args)
-    requires is_constructible_v<T&, initializer_list<U>&, Args&&...>
-    : value_(addressof(make_reference<T&>(il, std::forward<Args>(args)...))) {}
 
 template <class T>
 template <class U>
