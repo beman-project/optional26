@@ -122,6 +122,7 @@ namespace std {
     constexpr optional(nullopt_t) noexcept;
     constexpr optional(const optional&);
     constexpr optional(optional&&) noexcept(@\seebelow@);
+
     template<class... Args>
       constexpr explicit optional(in_place_t, Args&&...);
     template<class U, class... Args>
@@ -1290,6 +1291,9 @@ namespace std {
       constexpr optional(nullopt_t) noexcept;
       constexpr optional(const optional& rhs) noexcept = default;
       constexpr optional(optional&& rhs) noexcept      = default;
+      template <class Arg>
+      constexpr explicit optional(in_place_t, Arg&& arg);
+
       template <class U = T> constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
       template <class U> constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept;
 
@@ -1352,7 +1356,30 @@ constexpr optional(nullopt_t) noexcept;
 \pnum
 \remarks
     For all \tcode{T\&} these constructors are constexpr constructors\iref{dcl.constexpr}.
-  \end{itemdescr}
+\end{itemdescr}
+
+
+\begin{itemdecl}
+template <class Arg>
+constexpr explicit optional(in_place_t, Arg&& arg);
+\end{itemdecl}
+
+\begin{itemdescr}
+  \pnum
+  \constraints
+  \begin{itemize}
+  \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, Arg>} is \tcode{true}
+  \end{itemize}
+  \pnum
+  \mandates
+    \begin{itemize}
+    \item \tcode{reference_converts_from_temporary_v<R, Arg>} is \tcode{false}
+    \end{itemize}
+  \pnum
+  \ensures
+  \tcode{*this} refers to the T created by conversion from \tcode{arg}
+
+\end{itemdescr}
 
 \begin{itemdecl}
 template <class U = T>
@@ -1409,6 +1436,7 @@ constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept;
   \end{codeblock}
 
 \end{itemdescr}
+
 
 \rSec3[optionalref.assign]{Assignment}
 
