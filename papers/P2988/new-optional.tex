@@ -28,10 +28,6 @@ namespace std {
   @\added{template <class T> }@
   @\added{class optional<T\&>; // partially freestanding}@
 
-  @\added{// \ref{optional.optionalrref}, class template \tcode{optional} for rvalue reference types }@
-  @\added{template <class T> }@
-  @\added{class optional<T\&\&>; // partially freestanding}@
-
   template <class T>
   inline constexpr bool ranges::enable_view<optional<T>> = true;
   template <class T>
