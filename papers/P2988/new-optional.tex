@@ -1307,7 +1307,7 @@ namespace std {
         constexpr optional& operator=(U&& u);
 
       template <class U> constexpr optional& operator=(const optional<U>& rhs) noexcept;
-      template <class U> constexpr optional& operator=(optional<U>&& rhs) = delete;
+      template <class U> constexpr optional& operator=(optional<U>&& rhs);
       template <class U> constexpr optional& emplace(U&& u) noexcept;
 
       // \ref{optionalref.swap}, swap
@@ -1498,6 +1498,28 @@ constexpr optional& operator=(const optional<U>& rhs) noexcept;
     \pnum
     \ensures
     \tcode{rhs.has_value() == this->has_value()}.
+
+    \pnum
+    \returns
+    \tcode{*this}.
+\end{itemdescr}
+
+\begin{itemdecl}
+template <class U>
+constexpr optional& operator=(optional<U>&& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdescr}
+    \pnum
+    \mandates
+    \begin{itemize}
+    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
+    \item \tcode{reference_converts_from_temporary_v<R, Arg>} is \tcode{false}
+    \end{itemize}
+
+    \pnum
+    \ensures
+    If \tcode{rhs.has_value()} is \tcode{true}, \tcode{*this} refers to the value obtained by converting the \tcode{rhs} referred to value to a \tcode{T\&}, otherwise, \tcode{*this} does not refer to a value
 
     \pnum
     \returns
