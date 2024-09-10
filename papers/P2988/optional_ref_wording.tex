@@ -228,6 +228,12 @@ The weak consensus is to return a \tcode{T} from \tcode{optional<T\&>::value_or}
 
 Having \tcode{value_or} return by value also allows the common case of using a literal as the alternative to be expressed concisely.
 
+\section{in_place_t construction}
+The reference specialization allows a limited form of in_place construction where the argument can be converted to the appropriate reference without creation of a temporary. As the reference specialization is non-owning, there is no ``place'' for a temporary to be constructed that will not dangle. For cases where the lifetime of the constructed object would match the lifetime of the optional, the temporary can be constructed explicitly, instead.
+
+\section{Converting assignment}
+A similarly limited converting assignment operator is provided for cases where an optional<U> has a value or refers to a value which can be converted to a T\& without construction of a temporary. In particular, converting an optional<T\&> to an optional<T const\&> is supported.
+
 \section{Compiler Explorer Playground}
 
 See \url{https://godbolt.org/z/n5oooK58W} for a playground with relevant Google Test functions and various optional implementations made available for cross reference.
