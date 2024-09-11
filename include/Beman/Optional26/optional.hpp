@@ -1107,7 +1107,8 @@ template <class T>
 class optional<T&> {
   public:
     using value_type     = T&;
-    using iterator       = detail::contiguous_iterator<T, optional>; // see [optionalref.iterators]
+    using iterator       = detail::contiguous_iterator<T,
+                                                       optional>; // see [optionalref.iterators]
     using const_iterator = detail::contiguous_iterator<const T,
                                                        optional>; // see [optionalref.iterators]
 
@@ -1215,8 +1216,7 @@ template <class T>
 template <class Arg>
 constexpr optional<T&>::optional(in_place_t, Arg&& arg)
     requires is_constructible_v<add_lvalue_reference_t<T>, Arg>
-: value_(addressof(make_reference<add_lvalue_reference_t<T>>(std::forward<Arg>(arg)))) {}
-
+    : value_(addressof(make_reference<add_lvalue_reference_t<T>>(std::forward<Arg>(arg)))) {}
 
 template <class T>
 template <class U>
