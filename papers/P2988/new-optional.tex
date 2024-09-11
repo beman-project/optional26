@@ -425,7 +425,7 @@ namespace std {
       template <class Arg>
       constexpr explicit optional(in_place_t, Arg&& arg);
 
-      template <class U = T> constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
+      template <class U> constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
       template <class U> constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept;
 
       constexpr ~optional() = default;
@@ -513,7 +513,7 @@ constexpr explicit optional(in_place_t, Arg&& arg);
 \end{itemdescr}
 
 \begin{itemdecl}
-template <class U = T>
+template <class U>
   constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
 \end{itemdecl}
 

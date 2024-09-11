@@ -58,6 +58,18 @@ TEST(OptionalRefTest, Constructors) {
     beman::optional26::optional<derived&> empty;
     beman::optional26::optional<base&>    fromEmpty(empty);
     beman::optional26::optional<base&>    fromEmpty2 = empty;
+
+    /*
+     * template <class U>
+     *   requires(!is_derived_from_optional<decay_t<U>>)
+     * constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
+     *
+     * Not selected -- use default constructor of optional<T&> so it is
+     * *DIS*engaged
+     */
+
+    beman::optional26::optional<int&> tempint = {};
+    EXPECT_FALSE(tempint);
 }
 
 struct Thing {};

@@ -1129,7 +1129,7 @@ class optional<T&> {
     constexpr explicit optional(in_place_t, Arg&& arg)
         requires is_constructible_v<add_lvalue_reference_t<T>, Arg>;
 
-    template <class U = T>
+    template <class U>
         requires(!is_derived_from_optional<decay_t<U>>)
     constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
     template <class U>
