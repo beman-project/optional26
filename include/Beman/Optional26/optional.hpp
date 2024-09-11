@@ -45,7 +45,8 @@ using std::is_nothrow_move_constructible_v;
 using std::is_nothrow_swappable;
 using std::is_object_v;
 using std::is_reference_v;
-using std::is_rvalue_reference;
+using std::is_rvalue_reference_v;
+using std::is_lvalue_reference_v;
 using std::is_same;
 using std::is_same_v;
 using std::is_scalar;
@@ -1127,7 +1128,7 @@ class optional<T&> {
 
     template <class Arg>
     constexpr explicit optional(in_place_t, Arg&& arg)
-        requires is_constructible_v<add_lvalue_reference_t<T>, Arg>;
+        requires is_constructible_v<T&, Arg>;
 
     template <class U>
         requires(!is_derived_from_optional<decay_t<U>>)
@@ -1215,21 +1216,21 @@ constexpr optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
 template <class T>
 template <class Arg>
 constexpr optional<T&>::optional(in_place_t, Arg&& arg)
-    requires is_constructible_v<add_lvalue_reference_t<T>, Arg>
-    : value_(addressof(make_reference<add_lvalue_reference_t<T>>(std::forward<Arg>(arg)))) {}
+    requires is_constructible_v<T&, Arg>
+    : value_(addressof(make_reference<T&>(std::forward<Arg>(arg)))) {}
 
 template <class T>
 template <class U>
     requires(!is_derived_from_optional<decay_t<U>>)
 constexpr optional<T&>::optional(U&& u) noexcept : value_(addressof(u)) {
-    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-    static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
+    static_assert(is_constructible_v<T&, U>, "Must be able to bind U to T&");
+    static_assert(is_lvalue_reference_v<U>, "U must be an lvalue");
 }
 
 template <class T>
 template <class U>
 constexpr optional<T&>::optional(const optional<U>& rhs) noexcept {
-    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+    static_assert(is_constructible_v<T&, U>, "Must be able to bind U to T&");
     if (rhs.has_value())
         value_ = to_address(rhs);
     else
@@ -1247,8 +1248,8 @@ template <class T>
 template <class U>
     requires(!is_derived_from_optional<decay_t<U>>)
 constexpr optional<T&>& optional<T&>::operator=(U&& u) {
-    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-    static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
+    static_assert(is_constructible_v<T&, U>, "Must be able to bind U to T&");
+    static_assert(is_lvalue_reference_v<U>, "U must be an lvalue");
     value_ = addressof(u);
     return *this;
 }
@@ -1256,7 +1257,7 @@ constexpr optional<T&>& optional<T&>::operator=(U&& u) {
 template <class T>
 template <class U>
 constexpr optional<T&>& optional<T&>::operator=(const optional<U>& rhs) noexcept {
-    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+    static_assert(is_constructible_v<T&, U>, "Must be able to bind U to T&");
     if (rhs.has_value())
         value_ = to_address(rhs);
     else
@@ -1267,9 +1268,9 @@ constexpr optional<T&>& optional<T&>::operator=(const optional<U>& rhs) noexcept
 template <class T>
 template <class U>
 constexpr optional<T&>& optional<T&>::operator=(optional<U>&& rhs) {
-    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
+    static_assert(is_constructible_v<T&, U>, "Must be able to bind U to T&");
 #if (__cpp_lib_reference_from_temporary >= 202202L)
-    static_assert(!std::reference_converts_from_temporary_v<add_lvalue_reference_t<T>, U>,
+    static_assert(!std::reference_converts_from_temporary_v<T&, U>,
                   "Reference conversion from temporary not allowed.");
 #endif
     if (rhs.has_value())
