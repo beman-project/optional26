@@ -1130,7 +1130,7 @@ class optional<T&> {
         requires is_constructible_v<add_lvalue_reference_t<T>, Arg>;
 
     template <class U = T>
-        requires(!detail::is_optional<decay_t<U>>)
+        requires(!is_derived_from_optional<decay_t<U>>)
     constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
     template <class U>
     constexpr explicit(!is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept;
@@ -1145,7 +1145,7 @@ class optional<T&> {
     constexpr optional& operator=(optional&& rhs) noexcept      = default;
 
     template <class U = T>
-        requires(!detail::is_optional<decay_t<U>>)
+        requires(!is_derived_from_optional<decay_t<U>>)
     constexpr optional& operator=(U&& u);
 
     template <class U>
@@ -1155,7 +1155,7 @@ class optional<T&> {
     constexpr optional& operator=(optional<U>&& rhs);
 
     template <class U>
-        requires(!detail::is_optional<decay_t<U>>)
+        requires(!is_derived_from_optional<decay_t<U>>)
     constexpr optional& emplace(U&& u) noexcept;
 
     // \ref{optionalref.swap}, swap
@@ -1220,7 +1220,7 @@ constexpr optional<T&>::optional(in_place_t, Arg&& arg)
 
 template <class T>
 template <class U>
-    requires(!detail::is_optional<decay_t<U>>)
+    requires(!is_derived_from_optional<decay_t<U>>)
 constexpr optional<T&>::optional(U&& u) noexcept : value_(addressof(u)) {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
     static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
@@ -1245,7 +1245,7 @@ constexpr optional<T&>& optional<T&>::operator=(nullopt_t) noexcept {
 
 template <class T>
 template <class U>
-    requires(!detail::is_optional<decay_t<U>>)
+    requires(!is_derived_from_optional<decay_t<U>>)
 constexpr optional<T&>& optional<T&>::operator=(U&& u) {
     static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
     static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
@@ -1281,7 +1281,7 @@ constexpr optional<T&>& optional<T&>::operator=(optional<U>&& rhs) {
 
 template <class T>
 template <class U>
-    requires(!detail::is_optional<decay_t<U>>)
+    requires(!is_derived_from_optional<decay_t<U>>)
 constexpr optional<T&>& optional<T&>::emplace(U&& u) noexcept {
     return *this = std::forward<U>(u);
 }
