@@ -35,3 +35,21 @@ target_link_libraries(
 # platforms. Temporary switch to gtest_add_tests and skip some Asan checks.
 # Change also applied for CI flows.
 gtest_add_tests(TARGET beman_optional26_test "" AUTO)
+
+
+add_library(constructor_fails test_constuct_fail.cpp)
+
+target_link_libraries(
+  constructor_fails
+  PRIVATE
+  beman_optional26)
+
+set_target_properties(constructor_fails
+  PROPERTIES EXCLUDE_FROM_ALL true
+  EXCLUDE_FROM_DEFAULT_BUILD true)
+
+add_test(NAME constructor_fails
+  COMMAND ${CMAKE_COMMAND} --build "${CMAKE_BINARY_DIR}" --target constructor_fails --config $<CONFIGURATION>)
+
+# set_tests_properties(constructor_fails PROPERTIES PASS_REGULAR_EXPRESSION  "Assert true")
+set_tests_properties(constructor_fails PROPERTIES WILL_FAIL false)
