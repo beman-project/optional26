@@ -1215,10 +1215,8 @@ class optional<T&> {
     constexpr void swap(optional& rhs) noexcept;
 
     // \ref{optional.iterators}, iterator support
-    constexpr iterator       begin() noexcept;
-    constexpr const_iterator begin() const noexcept;
-    constexpr iterator       end() noexcept;
-    constexpr const_iterator end() const noexcept;
+    constexpr iterator begin() const noexcept;
+    constexpr iterator end() const noexcept;
 
     // \ref{optionalref.observe}, observers
     constexpr T*       operator->() const noexcept;
@@ -1411,23 +1409,15 @@ constexpr void optional<T&>::swap(optional<T&>& rhs) noexcept {
 }
 
 // \rSec3[optionalref.iterators]{Iterator Support}
+
 template <class T>
-constexpr optional<T&>::iterator optional<T&>::begin() noexcept {
+constexpr optional<T&>::iterator optional<T&>::begin() const noexcept {
     return iterator(has_value() ? value_ : nullptr);
 };
 
-template <class T>
-constexpr optional<T&>::const_iterator optional<T&>::begin() const noexcept {
-    return const_iterator(has_value() ? value_ : nullptr);
-};
 
 template <class T>
-constexpr optional<T&>::iterator optional<T&>::end() noexcept {
-    return begin() + has_value();
-}
-
-template <class T>
-constexpr optional<T&>::const_iterator optional<T&>::end() const noexcept {
+constexpr optional<T&>::iterator optional<T&>::end() const noexcept {
     return begin() + has_value();
 }
 
