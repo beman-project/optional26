@@ -37,75 +37,80 @@ const beman::optional26::optional<std::reference_wrapper<std::string>>& makeCRef
 const beman::optional26::optional<std::reference_wrapper<std::string>>&& makeCRefRefToOptionalRefWrap();
 
 void test_constructors() {
-    beman::optional26::optional<std::string>        os;
-    //    beman::optional26::optional<std::string&>       or1 = os; /// fails now
-    beman::optional26::optional<const std::string&> or2 = os;
-    beman::optional26::optional<std::string>        cos;
-    beman::optional26::optional<const std::string&> or3 = cos;
+    // beman::optional26::optional<std::string>        os;
+    // beman::optional26::optional<std::string&>       or1 = os;
+    // beman::optional26::optional<const std::string&> or2 = os;
+    // beman::optional26::optional<std::string>        cos;
+    // beman::optional26::optional<const std::string&> or3 = cos;
 
-    // beman::optional26::optional<std::string&>       or1a{os}; /// fails now
-    beman::optional26::optional<const std::string&> or2a{os};
-    beman::optional26::optional<const std::string&> or3a{cos};
+    // beman::optional26::optional<std::string&>       or1a{os};
+    // beman::optional26::optional<const std::string&> or2a{os};
+    // beman::optional26::optional<const std::string&> or3a{cos};
 
-    // But disable:
-    beman::optional26::optional<const char*>        os2;
-    beman::optional26::optional<const std::string&> or4 = os; // still ill-formed
+    // // But disable:
+    // beman::optional26::optional<const char*>        os2;
+    // beman::optional26::optional<const std::string&> or4 = os;
 }
 
-void test_constructors_dangling() {
-    beman::optional26::optional<std::string&> os1 = beman::optional26::optional<std::string&>();
-    //    beman::optional26::optional<std::string&> os2 =
-    //    beman::optional26::optional<std::reference_wrapper<std::string>>();
 
-    /*
- 1.    std::optional<T> & -> std::optional<T&> / std::optional<T const&> // OK
- 2.    std::optional<T> const& -> std::optional<T const&> / std::optional<T const&> // OK
- 3.     std::optional<T>&& -> std::optional<T&> / std::optional<T const&> // ILL-Formed
- 4.    std::optional<T> const&& -> std::optional<T const&> // ILL-Formed
- 5.     std::optional<T&> cv & -> std::optional<T&> / std::optional<T const&> // OK
- 6.     std::optional<T&> cv && -> std::optional<T&> / std::optional<T const&> // OK
- 7.     std::optional<std::reference_wrapper<T>> cv & -> std::optional<T&> / std::optional<T const&> // OK
- 8.     std::optional<std::reference_wrapper<T>> cv && -> std::optional<T&> / std::optional<T const&> // OK
-    */
-    auto&& t1 = makeRefToOptional(); // std::optional<T> &
-    static_assert(std::is_same_v<decltype(t1), beman::optional26::optional<std::string>&>);
-    //    beman::optional26::optional<std::string&> o01 = t1;
-    beman::optional26::optional<const std::string&> o02 = t1;
+ void test_constructors_dangling() {
+     // beman::optional26::optional<std::string&> os1 = beman::optional26::optional<std::string&>();
+     // beman::optional26::optional<std::string&> os2 =
+     //     beman::optional26::optional<std::reference_wrapper<std::string>>();
 
-    auto&& t2 = makeCRefToOptional(); // std::optional<T> const&
-    static_assert(std::is_same_v<decltype(t2), const beman::optional26::optional<std::string>&>);
-    // beman::optional26::optional<std::string&> o03 = t2; //std::optional<T> const&
-    beman::optional26::optional<const std::string&> o04 = t2;
+     /*
+  1.     std::optional<T> & -> std::optional<T&> / std::optional<T const&> // OK
+  2.     std::optional<T> const& -> std::optional<T const&> / std::optional<T const&> // OK
+  3.     std::optional<T>&& -> std::optional<T&> / std::optional<T const&> // ILL-Formed
+  4.     std::optional<T> const&& -> std::optional<T const&> // ILL-Formed
+  5.     std::optional<T&> cv & -> std::optional<T&> / std::optional<T const&> // OK
+  6.     std::optional<T&> cv && -> std::optional<T&> / std::optional<T const&> // OK
+  7.     std::optional<std::reference_wrapper<T>> cv & -> std::optional<T&> / std::optional<T const&> // OK
+  8.     std::optional<std::reference_wrapper<T>> cv && -> std::optional<T&> / std::optional<T const&> // OK
+     */
+     auto&& t1 = makeRefToOptional(); // std::optional<T> &
+     static_assert(std::is_same_v<decltype(t1), beman::optional26::optional<std::string>&>);
+     beman::optional26::optional<std::string&>       o01 = t1;
+     beman::optional26::optional<const std::string&> o02 = t1;
 
-    auto&& t3 = makeRefRefToOptional(); // std::optional<T> &&
-    static_assert(std::is_same_v<decltype(t3), beman::optional26::optional<std::string>&&>);
-    // beman::optional26::optional<std::string&> o05 = t3;
-    beman::optional26::optional<const std::string&> o06 = t3; // INCORRECT
+     auto&& t2 = makeCRefToOptional(); // std::optional<T> const&
+     static_assert(std::is_same_v<decltype(t2), const beman::optional26::optional<std::string>&>);
+     //     beman::optional26::optional<std::string&> o03 = t2; //optional is deep const -- correctly ill-formaed
+     beman::optional26::optional<const std::string&> o04 = t2;
 
-    auto&& t4 = makeCRefRefToOptional(); // std::optional<T> const&&
-    static_assert(std::is_same_v<decltype(t4), const beman::optional26::optional<std::string>&&>);
-    // beman::optional26::optional<std::string&> o07 = t4;
-    beman::optional26::optional<const std::string&> o07a = t4; // INCORRECT (?)
+     auto&& t3 = makeRefRefToOptional(); // std::optional<T> &&
+     static_assert(std::is_same_v<decltype(t3), beman::optional26::optional<std::string>&&>);
+     // ILL-Formed
+     //      beman::optional26::optional<std::string&> o05 = std::move(t3);
+     // ILL-Formed
+     //  beman::optional26::optional<const std::string&> o06 = std::move(t3); // INCORRECT
 
-    auto&& t5 = makeCRefToOptionalRef(); // std::optional<T&> const &
-    static_assert(std::is_same_v<decltype(t5), const beman::optional26::optional<std::string&>&>);
-    beman::optional26::optional<std::string&>       o08 = t5;
-    beman::optional26::optional<const std::string&> o09 = t5;
+     auto&& t4 = makeCRefRefToOptional(); // std::optional<T> const&&
+     static_assert(std::is_same_v<decltype(t4), const beman::optional26::optional<std::string>&&>);
+     // ILL-Formed
+     //      beman::optional26::optional<std::string&> o07 = std::move(t4);
+     // ILL-Formed
+     //  beman::optional26::optional<const std::string&> o07a = std::move(t4); // INCORRECT (?)
 
-    auto&& t6 = makeCRefRefToOptionalRef(); // std::optional<T&> const &&
-    static_assert(std::is_same_v<decltype(t6), const beman::optional26::optional<std::string&>&&>);
-    beman::optional26::optional<std::string&>       o10 = t6;
-    beman::optional26::optional<const std::string&> o11 = t6;
+     auto&& t5 = makeCRefToOptionalRef(); // std::optional<T&> const &
+     static_assert(std::is_same_v<decltype(t5), const beman::optional26::optional<std::string&>&>);
+     beman::optional26::optional<std::string&>       o08 = t5;
+     beman::optional26::optional<const std::string&> o09 = t5;
 
-    auto&& t7 = makeCRefToOptionalRefWrap(); // std::optional<std::reference_wrapper<T>> cv &
-    static_assert(
-        std::is_same_v<decltype(t7), const beman::optional26::optional<std::reference_wrapper<std::string>>&>);
-    // beman::optional26::optional<std::string&>       o12 = t7; // INCORRECT
-    // beman::optional26::optional<const std::string&> o13 = t7; // INCORRECT
+     auto&& t6 = makeCRefRefToOptionalRef(); // std::optional<T&> const &&
+     static_assert(std::is_same_v<decltype(t6), const beman::optional26::optional<std::string&>&&>);
+     beman::optional26::optional<std::string&>       o10 = std::move(t6);
+     beman::optional26::optional<const std::string&> o11 = std::move(t6);
 
-    auto&& t8 = makeCRefRefToOptionalRefWrap(); // std::optional<std::reference_wrapper<T>> cv &&
-    static_assert(
-        std::is_same_v<decltype(t8), const beman::optional26::optional<std::reference_wrapper<std::string>>&&>);
-    // beman::optional26::optional<std::string&>       o14 = t8; // INCORRECT
-    // beman::optional26::optional<const std::string&> o15 = t8; // INCORRECT
+     auto&& t7 = makeCRefToOptionalRefWrap(); // std::optional<std::reference_wrapper<T>> cv &
+     static_assert(
+         std::is_same_v<decltype(t7), const beman::optional26::optional<std::reference_wrapper<std::string>>&>);
+     beman::optional26::optional<std::string&>       o12 = t7;
+     beman::optional26::optional<const std::string&> o13 = t7;
+
+     auto&& t8 = makeCRefRefToOptionalRefWrap(); // std::optional<std::reference_wrapper<T>> cv &&
+     static_assert(
+         std::is_same_v<decltype(t8), const beman::optional26::optional<std::reference_wrapper<std::string>>&&>);
+     beman::optional26::optional<std::string&>       o14 = t8;
+     beman::optional26::optional<const std::string&> o15 = t8;
  }

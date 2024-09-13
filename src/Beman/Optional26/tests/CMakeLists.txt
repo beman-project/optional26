@@ -44,9 +44,10 @@ target_link_libraries(
   PRIVATE
   beman_optional26)
 
-set_target_properties(constructor_fails
-  PROPERTIES EXCLUDE_FROM_ALL true
-  EXCLUDE_FROM_DEFAULT_BUILD true)
+#set_target_properties(constructor_fails
+#  PROPERTIES EXCLUDE_FROM_ALL true
+#  EXCLUDE_FROM_DEFAULT_BUILD true
+#)
 
 add_test(NAME constructor_fails
   COMMAND ${CMAKE_COMMAND} --build "${CMAKE_BINARY_DIR}" --target constructor_fails --config $<CONFIGURATION>)
