@@ -1463,8 +1463,12 @@ template <class U>
 constexpr std::remove_cv_t<T> optional<T&>::value_or(U&& u) const {
     static_assert(is_constructible_v<std::remove_cv_t<T>, T&>, "T must be constructible from a T&");
     static_assert(is_convertible_v<decltype(u), std::remove_cv_t<T>>, "Must be able to convert u to T");
-    // make if TODO:
-    return has_value() ? *value_ : std::forward<U>(u);
+    if (has_value()) {
+        return *value_;
+    }
+    else {
+        return std::forward<U>(u);
+    }
 }
 
 //   \rSec3[optionalref.monadic]{Monadic operations}
@@ -1473,14 +1477,23 @@ template <class F>
 constexpr auto optional<T&>::and_then(F&& f) const {
     using U = invoke_result_t<F, T&>;
     static_assert(detail::is_optional<U>, "F must return an optional");
-    return (has_value()) ? invoke(std::forward<F>(f), *value_) : remove_cvref_t<U>();
+    if (has_value()) {
+        return invoke(std::forward<F>(f), *value_);
+    } else {
+        return remove_cvref_t<U>();
+    }
 }
 
 template <class T>
 template <class F>
 constexpr auto optional<T&>::transform(F&& f) const -> optional<invoke_result_t<F, T&>> {
     using U = invoke_result_t<F, T&>;
-    return (has_value()) ? optional<U>{invoke(std::forward<F>(f), *value_)} : optional<U>{};
+    if (has_value()) {
+        return optional<U>{invoke(std::forward<F>(f), *value_)};
+    }
+    else {
+        return optional<U>{};
+    }
 }
 
 template <class T>
@@ -1488,7 +1501,11 @@ template <class F>
 constexpr optional<T&> optional<T&>::or_else(F&& f) const {
     using U = invoke_result_t<F>;
     static_assert(is_same_v<remove_cvref_t<U>, optional>);
-    return has_value() ? *value_ : std::forward<F>(f)();
+    if (has_value()) {
+        return *value_;
+    } else {
+        return std::forward<F>(f)();
+    }
 }
 
 // \rSec3[optional.mod]{modifiers}
