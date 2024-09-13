@@ -5,58 +5,39 @@
 #include <string>
 #include <utility>
 
-beman::optional26::optional<std::string> makeOptional();
-beman::optional26::optional<std::string>& makeRefToOptional();
+beman::optional26::optional<std::string>&  makeRefToOptional();
 beman::optional26::optional<std::string>&& makeRefRefToOptional();
-const beman::optional26::optional<std::string> makeCOptional();
-const beman::optional26::optional<std::string>& makeCRefToOptional();
+
+const beman::optional26::optional<std::string>&  makeCRefToOptional();
 const beman::optional26::optional<std::string>&& makeCRefRefToOptional();
 
-beman::optional26::optional<const std::string> makeOptionalConst();
-beman::optional26::optional<const std::string>& makeRefToOptionalConst();
-beman::optional26::optional<const std::string>&& makeRefRefToOptionalConst();
-const beman::optional26::optional<const std::string> makeCOptionalConst();
-const beman::optional26::optional<const std::string>& makeCRefToOptionalConst();
-const beman::optional26::optional<const std::string>&& makeCRefRefToOptionalConst();
-
-beman::optional26::optional<std::string&> makeOptionalRef();
-beman::optional26::optional<std::string&>& makeRefToOptionalRef();
-beman::optional26::optional<std::string&>&& makeRefRefToOptionalRef();
-const beman::optional26::optional<std::string&> makeCOptionalRef();
-const beman::optional26::optional<std::string&>& makeCRefToOptionalRef();
+const beman::optional26::optional<std::string&>&  makeCRefToOptionalRef();
 const beman::optional26::optional<std::string&>&& makeCRefRefToOptionalRef();
 
-beman::optional26::optional<std::string const &> makeOptionalCRef();
-beman::optional26::optional<std::string const&>&   makeRefToOptionalCRef();
-beman::optional26::optional<std::string const &>&& makeRefRefToOptionalCRef();
-const beman::optional26::optional<std::string const&> makeCOptionalCRef();
-const beman::optional26::optional<std::string const &>& makeCRefToOptionalCRef();
-const beman::optional26::optional<std::string const &>&& makeCRefRefToOptionalCRef();
-
-const beman::optional26::optional<std::reference_wrapper<std::string>>& makeCRefToOptionalRefWrap();
+const beman::optional26::optional<std::reference_wrapper<std::string>>&  makeCRefToOptionalRefWrap();
 const beman::optional26::optional<std::reference_wrapper<std::string>>&& makeCRefRefToOptionalRefWrap();
 
 void test_constructors() {
-    // beman::optional26::optional<std::string>        os;
-    // beman::optional26::optional<std::string&>       or1 = os;
-    // beman::optional26::optional<const std::string&> or2 = os;
-    // beman::optional26::optional<std::string>        cos;
-    // beman::optional26::optional<const std::string&> or3 = cos;
+    beman::optional26::optional<std::string>        os;
+    beman::optional26::optional<std::string&>       or1 = os;
+    beman::optional26::optional<const std::string&> or2 = os;
+    beman::optional26::optional<std::string>        cos;
+    beman::optional26::optional<const std::string&> or3 = cos;
 
-    // beman::optional26::optional<std::string&>       or1a{os};
-    // beman::optional26::optional<const std::string&> or2a{os};
-    // beman::optional26::optional<const std::string&> or3a{cos};
+    beman::optional26::optional<std::string&>       or1a{os};
+    beman::optional26::optional<const std::string&> or2a{os};
+    beman::optional26::optional<const std::string&> or3a{cos};
 
-    // // But disable:
-    // beman::optional26::optional<const char*>        os2;
-    // beman::optional26::optional<const std::string&> or4 = os;
+    // But disable:
+    beman::optional26::optional<const char*>        os2;
+    beman::optional26::optional<const std::string&> or4 = os;
 }
 
 
  void test_constructors_dangling() {
-     // beman::optional26::optional<std::string&> os1 = beman::optional26::optional<std::string&>();
-     // beman::optional26::optional<std::string&> os2 =
-     //     beman::optional26::optional<std::reference_wrapper<std::string>>();
+     beman::optional26::optional<std::string&> os1 = beman::optional26::optional<std::string&>();
+     beman::optional26::optional<std::string&> os2 =
+         beman::optional26::optional<std::reference_wrapper<std::string>>();
 
      /*
   1.     std::optional<T> & -> std::optional<T&> / std::optional<T const&> // OK
@@ -75,22 +56,22 @@ void test_constructors() {
 
      auto&& t2 = makeCRefToOptional(); // std::optional<T> const&
      static_assert(std::is_same_v<decltype(t2), const beman::optional26::optional<std::string>&>);
-     //     beman::optional26::optional<std::string&> o03 = t2; //optional is deep const -- correctly ill-formaed
+     //beman::optional26::optional<std::string&> o03 = t2; //optional is deep const -- correctly ill-formaed
      beman::optional26::optional<const std::string&> o04 = t2;
 
      auto&& t3 = makeRefRefToOptional(); // std::optional<T> &&
      static_assert(std::is_same_v<decltype(t3), beman::optional26::optional<std::string>&&>);
      // ILL-Formed
-     //      beman::optional26::optional<std::string&> o05 = std::move(t3);
+     // beman::optional26::optional<std::string&> o05 = std::move(t3);
      // ILL-Formed
-     //  beman::optional26::optional<const std::string&> o06 = std::move(t3); // INCORRECT
+     // beman::optional26::optional<const std::string&> o06 = std::move(t3);
 
      auto&& t4 = makeCRefRefToOptional(); // std::optional<T> const&&
      static_assert(std::is_same_v<decltype(t4), const beman::optional26::optional<std::string>&&>);
      // ILL-Formed
-     //      beman::optional26::optional<std::string&> o07 = std::move(t4);
+     // beman::optional26::optional<std::string&> o07 = std::move(t4);
      // ILL-Formed
-     //  beman::optional26::optional<const std::string&> o07a = std::move(t4); // INCORRECT (?)
+     // beman::optional26::optional<const std::string&> o07a = std::move(t4);
 
      auto&& t5 = makeCRefToOptionalRef(); // std::optional<T&> const &
      static_assert(std::is_same_v<decltype(t5), const beman::optional26::optional<std::string&>&>);
