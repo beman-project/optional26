@@ -37,6 +37,7 @@ using std::is_convertible_v;
 using std::is_copy_assignable_v;
 using std::is_copy_constructible_v;
 using std::is_lvalue_reference;
+using std::is_lvalue_reference_v;
 using std::is_move_assignable_v;
 using std::is_move_constructible_v;
 using std::is_nothrow_constructible_v;
@@ -46,7 +47,6 @@ using std::is_nothrow_swappable;
 using std::is_object_v;
 using std::is_reference_v;
 using std::is_rvalue_reference_v;
-using std::is_lvalue_reference_v;
 using std::is_same;
 using std::is_same_v;
 using std::is_scalar;
@@ -1127,9 +1127,19 @@ class optional<T&> {
     constexpr optional(const optional& rhs) noexcept = default;
     constexpr optional(optional&& rhs) noexcept      = default;
 
+#if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class Arg>
-    constexpr explicit optional(in_place_t, Arg&& arg)
-        requires is_constructible_v<T&, Arg>;
+        requires(is_constructible_v<T&, remove_cv_t<Arg>> && !std::reference_constructs_from_temporary_v<T&, Arg>)
+    constexpr explicit optional(in_place_t, Arg&& arg);
+
+    template <class Arg>
+        requires(is_constructible_v<T&, remove_cv_t<Arg>> && std::reference_constructs_from_temporary_v<T&, Arg>)
+    constexpr explicit optional(in_place_t, Arg&& arg) = delete;
+#else
+    template <class Arg>
+        requires is_constructible_v<T&, remove_cv_t<Arg>>
+    constexpr explicit optional(in_place_t, Arg&& arg);
+#endif
 
 #if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class U>
@@ -1183,7 +1193,6 @@ class optional<T&> {
         requires(is_constructible_v<T&, U>)
     constexpr explicit(!is_convertible_v<U, T&>) optional(optional<U>&& rhs) noexcept(false);
 #endif
-
 
 #if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class U>
@@ -1263,11 +1272,17 @@ constexpr optional<T&>::optional() noexcept : value_(nullptr) {}
 template <class T>
 constexpr optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
 
+#if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
 template <class Arg>
-constexpr optional<T&>::optional(in_place_t, Arg&& arg)
-    requires is_constructible_v<T&, Arg>
-    : value_(addressof(make_reference<T&>(std::forward<Arg>(arg)))) {}
+    requires(is_constructible_v<T&, remove_cv_t<Arg>> && !std::reference_constructs_from_temporary_v<T&, Arg>)
+constexpr optional<T&>::optional(in_place_t, Arg&& arg) : value_(addressof(static_cast<T&>(std::forward<Arg>(arg)))) {}
+#else
+template <class T>
+template <class Arg>
+    requires is_constructible_v<T&, remove_cv_t<Arg>>
+constexpr optional<T&>::optional(in_place_t, Arg&& arg) : value_(addressof(static_cast<T&>(std::forward<Arg>(arg)))) {}
+#endif
 
 #if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
@@ -1293,7 +1308,7 @@ template <class U>
     requires(is_constructible_v<T&, U&> && !std::reference_constructs_from_temporary_v<T&, U&>)
 constexpr optional<T&>::optional(optional<U>& rhs) noexcept(false) {
     if (rhs.has_value()) {
-       value_ = addressof(static_cast<T&>(rhs.value()));
+        value_ = addressof(static_cast<T&>(rhs.value()));
     } else {
         value_ = nullptr;
     }
@@ -1310,7 +1325,6 @@ constexpr optional<T&>::optional(optional<U>& rhs) noexcept(false) {
     }
 }
 #endif
-
 
 #if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
@@ -1336,7 +1350,6 @@ constexpr optional<T&>::optional(const optional<U>& rhs) noexcept(false) {
 }
 #endif
 
-
 #if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
 template <class U>
@@ -1360,7 +1373,6 @@ constexpr optional<T&>::optional(optional<U>&& rhs) noexcept(false) {
     }
 }
 #endif
-
 
 #if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
@@ -1393,7 +1405,6 @@ constexpr optional<T&>& optional<T&>::operator=(nullopt_t) noexcept {
     return *this;
 }
 
-
 template <class T>
 template <class U>
     requires(!is_derived_from_optional<decay_t<U>>)
@@ -1414,7 +1425,6 @@ template <class T>
 constexpr optional<T&>::iterator optional<T&>::begin() const noexcept {
     return iterator(has_value() ? value_ : nullptr);
 };
-
 
 template <class T>
 constexpr optional<T&>::iterator optional<T&>::end() const noexcept {
@@ -1455,8 +1465,7 @@ constexpr std::remove_cv_t<T> optional<T&>::value_or(U&& u) const {
     static_assert(is_convertible_v<decltype(u), std::remove_cv_t<T>>, "Must be able to convert u to T");
     if (has_value()) {
         return *value_;
-    }
-    else {
+    } else {
         return std::forward<U>(u);
     }
 }
@@ -1480,8 +1489,7 @@ constexpr auto optional<T&>::transform(F&& f) const -> optional<invoke_result_t<
     using U = invoke_result_t<F, T&>;
     if (has_value()) {
         return optional<U>{invoke(std::forward<F>(f), *value_)};
-    }
-    else {
+    } else {
         return optional<U>{};
     }
 }
