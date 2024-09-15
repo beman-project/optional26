@@ -59,6 +59,7 @@ $(_build_path)/CMakeCache.txt: | $(_build_path) .gitmodules
 	-rm compile_commands.json
 	ln -s $(_build_path)/compile_commands.json
 
+TARGET:=all
 compile: $(_build_path)/CMakeCache.txt ## Compile the project
 	cmake --build $(_build_path)  --config $(CONFIG) --target all -- -k 0
 
@@ -91,7 +92,10 @@ env:
 papers:
 	$(MAKE) -C papers/P2988 papers
 
+.DEFAULT: $(_build_path)/CMakeCache.txt ## Other targets passed through to cmake
+	cmake --build $(_build_path)  --config $(CONFIG) --target $@ -- -k 0
+
 # Help target
 .PHONY: help
 help: ## Show this help.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST) targets.mk | sort
+	@awk 'BEGIN {FS = ":.*?## "} /^[.a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST) | sort

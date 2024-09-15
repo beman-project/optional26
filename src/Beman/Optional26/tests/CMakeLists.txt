@@ -36,7 +36,6 @@ target_link_libraries(
 # Change also applied for CI flows.
 gtest_add_tests(TARGET beman_optional26_test "" AUTO)
 
-
 add_library(constructor_fails test_constuct_fail.cpp)
 
 target_link_libraries(
@@ -44,13 +43,14 @@ target_link_libraries(
   PRIVATE
   beman_optional26)
 
-#set_target_properties(constructor_fails
-#  PROPERTIES EXCLUDE_FROM_ALL true
-#  EXCLUDE_FROM_DEFAULT_BUILD true
-#)
+set_target_properties(constructor_fails
+  PROPERTIES EXCLUDE_FROM_ALL true
+  EXCLUDE_FROM_DEFAULT_BUILD true
+)
 
 add_test(NAME constructor_fails
   COMMAND ${CMAKE_COMMAND} --build "${CMAKE_BINARY_DIR}" --target constructor_fails --config $<CONFIGURATION>)
 
+set_tests_properties(constructor_fails PROPERTIES WILL_FAIL true)
+# Alernatively -- check for a particular regex to pass
 # set_tests_properties(constructor_fails PROPERTIES PASS_REGULAR_EXPRESSION  "Assert true")
-set_tests_properties(constructor_fails PROPERTIES WILL_FAIL false)

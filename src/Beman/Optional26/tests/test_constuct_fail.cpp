@@ -56,22 +56,23 @@ void test_constructors() {
 
      auto&& t2 = makeCRefToOptional(); // std::optional<T> const&
      static_assert(std::is_same_v<decltype(t2), const beman::optional26::optional<std::string>&>);
-     //beman::optional26::optional<std::string&> o03 = t2; //optional is deep const -- correctly ill-formaed
+     // Ill-formed - Diagnosed
+     beman::optional26::optional<std::string&> o03 = t2; //optional is deep const
      beman::optional26::optional<const std::string&> o04 = t2;
 
      auto&& t3 = makeRefRefToOptional(); // std::optional<T> &&
      static_assert(std::is_same_v<decltype(t3), beman::optional26::optional<std::string>&&>);
-     // ILL-Formed
-     // beman::optional26::optional<std::string&> o05 = std::move(t3);
-     // ILL-Formed
-     // beman::optional26::optional<const std::string&> o06 = std::move(t3);
+     // Ill-formed - Diagnosed
+     beman::optional26::optional<std::string&> o05 = std::move(t3);
+     // Ill-formed - Diagnosed
+     beman::optional26::optional<const std::string&> o06 = std::move(t3);
 
      auto&& t4 = makeCRefRefToOptional(); // std::optional<T> const&&
      static_assert(std::is_same_v<decltype(t4), const beman::optional26::optional<std::string>&&>);
-     // ILL-Formed
-     // beman::optional26::optional<std::string&> o07 = std::move(t4);
-     // ILL-Formed
-     // beman::optional26::optional<const std::string&> o07a = std::move(t4);
+     // Ill-formed - Diagnosed
+     beman::optional26::optional<std::string&> o07 = std::move(t4);
+     // Ill-formed - Diagnosed
+     beman::optional26::optional<const std::string&> o07a = std::move(t4);
 
      auto&& t5 = makeCRefToOptionalRef(); // std::optional<T&> const &
      static_assert(std::is_same_v<decltype(t5), const beman::optional26::optional<std::string&>&>);
