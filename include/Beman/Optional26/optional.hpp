@@ -339,7 +339,7 @@ class optional {
         }
     }
 
-    constexpr optional(const optional&)
+    optional(const optional&)
         requires std::is_copy_constructible_v<T> && std::is_trivially_copy_constructible_v<T>
     = default;
 
@@ -352,7 +352,7 @@ class optional {
         }
     }
 
-    constexpr optional(optional&&)
+    optional(optional&&)
         requires std::is_move_constructible_v<T> && std::is_trivially_move_constructible_v<T>
     = default;
 
@@ -430,7 +430,7 @@ class optional {
         return *this;
     }
 
-    constexpr optional& operator=(const optional&)
+    optional& operator=(const optional&)
         requires std::is_copy_constructible_v<T> && std::is_copy_assignable_v<T> &&
                      std::is_trivially_copy_constructible_v<T> && std::is_trivially_copy_assignable_v<T>
     = default;
@@ -448,7 +448,7 @@ class optional {
         return *this;
     }
 
-    constexpr optional& operator=(optional&&)
+    optional& operator=(optional&&)
         requires std::is_move_constructible_v<T> && std::is_move_assignable_v<T> &&
                      std::is_trivially_move_constructible_v<T> && std::is_trivially_move_assignable_v<T>
     = default;
@@ -1016,17 +1016,17 @@ class optional<T&> {
     // constexpr void reset() noexcept;
 
   private:
-    T* value_; // exposition only
+    T* value_ = nullptr; // exposition only
 
   public:
     //  \rSec3[optional.ctor]{Constructors}
 
-    constexpr optional() noexcept : value_(nullptr) {}
+    optional() = default;
 
     constexpr optional(nullopt_t) noexcept : value_(nullptr) {}
 
-    constexpr optional(const optional& rhs) noexcept = default;
-    constexpr optional(optional&& rhs) noexcept      = default;
+    optional(const optional& rhs) = default;
+    optional(optional&& rhs)      = default;
 
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>)
@@ -1046,7 +1046,7 @@ class optional<T&> {
 
     //  \rSec3[optional.dtor]{Destructor}
 
-    constexpr ~optional() = default;
+    ~optional() = default;
 
     // \rSec3[optional.assign]{Assignment}
 
@@ -1055,8 +1055,8 @@ class optional<T&> {
         return *this;
     }
 
-    constexpr optional& operator=(const optional& rhs) noexcept = default;
-    constexpr optional& operator=(optional&& rhs) noexcept      = default;
+    optional& operator=(const optional&) = default;
+    optional& operator=(optional&&)      = default;
 
     template <class U = T>
         requires(!detail::is_optional<std::decay_t<U>>)
@@ -1078,7 +1078,7 @@ class optional<T&> {
     }
 
     template <class U>
-    constexpr optional& operator=(optional<U>&& rhs) = delete;
+    optional& operator=(optional<U>&& rhs) = delete;
 
     template <class U>
         requires(!detail::is_optional<std::decay_t<U>>)
