@@ -234,28 +234,39 @@ template <class T>
 inline constexpr bool is_optional<optional<T>> = true;
 } // namespace detail
 
-template <typename T>
-constexpr optional<std::decay_t<T>>
-make_optional(T&& t) noexcept(std::is_nothrow_constructible_v<optional<std::decay_t<T>>, T>)
-    requires std::is_constructible_v<std::decay_t<T>, T>
+template <typename T = void,
+          typename... Chomp,
+          typename U,
+          typename D = std::conditional_t<std::is_void_v<T>, std::decay_t<U>, T>>
+constexpr optional<D> make_optional(U&& u) noexcept(std::is_nothrow_constructible_v<D, U>)
+    requires std::is_constructible_v<D, U>
 {
-    return optional<std::decay_t<T>>{std::forward<T>(t)};
+    static_assert(sizeof...(Chomp) == 0, "make_optional takes at most one template argument");
+    if constexpr (!std::is_void_v<T>) {
+        static_assert(std::is_object_v<T>, "make_optional's template argument must be an object type");
+        static_assert(!std::is_array_v<T>, "make_optional's template argument must be a non-array object type");
+    }
+    return optional<D>(std::forward<U>(u));
 }
 
 template <typename T, typename... Args>
 constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
     requires std::is_constructible_v<T, Args...>
 {
-    return optional<T>{in_place, std::forward<Args>(args)...};
+    static_assert(std::is_object_v<T>, "make_optional's template argument must be an object type");
+    static_assert(!std::is_array_v<T>, "make_optional's template argument must be a non-array object type");
+    return optional<T>(in_place, std::forward<Args>(args)...);
 }
 
-template <typename T, typename _Up, typename... Args>
+template <typename T, typename U, typename... Args>
 constexpr optional<T>
-make_optional(std::initializer_list<_Up> init_list,
-              Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<_Up>&, Args...>)
-    requires std::is_constructible_v<T, std::initializer_list<_Up>&, Args...>
+make_optional(std::initializer_list<U> il,
+              Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
+    requires std::is_constructible_v<T, std::initializer_list<U>&, Args...>
 {
-    return optional<T>{in_place, init_list, std::forward<Args>(args)...};
+    static_assert(std::is_object_v<T>, "make_optional's template argument must be an object type");
+    static_assert(!std::is_array_v<T>, "make_optional's template argument must be a non-array object type");
+    return optional<T>(in_place, il, std::forward<Args>(args)...);
 }
 
 template <class T, class U>

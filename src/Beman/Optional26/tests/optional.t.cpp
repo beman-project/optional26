@@ -371,7 +371,7 @@ TEST(OptionalTest, MakeOptional) {
     EXPECT_TRUE(std::get<1>(o5->t) == 3);
 
     auto i  = 42;
-    auto o6 = beman::optional26::make_optional<int&>(i);
+    auto o6 = beman::optional26::make_optional(i);
     static_assert(std::is_same<decltype(o6), beman::optional26::optional<int>>::value);
 
     EXPECT_TRUE((std::is_same<decltype(o6), beman::optional26::optional<int>>::value));

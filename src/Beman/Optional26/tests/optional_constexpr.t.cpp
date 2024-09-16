@@ -241,10 +241,9 @@ TEST(OptionalConstexprTest, MakeOptional) {
     EXPECT_TRUE(std::get<1>(o5->t) == 3);
 
     static constexpr auto i  = 42;
-    constexpr auto        o6 = beman::optional26::make_optional<const int&>(i);
-    static_assert(std::is_same<decltype(o6), const beman::optional26::optional<int>>::value);
+    constexpr auto        o6 = beman::optional26::make_optional(i);
+    static_assert(std::is_same_v<decltype(o6), const beman::optional26::optional<int>>);
 
-    EXPECT_TRUE((std::is_same<decltype(o6), const beman::optional26::optional<int>>::value));
     EXPECT_TRUE(o6);
     EXPECT_TRUE(*o6 == 42);
 }
