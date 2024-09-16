@@ -647,11 +647,17 @@ TEST(OptionalRefTest, ConstructFromOptional) {
 TEST(OptionalRefTest, OptionalOfOptional) {
     using O = beman::optional26::optional<int>;
     O                               o;
-    beman::optional26::optional<O&> oo = o;
-    EXPECT_TRUE(oo.has_value());
-    oo = o;
-    EXPECT_TRUE(oo.has_value());
-    EXPECT_TRUE(&oo.value() == &o);
+    beman::optional26::optional<O&> oo1 = o;
+    EXPECT_TRUE(oo1.has_value());
+    oo1 = o;
+    EXPECT_TRUE(oo1.has_value());
+    EXPECT_TRUE(&oo1.value() == &o);
+
+    beman::optional26::optional<const O&> oo2 = o;
+    EXPECT_TRUE(oo2.has_value());
+    oo2 = o;
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(&oo2.value() == &o);
 }
 
 TEST(OptionalRefTest, ConstructFromReferenceWrapper) {
