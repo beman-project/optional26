@@ -643,3 +643,43 @@ TEST(OptionalRefTest, ConstructFromOptional) {
     beman::optional26::optional<const base&> optional_base_const_ref2{engaged_derived};
     EXPECT_TRUE(optional_base_const_ref2.has_value());
 }
+
+TEST(OptionalRefTest, OptionalOfOptional) {
+    using O = beman::optional26::optional<int>;
+    O                               o;
+    beman::optional26::optional<O&> oo = o;
+    EXPECT_TRUE(oo.has_value());
+    oo = o;
+    EXPECT_TRUE(oo.has_value());
+    EXPECT_TRUE(&oo.value() == &o);
+}
+
+TEST(OptionalRefTest, ConstructFromReferenceWrapper) {
+    using O = beman::optional26::optional<int>;
+    O o;
+
+    beman::optional26::optional<O&> oo1 = std::ref(o);
+    EXPECT_TRUE(oo1.has_value());
+    oo1 = std::ref(o);
+    EXPECT_TRUE(oo1.has_value());
+    EXPECT_TRUE(&oo1.value() == &o);
+
+    auto                            lvalue_refwrapper = std::ref(o);
+    beman::optional26::optional<O&> oo2               = lvalue_refwrapper;
+    EXPECT_TRUE(oo2.has_value());
+    oo2 = lvalue_refwrapper;
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(&oo2.value() == &o);
+
+    beman::optional26::optional<const O&> oo3 = std::ref(o);
+    EXPECT_TRUE(oo3.has_value());
+    oo3 = std::ref(o);
+    EXPECT_TRUE(oo3.has_value());
+    EXPECT_TRUE(&oo3.value() == &o);
+
+    beman::optional26::optional<const O&> oo4 = lvalue_refwrapper;
+    EXPECT_TRUE(oo4.has_value());
+    oo4 = lvalue_refwrapper;
+    EXPECT_TRUE(oo4.has_value());
+    EXPECT_TRUE(&oo4.value() == &o);
+}

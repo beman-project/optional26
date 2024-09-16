@@ -1028,21 +1028,35 @@ class optional<T&> {
     optional(const optional& rhs) = default;
     optional(optional&& rhs)      = default;
 
-    template <class U = T>
-        requires(!detail::is_optional<std::decay_t<U>>)
-    constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u) noexcept : value_(std::addressof(u)) {
-        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
-    }
+    template <class U>
+    constexpr explicit optional(U&& u) noexcept(std::is_nothrow_constructible_v<U&&, T&>)
+        requires (std::is_constructible_v<T&, U&&> && !std::is_convertible_v<U&&, T&>)
+        : value_(std::addressof(static_cast<T&>(std::forward<U>(u)))) {}
 
     template <class U>
-    constexpr explicit(!std::is_convertible_v<U, T>) optional(const optional<U>& rhs) noexcept {
-        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        if (rhs.has_value())
-            value_ = std::to_address(rhs);
-        else
-            value_ = nullptr;
-    }
+    constexpr optional(U&& u) noexcept(std::is_nothrow_convertible_v<U&&, T&>)
+        requires std::is_convertible_v<U&&, T&>
+        : value_(std::addressof(static_cast<T&>(std::forward<U>(u)))) {}
+
+    template <class U>
+    constexpr explicit optional(const optional<U>& rhs) noexcept(std::is_nothrow_constructible_v<T&, const U&>)
+        requires (std::is_constructible_v<T&, const U&> && !std::is_convertible_v<const U&, T&>)
+        : value_(rhs ? std::addressof(static_cast<T&>(*rhs)) : nullptr) {}
+
+    template <class U>
+    constexpr optional(const optional<U>& rhs) noexcept(std::is_nothrow_convertible_v<const U&, T&>)
+        requires std::is_convertible_v<const U&, T&>
+        : value_(rhs ? std::addressof(static_cast<T&>(*rhs)) : nullptr) {}
+
+    template <class U>
+    constexpr explicit optional(optional<U>& rhs) noexcept(std::is_nothrow_constructible_v<T&, U&>)
+        requires (std::is_constructible_v<T&, U&> && !std::is_convertible_v<U&, T&>)
+        : value_(rhs ? std::addressof(static_cast<T&>(*rhs)) : nullptr) {}
+
+    template <class U>
+    constexpr optional(optional<U>& rhs) noexcept(std::is_nothrow_convertible_v<U&, T&>)
+        requires std::is_convertible_v<U&, T&>
+        : value_(rhs ? std::addressof(static_cast<T&>(*rhs)) : nullptr) {}
 
     //  \rSec3[optional.dtor]{Destructor}
 
@@ -1057,28 +1071,6 @@ class optional<T&> {
 
     optional& operator=(const optional&) = default;
     optional& operator=(optional&&)      = default;
-
-    template <class U = T>
-        requires(!detail::is_optional<std::decay_t<U>>)
-    constexpr optional& operator=(U&& u) {
-        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        static_assert(std::is_lvalue_reference<U>::value, "U must be an lvalue");
-        value_ = std::addressof(u);
-        return *this;
-    }
-
-    template <class U>
-    constexpr optional& operator=(const optional<U>& rhs) noexcept {
-        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>, U>, "Must be able to bind U to T&");
-        if (rhs.has_value())
-            value_ = std::to_address(rhs);
-        else
-            value_ = nullptr;
-        return *this;
-    }
-
-    template <class U>
-    optional& operator=(optional<U>&& rhs) = delete;
 
     template <class U>
         requires(!detail::is_optional<std::decay_t<U>>)
