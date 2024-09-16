@@ -132,6 +132,23 @@ TEST(OptionalTest, OptionalOfOptional) {
     oo2 = o;
     EXPECT_TRUE(oo2.has_value());
     EXPECT_FALSE(oo2->has_value());
+
+    // emplace constructs the inner optional
+    oo2.emplace(beman::optional26::nullopt);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_FALSE(oo2->has_value());
+    oo2.emplace(beman::optional26::in_place, 41);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(oo2.value() == 41);
+    oo2.emplace(42);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(oo2.value() == 42);
+    oo2.emplace(o);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_FALSE(oo2->has_value());
+    oo2.emplace(O(43));
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(oo2.value() == 43);
 }
 
 TEST(OptionalTest, AssignmentValue) {
