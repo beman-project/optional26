@@ -11,7 +11,6 @@
 
 #include <gtest/gtest.h>
 
-
 TEST(OptionalConstexprTest, Constructors) {
     constexpr beman::optional26::optional<int> i1;
     constexpr beman::optional26::optional<int> i2{beman::optional26::nullopt};
@@ -20,17 +19,17 @@ TEST(OptionalConstexprTest, Constructors) {
 
     constexpr int                              i  = 0;
     constexpr beman::optional26::optional<int> i3 = i;
-    std::ignore = i3;
+    std::ignore                                   = i3;
 
     constexpr beman::optional26::optional<beman::optional26::tests::empty> e1;
-    constexpr beman::optional26::optional<int>   e2{beman::optional26::nullopt};
+    constexpr beman::optional26::optional<int>                             e2{beman::optional26::nullopt};
 
     constexpr beman::optional26::tests::empty                              e{};
     constexpr beman::optional26::optional<beman::optional26::tests::empty> e3 = e;
-    std::ignore = e1;
-    std::ignore = e2;
-    std::ignore = e;
-    std::ignore = e3;
+    std::ignore                                                               = e1;
+    std::ignore                                                               = e2;
+    std::ignore                                                               = e;
+    std::ignore                                                               = e3;
 }
 
 TEST(OptionalConstexprTest, Constructors2) {
@@ -70,7 +69,7 @@ TEST(OptionalConstexprTest, Constructors2) {
     }
 
     {
-        constexpr static auto                              i = 42;
+        static constexpr auto                             i = 42;
         constexpr beman::optional26::optional<const int&> o = i;
         EXPECT_TRUE(o);
         EXPECT_TRUE(*o == 42);
@@ -79,7 +78,6 @@ TEST(OptionalConstexprTest, Constructors2) {
         EXPECT_TRUE(oo);
         EXPECT_TRUE(*oo == 42);
     }
-
 }
 
 TEST(OptionalConstexprTest, Constructors3) {
@@ -103,7 +101,6 @@ TEST(OptionalConstexprTest, Constructors3) {
     std::ignore = b3;
     std::ignore = b4;
     std::ignore = d2;
-
 }
 
 namespace {
@@ -124,9 +121,9 @@ TEST(OptionalConstexprTest, NonDefaultConstruct) {
 }
 
 consteval bool testConstexprAssignmentValue() {
-    bool retval = true;
-    beman::optional26::optional<int> o1 = 42;
-    beman::optional26::optional<int> o2 = 12;
+    bool                             retval = true;
+    beman::optional26::optional<int> o1     = 42;
+    beman::optional26::optional<int> o2     = 12;
     beman::optional26::optional<int> o3;
 
     o1 = o1;
@@ -187,16 +184,16 @@ consteval bool testConstexprAssignmentValue() {
 
 static_assert(testConstexprAssignmentValue());
 
-
 struct takes_init_and_variadic {
-    int     v0;
+    int                  v0;
     std::tuple<int, int> t;
     template <class... Args>
-    constexpr takes_init_and_variadic(std::initializer_list<int>& l, Args&&... args) : v0{*std::begin(l)}, t(std::forward<Args>(args)...) {}
+    constexpr takes_init_and_variadic(std::initializer_list<int>& l, Args&&... args)
+        : v0{*std::begin(l)}, t(std::forward<Args>(args)...) {}
 };
 
 consteval bool testConstexprInPlace() {
-    bool retval = true;
+    bool                                       retval = true;
     constexpr beman::optional26::optional<int> o1{beman::optional26::in_place};
     constexpr beman::optional26::optional<int> o2(beman::optional26::in_place);
     retval &= (bool(o1));
@@ -221,9 +218,7 @@ consteval bool testConstexprInPlace() {
 
 using beman::optional26::tests::constify;
 
-TEST(OptionalConstexprTest, InPlace) {
-    EXPECT_TRUE(constify(testConstexprInPlace()));
-}
+TEST(OptionalConstexprTest, InPlace) { EXPECT_TRUE(constify(testConstexprInPlace())); }
 
 TEST(OptionalConstexprTest, MakeOptional) {
     constexpr auto o1 = beman::optional26::make_optional(42);
@@ -244,8 +239,8 @@ TEST(OptionalConstexprTest, MakeOptional) {
     EXPECT_TRUE(std::get<0>(o5->t) == 2);
     EXPECT_TRUE(std::get<1>(o5->t) == 3);
 
-    constexpr static auto i  = 42;
-    constexpr auto o6 = beman::optional26::make_optional<const int&>(i);
+    static constexpr auto i  = 42;
+    constexpr auto        o6 = beman::optional26::make_optional<const int&>(i);
     static_assert(std::is_same<decltype(o6), const beman::optional26::optional<int>>::value);
 
     EXPECT_TRUE((std::is_same<decltype(o6), const beman::optional26::optional<int>>::value));
@@ -267,10 +262,9 @@ TEST(OptionalConstexprTest, Nullopt) {
     EXPECT_TRUE(!std::is_default_constructible<beman::optional26::nullopt_t>::value);
 }
 
-
 TEST(OptionalConstexprTest, Observers) {
-    constexpr beman::optional26::optional<int>       o1 = 42;
-    constexpr beman::optional26::optional<int>       o2;
+    constexpr beman::optional26::optional<int> o1 = 42;
+    constexpr beman::optional26::optional<int> o2;
     constexpr beman::optional26::optional<int> o3 = 42;
 
     EXPECT_TRUE(*o1 == 42);
@@ -283,7 +277,6 @@ TEST(OptionalConstexprTest, Observers) {
     EXPECT_TRUE(success2);
     constexpr auto success3 = std::is_same<decltype(std::move(o1).value()), const int&>::value;
     EXPECT_TRUE(success3);
-
 }
 
 TEST(OptionalConstexprTest, RelationalOps) {
@@ -334,7 +327,6 @@ TEST(OptionalConstexprTest, RelationalOps) {
             EXPECT_TRUE(constify((o3 >= beman::optional26::nullopt)));
             EXPECT_TRUE(constify((beman::optional26::nullopt >= o3)));
         }
-
     }
     //  SECTION("with T simple")
     {
@@ -352,7 +344,6 @@ TEST(OptionalConstexprTest, RelationalOps) {
             EXPECT_TRUE(constify((o1 >= 1)));
             EXPECT_TRUE(constify((!(1 >= o1))));
         }
-
 
         {
             EXPECT_TRUE(constify((o1 == 4)));
@@ -394,7 +385,6 @@ TEST(OptionalConstexprTest, RelationalOps) {
             EXPECT_TRUE(constify((!(o4 >= o5))));
             EXPECT_TRUE(constify((o4 >= o4)));
         }
-
     }
     //  SECTION("nullopt complex")
     {
@@ -413,7 +403,6 @@ TEST(OptionalConstexprTest, RelationalOps) {
             EXPECT_TRUE(constify((!(beman::optional26::nullopt >= o4))));
         }
 
-
         {
             EXPECT_TRUE(constify((o3 == beman::optional26::nullopt)));
             EXPECT_TRUE(constify((beman::optional26::nullopt == o3)));
@@ -428,7 +417,6 @@ TEST(OptionalConstexprTest, RelationalOps) {
             EXPECT_TRUE(constify((o3 >= beman::optional26::nullopt)));
             EXPECT_TRUE(constify((beman::optional26::nullopt >= o3)));
         }
-
     }
 
     //  SECTION("with T complex")
@@ -448,7 +436,6 @@ TEST(OptionalConstexprTest, RelationalOps) {
             EXPECT_TRUE(constify((!(Point{} >= o4))));
         }
 
-
         {
             EXPECT_TRUE(constify((o4 == p4)));
             EXPECT_TRUE(constify((p4 == o4)));
@@ -463,7 +450,6 @@ TEST(OptionalConstexprTest, RelationalOps) {
             EXPECT_TRUE(constify((o4 >= p4)));
             EXPECT_TRUE(constify((p4 >= o4)));
         }
-
     }
 }
 
@@ -1117,7 +1103,7 @@ consteval bool testSwap() {
     beman::optional26::optional<int> o1 = 42;
     beman::optional26::optional<int> o2 = 12;
     o1.swap(o2);
-    return (o1.value() ==  12) && (o2.value() == 42);
+    return (o1.value() == 12) && (o2.value() == 42);
 }
 static_assert(testSwap());
 
@@ -1125,9 +1111,7 @@ consteval bool testSwapWNull() {
     beman::optional26::optional<int> o1 = 42;
     beman::optional26::optional<int> o2 = beman::optional26::nullopt;
     o1.swap(o2);
-    return
-    (!o1.has_value()) &&
-    (o2.value(), 42);
+    return (!o1.has_value()) && (o2.value(), 42);
 }
 static_assert(testSwapWNull());
 
@@ -1135,30 +1119,21 @@ consteval bool testSwapNullIntializedWithValue() {
     beman::optional26::optional<int> o1 = beman::optional26::nullopt;
     beman::optional26::optional<int> o2 = 42;
     o1.swap(o2);
-    return
-    (o1.value() ==  42) &&
-    (!o2.has_value());
+    return (o1.value() == 42) && (!o2.has_value());
 }
 static_assert(testSwapNullIntializedWithValue());
 
 consteval bool testEmplace() {
     beman::optional26::optional<std::pair<std::pair<int, int>, std::pair<double, double>>> i;
     i.emplace(std::piecewise_construct, std::make_tuple(0, 2), std::make_tuple(3, 4));
-    return
-    (i->first.first == 0) &&
-    (i->first.second == 2) &&
-    (i->second.first == 3) &&
-    (i->second.second == 4);
+    return (i->first.first == 0) && (i->first.second == 2) && (i->second.first == 3) && (i->second.second == 4);
 }
 static_assert(testEmplace());
 
 consteval bool testEmplaceInitList() {
     beman::optional26::optional<takes_init_and_variadic> o;
     o.emplace({0, 1}, 2, 3);
-    return
-        (o->v0 == 0) &&
-    (std::get<0>(o->t) == 2) &&
-    (std::get<1>(o->t) == 3);
+    return (o->v0 == 0) && (std::get<0>(o->t) == 2) && (std::get<1>(o->t) == 3);
 }
 static_assert(testEmplaceInitList());
 
@@ -1240,7 +1215,6 @@ consteval bool testAssignmentValue() {
     retval &= (o5->i_ == 5);
 
     return retval;
-
 }
 
 static_assert(testAssignmentValue());

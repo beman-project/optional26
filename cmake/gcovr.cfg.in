@@ -1,0 +1,11 @@
+root = @CMAKE_SOURCE_DIR@
+cobertura = @CMAKE_BINARY_DIR@/coverage/cobertura.xml
+sonarqube = @CMAKE_BINARY_DIR@/coverage/sonarqube.xml
+html-details = @CMAKE_BINARY_DIR@/coverage/coverage.html
+gcov-executable = @GCOV_EXECUTABLE@
+gcov-parallel = yes
+html-theme = github.dark-blue
+html-self-contained = yes
+print-summary = yes
+filter = .*/Beman/Optional26/.*
+exclude = .*\.t\.cpp

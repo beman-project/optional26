@@ -80,7 +80,7 @@ nullable
 </td>
 <td style="font-size:80%; background-color: #EAFDC7A0">
 to denote missing value<br/>
-best for return values 
+best for return values
 </td>
 </tr>
 <tr class="fragment">
@@ -123,18 +123,18 @@ nullable
 </td>
 <td  style="background-color: #F9DE96A0; vertical-align:middle;">fixed</td>
 <td  style="background-color: #F9DE96A0; font-size: 70%; vertical-align:middle;">
-  
+
 `jss::object_ptr<T> const`{.cpp}<br/>
 `boost::optional<T&> const`{.cpp}
 
 </td>
 <td rowspan="2" style="vertical-align:middle;font-size:70%;background-color: #F9DE96A0">
-  
+
 missing in std<br/>
 `std::optional`{.cpp} can not do this<br/>
 `boost::optional`{.cpp} can<br/>
 `object_ptr<T>`{.cpp} by A. Williams
-  
+
 </td>
 </tr>
 <tr class="fragment">
@@ -157,7 +157,7 @@ missing in std<br/>
 
 > assigning a reference to an `optional<T&>` rebinds.
 
-* no other semantics is actually reasonable. 
+* no other semantics is actually reasonable.
 
 ## Why the mess wrt assignment ?
 
@@ -171,7 +171,7 @@ I say:
 
 > Pointers have a too wide interface (arithmetic!, array semantics, `void*` conversion), optional references remove unsafe operations and provide semantic meaning lacking in a pointer, where it is only given by convention, as in the Core Guidelines
 
-`optional<T&>` 
+`optional<T&>`
 
 * type says what it is
 * monadic API makes usage superior to `T*`
@@ -179,4 +179,3 @@ I say:
 :::
 
 # [P2988](https://wg21.link/P2988)
-
