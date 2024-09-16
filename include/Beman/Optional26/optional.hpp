@@ -971,6 +971,9 @@ template <class To, class From>
 concept safely_constructible_not_convertible = std::is_constructible_v<To, From> && !std::is_convertible_v<From, To> &&
                                                !reference_constructs_from_temporary_v<To, From>;
 
+template <class To, class From>
+concept safely_constructible = std::is_constructible_v<To, From> && !reference_constructs_from_temporary_v<To, From>;
+
 } // namespace detail
 
 template <class T>
@@ -1107,9 +1110,10 @@ class optional<T&> {
     optional& operator=(optional&&)      = default;
 
     template <class U>
-        requires(!detail::is_optional<std::decay_t<U>>)
-    constexpr optional& emplace(U&& u) noexcept {
-        return *this = std::forward<U>(u);
+        requires detail::safely_constructible<T&, U&&>
+    constexpr T& emplace(U&& u) {
+        value_ = std::addressof(static_cast<T&>(std::forward<U>(u)));
+        return *value_;
     }
 
     //   \rSec3[optional.swap]{Swap}

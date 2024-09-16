@@ -81,10 +81,11 @@ TEST(OptionalRefTest, Assignment) {
     EXPECT_FALSE(empty);
     i2 = empty;
     EXPECT_FALSE(i2);
-    int eight = 8;
-    empty.emplace(eight);
+    int  eight  = 8;
+    int& result = empty.emplace(eight);
     EXPECT_TRUE(empty);
     EXPECT_EQ(empty, 8);
+    EXPECT_EQ(&result, &eight);
 }
 
 TEST(OptionalRefTest, RelationalOps) {
@@ -652,10 +653,16 @@ TEST(OptionalRefTest, OptionalOfOptional) {
     oo1 = o;
     EXPECT_TRUE(oo1.has_value());
     EXPECT_TRUE(&oo1.value() == &o);
+    oo1.emplace(o); // emplace, like assignment, binds the reference
+    EXPECT_TRUE(oo1.has_value());
+    EXPECT_TRUE(&oo1.value() == &o);
 
     beman::optional26::optional<const O&> oo2 = o;
     EXPECT_TRUE(oo2.has_value());
     oo2 = o;
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(&oo2.value() == &o);
+    oo2.emplace(o);
     EXPECT_TRUE(oo2.has_value());
     EXPECT_TRUE(&oo2.value() == &o);
 }
