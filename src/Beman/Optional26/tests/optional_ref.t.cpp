@@ -696,3 +696,11 @@ TEST(OptionalRefTest, ConstructFromReferenceWrapper) {
     EXPECT_TRUE(oo4.has_value());
     EXPECT_TRUE(&oo4.value() == &o);
 }
+
+TEST(OptionalRefTest, OverloadResolutionChecksDangling) {
+    extern int  check_dangling(beman::optional26::optional<const std::string&>);
+    extern void check_dangling(beman::optional26::optional<const char*>);
+    std::string lvalue_string = "abc";
+    static_assert(std::is_same_v<decltype(check_dangling(lvalue_string)), int>);
+    static_assert(std::is_same_v<decltype(check_dangling("abc")), void>);
+}
