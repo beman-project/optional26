@@ -118,6 +118,22 @@ TEST(OptionalTest, NonDefaultConstruct) {
     std::ignore = v2;
 }
 
+TEST(OptionalTest, OptionalOfOptional) {
+    using O = beman::optional26::optional<int>;
+    O                              o;
+    beman::optional26::optional<O> oo1 = o;
+    EXPECT_TRUE(oo1.has_value());
+    oo1 = o;
+    EXPECT_TRUE(oo1.has_value());
+    EXPECT_FALSE(oo1->has_value());
+
+    beman::optional26::optional<O> oo2 = std::move(o);
+    EXPECT_TRUE(oo2.has_value());
+    oo2 = o;
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_FALSE(oo2->has_value());
+}
+
 TEST(OptionalTest, AssignmentValue) {
     beman::optional26::optional<int> o1 = 42;
     beman::optional26::optional<int> o2 = 12;
