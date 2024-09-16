@@ -1095,6 +1095,12 @@ class optional<T&> {
         requires detail::safely_convertible<T&, U&>
         : value_(rhs ? std::addressof(static_cast<T&>(*rhs)) : nullptr) {}
 
+    /// Binds the stored reference in-place using the given argument.
+    template <class U>
+    constexpr optional(in_place_t, U&& u)
+        requires detail::safely_constructible<T&, U&&>
+        : value_(std::addressof(static_cast<T&>(std::forward<U>(u)))) {}
+
     //  \rSec3[optional.dtor]{Destructor}
 
     ~optional() = default;

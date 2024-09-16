@@ -387,6 +387,13 @@ TEST(OptionalRefTest, MakeOptional) {
     EXPECT_TRUE((std::is_same_v<decltype(o6), beman::optional26::optional<int>>));
     EXPECT_TRUE(o6);
     EXPECT_TRUE(*o6 == 42);
+
+    // Test the surprising misbehavior of make_optional.
+    auto co1 = beman::optional26::make_optional<int&>(var);
+    auto co2 = beman::optional26::make_optional<const int&>(var);
+
+    static_assert(std::is_same_v<decltype(co1), beman::optional26::optional<int>>);
+    static_assert(std::is_same_v<decltype(co2), beman::optional26::optional<const int&>>);
 }
 
 TEST(OptionalRefTest, Nullopt) {
