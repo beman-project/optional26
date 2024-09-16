@@ -183,7 +183,7 @@ TEST(RangeSupportTest, FormatOptionalIsStillDisabled) {
 #if defined(__cpp_lib_format_ranges)
     EXPECT_EQ(std::format_kind<beman::optional26::optional<int>>, std::range_format::disabled);
 
-    // Next line shold not compile: formatter is not defined for optional.
+    // Next line should not compile: formatter is not defined for optional.
     // EXPECT_EQ(std::format("{}", beman::optional26::optional<int> {}), "[]");
 #endif
 }

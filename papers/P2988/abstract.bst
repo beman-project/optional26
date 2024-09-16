@@ -1,4 +1,4 @@
-% BibTeX bibliography style `abstract' 
+% BibTeX bibliography style `abstract'
 % by David Kotz dfk@cs.duke.edu
 % March 1989, May 1993, November 1995, October 2000
 %    modified from
@@ -556,8 +556,8 @@ FUNCTION {format.incoll.inproc.crossref}
 FUNCTION {format.abstract}
 { abstract empty$
     { "" }
-    { "\begin{quotation}\noindent {\bf Abstract:} " 
-	abstract * 
+    { "\begin{quotation}\noindent {\bf Abstract:} "
+	abstract *
 	" \end{quotation}" *}
   if$
 }
@@ -589,7 +589,7 @@ FUNCTION {format.comment}
     }
     {	private empty$
 		{ "\begin{quote} {\bf Comment:} " comment * " \end{quote}" *}
-		{ "\begin{quote} {\bf Comment:} " comment * 
+		{ "\begin{quote} {\bf Comment:} " comment *
 				" {\bf Private:} " * private *
 				" \end{quote}" * }
 	if$

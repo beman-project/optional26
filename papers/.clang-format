@@ -109,11 +109,3 @@ SpacesInSquareBrackets: false
 Standard:        Auto
 TabWidth:        8
 UseTab:          Never
-
----
-Language:        Cpp
-
----
-Language:        ObjC
-
-...
