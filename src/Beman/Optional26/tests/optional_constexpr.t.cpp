@@ -109,6 +109,7 @@ class NoDefault {
 
   public:
     constexpr NoDefault(int v) : v_(v) {}
+    constexpr int value() const { return v_; }
 };
 } // namespace
 
@@ -126,7 +127,7 @@ consteval bool testConstexprAssignmentValue() {
     beman::optional26::optional<int> o2     = 12;
     beman::optional26::optional<int> o3;
 
-    o1 = o1;
+    o1 = static_cast<beman::optional26::optional<int>&>(o1);
     retval &= (*o1 == 42);
 
     o1 = o2;

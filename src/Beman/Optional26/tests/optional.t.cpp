@@ -123,7 +123,7 @@ TEST(OptionalTest, AssignmentValue) {
     beman::optional26::optional<int> o2 = 12;
     beman::optional26::optional<int> o3;
 
-    o1 = o1;
+    o1 = static_cast<beman::optional26::optional<int>&>(o1);
     EXPECT_TRUE(*o1 == 42);
 
     o1 = o2;
