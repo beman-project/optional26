@@ -7,5 +7,5 @@ gcov-parallel = yes
 html-theme = github.dark-blue
 html-self-contained = yes
 print-summary = yes
-filter = .*/Beman/Optional26/.*
+filter = .*/beman/optional26/.*
 exclude = .*\.t\.cpp

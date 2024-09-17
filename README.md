@@ -1,4 +1,4 @@
-# Beman.Optional26: C++26 Extensions for std::optional
+# beman.optional26: C++26 Extensions for std::optional
 
 <!--
 SPDX-License-Identifier: 2.0 license with LLVM exceptions
@@ -6,7 +6,7 @@ SPDX-License-Identifier: 2.0 license with LLVM exceptions
 
 ![CI Tests](https://github.com/beman-project/Optional26/actions/workflows/ci.yml/badge.svg)
 
-This repository implements `std::optional` extensions targeting C++26. The `Beman.Optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
+This repository implements `std::optional` extensions targeting C++26. The `beman.optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
 
 **Implements**:
 
@@ -15,7 +15,7 @@ This repository implements `std::optional` extensions targeting C++26. The `Bema
 
 ## Table of Contents
 
-* [Beman.Optional26: C++26 Extensions for std::optional](#bemanoptional26-c26-extensions-for-stdoptional)
+* [beman.optional26: C++26 Extensions for std::optional](#bemanoptional26-c26-extensions-for-stdoptional)
   * [Table of Contents](#table-of-contents)
   * [License](#license)
   * [Examples](#examples)
@@ -232,8 +232,8 @@ $ cmake --build .build --config Asan --target all -- -k 0
 
 # Check that tests are not built/installed.
 $ ctest --build-config Asan --output-on-failure --test-dir .build
-Internal ctest changing into directory: /path/to/Beman.Optional26/.build
-Test project /path/to/Beman.Optional26/.build
+Internal ctest changing into directory: /path/to/beman.optional26/.build
+Test project /path/to/beman.optional26/.build
 No tests were found!!!
 ```
 
