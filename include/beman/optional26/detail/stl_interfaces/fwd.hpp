@@ -1,4 +1,4 @@
-// include/Beman/Optional26/detail/stl_interfaces/fwd.hpp -*-C++-*-
+// include/beman/optional26/detail/stl_interfaces/fwd.hpp -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 // Copyright (C) 2019 T. Zachary Laine
@@ -9,7 +9,7 @@
 #ifndef BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_FWD_HPP
 #define BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_FWD_HPP
 
-#include <Beman/Optional26/detail/stl_interfaces/config.hpp>
+#include <beman/optional26/detail/stl_interfaces/config.hpp>
 
 #if BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_USE_CONCEPTS
 #include <ranges>

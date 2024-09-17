@@ -1,9 +1,9 @@
-// src/Beman/Optional26/tests/optional_constexpr.t.cpp                -*-C++-*-
+// src/beman/optional26/tests/optional_constexpr.t.cpp                -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include <Beman/Optional26/optional.hpp>
-#include <Beman/Optional26/tests/test_types.hpp>
-#include <Beman/Optional26/tests/test_utilities.hpp>
+#include <beman/optional26/optional.hpp>
+#include <beman/optional26/tests/test_types.hpp>
+#include <beman/optional26/tests/test_utilities.hpp>
 
 #include <functional>
 #include <ranges>

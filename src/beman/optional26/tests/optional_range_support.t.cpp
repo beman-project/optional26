@@ -1,4 +1,4 @@
-// src/Beman/Optional26/tests/optional_range_support.t.cpp -*-C++-*-
+// src/beman/optional26/tests/optional_range_support.t.cpp -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 /**
@@ -8,12 +8,12 @@
  *
  * Classes used in the tests: int, pointers, empty, no_default_ctor, base, derived.
  */
-#include <Beman/Optional26/optional.hpp>
+#include <beman/optional26/optional.hpp>
 
 #include <gtest/gtest.h>
 
-#include <Beman/Optional26/detail/iterator.hpp>
-#include <Beman/Optional26/tests/test_types.hpp>
+#include <beman/optional26/detail/iterator.hpp>
+#include <beman/optional26/tests/test_types.hpp>
 
 #include <algorithm>
 #include <concepts>
