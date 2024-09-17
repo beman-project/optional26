@@ -22,7 +22,7 @@ Stage  Job ID  Job name                   Workflow name  Workflow file  Events
 0      build   ${{ matrix.config.name }}  CI Tests       ci.yml         pull_request,push
 
 # Run all CI jobs
-Optional26 $ sudo act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:full-24.04 --container-architecture linux/amd64 push
+optional26 $ sudo act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:full-24.04 --container-architecture linux/amd64 push
 [CI Tests/Ubuntu Clang 18-2] 🚀  Start image=ghcr.io/catthehacker/ubuntu:full-24.04
 [CI Tests/Ubuntu Clang 19-3] 🚀  Start image=ghcr.io/catthehacker/ubuntu:full-24.04
 [CI Tests/Ubuntu Clang 17-1] 🚀  Start image=ghcr.io/catthehacker/ubuntu:full-24.04
