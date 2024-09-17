@@ -1,4 +1,4 @@
-// include/Beman/Optional26/detail/stl_interfaces/iterator_interface.hpp -*-C++-*-
+// include/beman/optional26/detail/stl_interfaces/iterator_interface.hpp -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 // Copyright (C) 2019 T. Zachary Laine
@@ -9,7 +9,7 @@
 #ifndef BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_ITERATOR_INTERFACE_HPP
 #define BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_ITERATOR_INTERFACE_HPP
 
-#include <Beman/Optional26/detail/stl_interfaces/fwd.hpp>
+#include <beman/optional26/detail/stl_interfaces/fwd.hpp>
 
 #include <utility>
 #include <type_traits>

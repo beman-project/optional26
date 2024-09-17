@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.27)
 
 project(
-  beman_optional26
+  beman.optional26
   VERSION 0.0.0
   LANGUAGES CXX)
 
@@ -26,7 +26,7 @@ if(BUILD_TESTING)
   FetchContent_MakeAvailable(googletest)
 endif()
 
-add_subdirectory(src/Beman/Optional26)
+add_subdirectory(src/beman/optional26)
 add_subdirectory(examples)
 
 include(GNUInstallDirs)

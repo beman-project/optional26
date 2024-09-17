@@ -1,10 +1,10 @@
-// src/Beman/Optional26/tests/detail/iterator.t.cpp -*-C++-*-
+// src/beman/optional26/tests/detail/iterator.t.cpp -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 /**
  * This file contains tests for beman::optional26::detail::contiguous_iterator.
  */
-#include <Beman/Optional26/detail/iterator.hpp>
+#include <beman/optional26/detail/iterator.hpp>
 
 #include <gtest/gtest.h>
 #include <tests/test_types.hpp>

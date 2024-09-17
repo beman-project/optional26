@@ -1,4 +1,4 @@
-# Beman.Optional26: C++26 Extensions for std::optional
+# beman.optional26: C++26 Extensions for std::optional
 
 <!--
 SPDX-License-Identifier: 2.0 license with LLVM exceptions
@@ -6,7 +6,7 @@ SPDX-License-Identifier: 2.0 license with LLVM exceptions
 
 ![CI Tests](https://github.com/beman-project/Optional26/actions/workflows/ci.yml/badge.svg)
 
-This repository implements `std::optional` extensions targeting C++26. The `Beman.Optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
+This repository implements `std::optional` extensions targeting C++26. The `beman.optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
 
 **Implements**:
 
@@ -15,7 +15,7 @@ This repository implements `std::optional` extensions targeting C++26. The `Bema
 
 ## Table of Contents
 
-* [Beman.Optional26: C++26 Extensions for std::optional](#bemanoptional26-c26-extensions-for-stdoptional)
+* [beman.optional26: C++26 Extensions for std::optional](#bemanoptional26-c26-extensions-for-stdoptional)
   * [Table of Contents](#table-of-contents)
   * [License](#license)
   * [Examples](#examples)
@@ -56,7 +56,7 @@ Full runable examples can be found in `examples/` - please check [./examples/REA
 The next code snippet shows optional range support added in [Give *std::optional* Range Support (P3168R2)](https://wg21.link/P3168R2):
 
 ```cpp
-#include <Beman/Optional26/optional.hpp>
+#include <beman/optional26/optional.hpp>
 ...
 
 // Example from P3168R2: basic range loop over C++26 optional.
@@ -81,7 +81,7 @@ Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp)
 The next code snippet shows optional reference support added in [`std::optional<T&>` (P2988R5)](https://wg21.link/P2988R5):
 
 ```cpp
-#include <Beman/Optional26/optional.hpp>
+#include <beman/optional26/optional.hpp>
 ...
 
 {
@@ -197,7 +197,7 @@ CI current build and test flows:
 $ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...
--- Build files have been written to: /path/to/Optional26/.build
+-- Build files have been written to: /path/to/optional26/.build
 
 # Build.
 $ cmake --build .build --config Asan --target all -- -k 0
@@ -206,8 +206,8 @@ $ cmake --build .build --config Asan --target all -- -k 0
 
 # Run tests.
 $ ctest --build-config Asan --output-on-failure --test-dir .build
-Internal ctest changing into directory: /path/to/Optional26/.build
-Test project /path/to/Optional26/.build
+Internal ctest changing into directory: /path/to/optional26/.build
+Test project /path/to/optional26/.build
 ...
 100% tests passed, 0 tests failed out of 82
 
@@ -223,7 +223,7 @@ By default, we build and run tests. You can provide `-DBUILD_TESTING=OFF` and co
 $ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -DBUILD_TESTING=OFF -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...
--- Build files have been written to: /path/to/Optional26/.build
+-- Build files have been written to: /path/to/optional26/.build
 
 # Build.
 $ cmake --build .build --config Asan --target all -- -k 0
@@ -232,8 +232,8 @@ $ cmake --build .build --config Asan --target all -- -k 0
 
 # Check that tests are not built/installed.
 $ ctest --build-config Asan --output-on-failure --test-dir .build
-Internal ctest changing into directory: /path/to/Beman.Optional26/.build
-Test project /path/to/Beman.Optional26/.build
+Internal ctest changing into directory: /path/to/beman.optional26/.build
+Test project /path/to/beman.optional26/.build
 No tests were found!!!
 ```
 
