@@ -1102,6 +1102,43 @@ make_optional(initializer_list<U> init_list,
 /* optional<T&> */
 /****************/
 
+namespace detail {
+
+#ifdef __cpp_lib_reference_from_temporary
+using std::reference_constructs_from_temporary_v;
+using std::reference_converts_from_temporary_v;
+#else
+template <class To, class From>
+concept reference_converts_from_temporary_v =
+    std::is_reference_v<To> &&
+    (
+        // A prvalue of a type similar to To, so that we're binding directly to the materialized prvalue of type From
+        (!std::is_reference_v<From> && std::is_convertible_v<std::remove_cvref_t<From>*, std::remove_cvref_t<To>*>) ||
+        // A value of an unrelated type, convertible to To, but only by materializing a To and binding a const
+        // reference; if we were trying to bind a non-const reference, we'd be unable to. (This is not quite exhaustive
+        // of the problem cases, but I think it's fairly close in practice.)
+        (std::is_lvalue_reference_v<To> && std::is_const_v<std::remove_reference_t<To>> &&
+         std::is_convertible_v<From, const std::remove_cvref_t<To>&&> &&
+         !std::is_convertible_v<From, std::remove_cvref_t<To>&>));
+
+template <class To, class From>
+concept reference_constructs_from_temporary_v =
+    // This is close in practice, because cases where conversion and construction differ in semantics are rare.
+    reference_converts_from_temporary_v<To, From>;
+#endif
+
+template <class To, class From>
+concept safely_convertible = std::is_convertible_v<From, To> && !reference_converts_from_temporary_v<To, From>;
+
+template <class To, class From>
+concept safely_constructible_not_convertible = std::is_constructible_v<To, From> && !std::is_convertible_v<From, To> &&
+                                               !reference_constructs_from_temporary_v<To, From>;
+
+template <class To, class From>
+concept safely_constructible = std::is_constructible_v<To, From> && !reference_constructs_from_temporary_v<To, From>;
+
+} // namespace detail
+
 template <class T>
 class optional<T&> {
   public:
@@ -1124,86 +1161,60 @@ class optional<T&> {
     constexpr optional(const optional& rhs) noexcept = default;
     constexpr optional(optional&& rhs) noexcept      = default;
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class Arg>
-        requires(is_constructible_v<T&, remove_cv_t<Arg>> && !std::reference_constructs_from_temporary_v<T&, Arg>)
+        requires(is_constructible_v<T&, remove_cv_t<Arg>> && !detail::reference_constructs_from_temporary_v<T&, Arg>)
     constexpr explicit optional(in_place_t, Arg&& arg);
 
     template <class Arg>
-        requires(is_constructible_v<T&, remove_cv_t<Arg>> && std::reference_constructs_from_temporary_v<T&, Arg>)
+            requires(is_constructible_v<T&, remove_cv_t<Arg>> && detail::reference_constructs_from_temporary_v<T&, Arg>)
     constexpr explicit optional(in_place_t, Arg&& arg) = delete;
-#else
-    template <class Arg>
-        requires is_constructible_v<T&, remove_cv_t<Arg>>
-    constexpr explicit optional(in_place_t, Arg&& arg);
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class U>
-        requires(!is_derived_from_optional<decay_t<U>> && !std::reference_constructs_from_temporary_v<T&, U>)
+        requires(is_constructible_v<T&, U&> && !(is_same_v<remove_cvref_t<U>, in_place_t>) &&
+                 !(is_same_v<bool, remove_cv_t<T>> && (is_derived_from_optional<remove_cvref_t<U>>)) &&
+                 !detail::reference_constructs_from_temporary_v<T&, U>)
     constexpr explicit(!is_convertible_v<U, T&>) optional(U&& u) noexcept(false);
 
     // Do not need an =delete as this is the fallback catch all constructor
-#else
-    template <class U>
-        requires(!is_derived_from_optional<decay_t<U>>)
-    constexpr explicit(!is_convertible_v<U, T&>) optional(U&& u) noexcept(false);
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class U>
-        requires(is_constructible_v<T&, U&> && !std::reference_constructs_from_temporary_v<T&, U&>)
+        requires(is_constructible_v<T&, U&> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+                 !detail::reference_constructs_from_temporary_v<T&, U&>)
     constexpr explicit(!is_convertible_v<U&, T&>) optional(optional<U>& rhs) noexcept(false);
 
     template <class U>
-        requires(is_constructible_v<T&, U&> && std::reference_constructs_from_temporary_v<T&, U&>)
+        requires(is_constructible_v<T&, U&> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+                 detail::reference_constructs_from_temporary_v<T&, U&>)
     constexpr explicit(!is_convertible_v<U&, T&>) optional(optional<U>& rhs) noexcept(false) = delete;
-#else
-    template <class U>
-        requires(is_constructible_v<T&, U&>)
-    constexpr explicit(!is_convertible_v<U&, T&>) optional(optional<U>& rhs) noexcept(false);
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class U>
-        requires(is_constructible_v<T&, const U&> && !std::reference_constructs_from_temporary_v<T&, const U&>)
+        requires(is_constructible_v<T&, const U&> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+                 !detail::reference_constructs_from_temporary_v<T&, const U&>)
     constexpr explicit(!is_convertible_v<const U&, T&>) optional(const optional<U>& rhs) noexcept(false);
     template <class U>
-        requires(is_constructible_v<T&, const U&> && std::reference_constructs_from_temporary_v<T&, const U&>)
+        requires(is_constructible_v<T&, const U&> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+                 detail::reference_constructs_from_temporary_v<T&, const U&>)
     constexpr explicit(!is_convertible_v<const U&, T&>) optional(const optional<U>& rhs) noexcept(false) = delete;
-#else
-    template <class U>
-        requires(is_constructible_v<T&, const U&>)
-    constexpr explicit(!is_convertible_v<const U&, T&>) optional(const optional<U>& rhs) noexcept(false);
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class U>
-        requires(is_constructible_v<T&, U> && !std::reference_constructs_from_temporary_v<T&, U>)
+        requires(is_constructible_v<T&, U> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+                 !detail::reference_constructs_from_temporary_v<T&, U>)
     constexpr explicit(!is_convertible_v<U, T&>) optional(optional<U>&& rhs) noexcept(false);
 
     template <class U>
-        requires(is_constructible_v<T&, U> && std::reference_constructs_from_temporary_v<T&, U>)
+        requires(is_constructible_v<T&, U> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+                 detail::reference_constructs_from_temporary_v<T&, U>)
     constexpr explicit(!is_convertible_v<U, T&>) optional(optional<U>&& rhs) noexcept(false) = delete;
-#else
-    template <class U>
-        requires(is_constructible_v<T&, U>)
-    constexpr explicit(!is_convertible_v<U, T&>) optional(optional<U>&& rhs) noexcept(false);
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
     template <class U>
-        requires(is_constructible_v<T&, const U> && !std::reference_constructs_from_temporary_v<T&, const U>)
+        requires(is_constructible_v<T&, const U> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+                 !detail::reference_constructs_from_temporary_v<T&, const U>)
     constexpr explicit(!is_convertible_v<const U, T&>) optional(const optional<U>&& rhs) noexcept(false);
 
     template <class U>
-        requires(is_constructible_v<T&, const U> && std::reference_constructs_from_temporary_v<T&, const U>)
+        requires(is_constructible_v<T&, const U> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+                 detail::reference_constructs_from_temporary_v<T&, const U>)
     constexpr explicit(!is_convertible_v<const U, T&>) optional(const optional<U>&& rhs) noexcept(false) = delete;
-#else
-    template <class U>
-        requires(is_constructible_v<T&, const U>)
-    constexpr explicit(!is_convertible_v<const U, T&>) optional(const optional<U>&& rhs) noexcept(false);
-#endif
 
     // \ref{optionalref.dtor}, destructor
     constexpr ~optional() = default;
@@ -1212,10 +1223,10 @@ class optional<T&> {
     constexpr optional& operator=(nullopt_t) noexcept;
 
     constexpr optional& operator=(const optional& rhs) noexcept = default;
+    constexpr optional& operator=(optional&&) noexcept          = default;
 
     template <class U>
-        requires(!is_derived_from_optional<decay_t<U>>)
-    constexpr optional& emplace(U&& u) noexcept;
+    constexpr T& emplace(U&& u) noexcept;
 
     // \ref{optionalref.swap}, swap
     constexpr void swap(optional& rhs) noexcept;
@@ -1254,10 +1265,8 @@ constexpr R optional<T&>::make_reference(Arg&& arg)
     requires is_constructible_v<R, Arg>
 {
     static_assert(std::is_reference_v<R>);
-#if (__cpp_lib_reference_from_temporary >= 202202L)
-    static_assert(!std::reference_converts_from_temporary_v<R, Arg>,
+    static_assert(!detail::reference_converts_from_temporary_v<R, Arg>,
                   "Reference conversion from temporary not allowed.");
-#endif
     R r(std::forward<Arg>(arg));
     return r;
 }
@@ -1269,40 +1278,25 @@ constexpr optional<T&>::optional() noexcept : value_(nullptr) {}
 template <class T>
 constexpr optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
 template <class Arg>
-    requires(is_constructible_v<T&, remove_cv_t<Arg>> && !std::reference_constructs_from_temporary_v<T&, Arg>)
+    requires(is_constructible_v<T&, remove_cv_t<Arg>> && !detail::reference_constructs_from_temporary_v<T&, Arg>)
 constexpr optional<T&>::optional(in_place_t, Arg&& arg) : value_(addressof(static_cast<T&>(std::forward<Arg>(arg)))) {}
-#else
-template <class T>
-template <class Arg>
-    requires is_constructible_v<T&, remove_cv_t<Arg>>
-constexpr optional<T&>::optional(in_place_t, Arg&& arg) : value_(addressof(static_cast<T&>(std::forward<Arg>(arg)))) {}
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
 template <class U>
-    requires(!is_derived_from_optional<decay_t<U>> && !std::reference_constructs_from_temporary_v<T&, U>)
-constexpr optional<T&>::optional(U&& u) noexcept(false) : value_(addressof(u)) {
-    static_assert(is_constructible_v<T&, U>, "Must be able to bind U to T&");
-    static_assert(is_lvalue_reference_v<U>, "U must be an lvalue");
+    requires(is_constructible_v<T&, U&> && !(is_same_v<remove_cvref_t<U>, in_place_t>) &&
+             !(is_same_v<bool, remove_cv_t<T>> && (is_derived_from_optional<remove_cvref_t<U>>)) &&
+             !detail::reference_constructs_from_temporary_v<T&, U>)
+constexpr optional<T&>::optional(U&& u) noexcept(false) : value_(std::addressof(static_cast<T&>(std::forward<U>(u)))) {
+    // static_assert(is_constructible_v<T&, U>, "Must be able to bind U to T&");
+    //    static_assert(is_lvalue_reference_v<U>, "U must be an lvalue");
 }
-#else
-template <class T>
-template <class U>
-    requires(!is_derived_from_optional<decay_t<U>>)
-constexpr optional<T&>::optional(U&& u) noexcept(false) : value_(addressof(u)) {
-    static_assert(is_constructible_v<T&, U>, "Must be able to bind U to T&");
-    static_assert(is_lvalue_reference_v<U>, "U must be an lvalue");
-}
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
 template <class U>
-    requires(is_constructible_v<T&, U&> && !std::reference_constructs_from_temporary_v<T&, U&>)
+    requires(is_constructible_v<T&, U&> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+             !detail::reference_constructs_from_temporary_v<T&, U&>)
 constexpr optional<T&>::optional(optional<U>& rhs) noexcept(false) {
     if (rhs.has_value()) {
         value_ = addressof(static_cast<T&>(rhs.value()));
@@ -1310,23 +1304,11 @@ constexpr optional<T&>::optional(optional<U>& rhs) noexcept(false) {
         value_ = nullptr;
     }
 }
-#else
-template <class T>
-template <class U>
-    requires(is_constructible_v<T&, U&>)
-constexpr optional<T&>::optional(optional<U>& rhs) noexcept(false) {
-    if (rhs.has_value()) {
-        value_ = addressof(static_cast<T&>(rhs.value()));
-    } else {
-        value_ = nullptr;
-    }
-}
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
 template <class U>
-    requires(is_constructible_v<T&, const U&> && !std::reference_constructs_from_temporary_v<T&, const U&>)
+    requires(is_constructible_v<T&, const U&> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+             !detail::reference_constructs_from_temporary_v<T&, const U&>)
 constexpr optional<T&>::optional(const optional<U>& rhs) noexcept(false) {
     if (rhs.has_value()) {
         value_ = addressof(static_cast<T&>(rhs.value()));
@@ -1334,23 +1316,11 @@ constexpr optional<T&>::optional(const optional<U>& rhs) noexcept(false) {
         value_ = nullptr;
     }
 }
-#else
-template <class T>
-template <class U>
-    requires(is_constructible_v<T&, const U&>)
-constexpr optional<T&>::optional(const optional<U>& rhs) noexcept(false) {
-    if (rhs.has_value()) {
-        value_ = addressof(static_cast<T&>(rhs.value()));
-    } else {
-        value_ = nullptr;
-    }
-}
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
 template <class U>
-    requires(is_constructible_v<T&, U> && !std::reference_constructs_from_temporary_v<T&, U>)
+    requires(is_constructible_v<T&, U> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+             !detail::reference_constructs_from_temporary_v<T&, U>)
 constexpr optional<T&>::optional(optional<U>&& rhs) noexcept(false) {
     if (rhs.has_value()) {
         value_ = addressof(static_cast<T&>(std::move(rhs).value()));
@@ -1358,23 +1328,11 @@ constexpr optional<T&>::optional(optional<U>&& rhs) noexcept(false) {
         value_ = nullptr;
     }
 }
-#else
-template <class T>
-template <class U>
-    requires(is_constructible_v<T&, U>)
-constexpr optional<T&>::optional(optional<U>&& rhs) noexcept(false) {
-    if (rhs.has_value()) {
-        value_ = addressof(static_cast<T&>(std::move(rhs).value()));
-    } else {
-        value_ = nullptr;
-    }
-}
-#endif
 
-#if (__cpp_lib_reference_from_temporary >= 202202L)
 template <class T>
 template <class U>
-    requires(is_constructible_v<T&, const U> && !std::reference_constructs_from_temporary_v<T&, const U>)
+    requires(is_constructible_v<T&, const U> && !(is_derived_from_optional<remove_cvref_t<T>>) &&
+             !detail::reference_constructs_from_temporary_v<T&, const U>)
 constexpr optional<T&>::optional(const optional<U>&& rhs) noexcept(false) {
     if (rhs.has_value()) {
         value_ = addressof(static_cast<T&>(std::move(rhs).value()));
@@ -1382,18 +1340,6 @@ constexpr optional<T&>::optional(const optional<U>&& rhs) noexcept(false) {
         value_ = nullptr;
     }
 }
-#else
-template <class T>
-template <class U>
-    requires(is_constructible_v<T&, const U>)
-constexpr optional<T&>::optional(const optional<U>&& rhs) noexcept(false) {
-    if (rhs.has_value()) {
-        value_ = addressof(static_cast<T&>(std::move(rhs).value()));
-    } else {
-        value_ = nullptr;
-    }
-}
-#endif
 
 // \rSec3[optionalref.assign]{Assignment}
 template <class T>
@@ -1404,9 +1350,9 @@ constexpr optional<T&>& optional<T&>::operator=(nullopt_t) noexcept {
 
 template <class T>
 template <class U>
-    requires(!is_derived_from_optional<decay_t<U>>)
-constexpr optional<T&>& optional<T&>::emplace(U&& u) noexcept {
-    return *this = std::forward<U>(u);
+constexpr T& optional<T&>::emplace(U&& u) noexcept {
+    value_ = std::addressof(static_cast<T&>(std::forward<U>(u)));
+    return *value_;
 }
 
 //   \rSec3[optionalref.swap]{Swap}

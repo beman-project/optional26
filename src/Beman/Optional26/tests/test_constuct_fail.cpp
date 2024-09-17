@@ -93,4 +93,21 @@ void test_constructors_dangling() {
         std::is_same_v<decltype(t8), const beman::optional26::optional<std::reference_wrapper<std::string>>&&>);
     beman::optional26::optional<std::string&>       o14 = t8;
     beman::optional26::optional<const std::string&> o15 = t8;
+
+    std::ignore = o01;
+    std::ignore = o02;
+    std::ignore = o03;
+    std::ignore = o04;
+    std::ignore = o05;
+    std::ignore = o06;
+    std::ignore = o07;
+    std::ignore = o07a;
+    std::ignore = o08;
+    std::ignore = o09;
+    std::ignore = o10;
+    std::ignore = o11;
+    std::ignore = o12;
+    std::ignore = o13;
+    std::ignore = o14;
+    std::ignore = o15;
 }

@@ -100,10 +100,11 @@ TEST(OptionalRefTest, Assignment) {
     EXPECT_FALSE(empty);
     i2 = empty;
     EXPECT_FALSE(i2);
-    int eight = 8;
-    empty.emplace(eight);
+    int  eight  = 8;
+    int& result = empty.emplace(eight);
     EXPECT_TRUE(empty);
     EXPECT_EQ(empty, 8);
+    EXPECT_EQ(&result, &eight);
 
     beman::optional26::optional<const Thing&> o;
     EXPECT_FALSE(o);
@@ -649,30 +650,34 @@ TEST(OptionalRefTest, ConstructFromOptional) {
     int                               var = 42;
     beman::optional26::optional<int&> o1  = beman::optional26::nullopt;
     beman::optional26::optional<int&> o2{var};
+    EXPECT_FALSE(o1.has_value());
+    EXPECT_TRUE(o2.has_value());
 
     using beman::optional26::tests::base;
     using beman::optional26::tests::derived;
 
     base                               b{1};
     derived                            d(1, 2);
-    beman::optional26::optional<base&> empty_base;
+    beman::optional26::optional<base&> disengaged_base;
     beman::optional26::optional<base&> engaged_base{b};
+    EXPECT_FALSE(disengaged_base.has_value());
+    EXPECT_TRUE(engaged_base.has_value());
 
-    beman::optional26::optional<derived&> empty_derived_ref;
+    beman::optional26::optional<derived&> disengaged_derived_ref;
     beman::optional26::optional<derived&> engaged_derived_ref{d};
 
-    beman::optional26::optional<base&> optional_base_ref{empty_derived_ref};
+    beman::optional26::optional<base&> optional_base_ref{disengaged_derived_ref};
     EXPECT_FALSE(optional_base_ref.has_value());
 
     beman::optional26::optional<base&> optional_base_ref2{engaged_derived_ref};
     EXPECT_TRUE(optional_base_ref2.has_value());
 
-    beman::optional26::optional<derived> empty_derived;
+    beman::optional26::optional<derived> disengaged_derived;
     beman::optional26::optional<derived> engaged_derived{d};
 
     static_assert(std::is_constructible_v<const base&, derived>);
 
-    beman::optional26::optional<const base&> optional_base_const_ref{empty_derived};
+    beman::optional26::optional<const base&> optional_base_const_ref{disengaged_derived};
     EXPECT_FALSE(optional_base_const_ref.has_value());
 
     beman::optional26::optional<const base&> optional_base_const_ref2{engaged_derived};
@@ -703,4 +708,64 @@ TEST(OptionalRefTest, InPlace) {
     // EXPECT_TRUE(o4);
     // EXPECT_TRUE(std::get<0>(*o4) == 0);
     // EXPECT_TRUE(std::get<1>(*o4) == 1);
+}
+
+TEST(OptionalRefTest, OptionalOfOptional) {
+    using O = beman::optional26::optional<int>;
+    O                               o;
+    beman::optional26::optional<O&> oo1 = o;
+    EXPECT_TRUE(oo1.has_value());
+    oo1 = o;
+    EXPECT_TRUE(oo1.has_value());
+    EXPECT_TRUE(&oo1.value() == &o);
+    oo1.emplace(o); // emplace, like assignment, binds the reference
+    EXPECT_TRUE(oo1.has_value());
+    EXPECT_TRUE(&oo1.value() == &o);
+
+    beman::optional26::optional<const O&> oo2 = o;
+    EXPECT_TRUE(oo2.has_value());
+    oo2 = o;
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(&oo2.value() == &o);
+    oo2.emplace(o);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(&oo2.value() == &o);
+}
+
+TEST(OptionalRefTest, ConstructFromReferenceWrapper) {
+    using O = beman::optional26::optional<int>;
+    O o;
+
+    beman::optional26::optional<O&> oo1 = std::ref(o);
+    EXPECT_TRUE(oo1.has_value());
+    oo1 = std::ref(o);
+    EXPECT_TRUE(oo1.has_value());
+    EXPECT_TRUE(&oo1.value() == &o);
+
+    auto                            lvalue_refwrapper = std::ref(o);
+    beman::optional26::optional<O&> oo2               = lvalue_refwrapper;
+    EXPECT_TRUE(oo2.has_value());
+    oo2 = lvalue_refwrapper;
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(&oo2.value() == &o);
+
+    beman::optional26::optional<const O&> oo3 = std::ref(o);
+    EXPECT_TRUE(oo3.has_value());
+    oo3 = std::ref(o);
+    EXPECT_TRUE(oo3.has_value());
+    EXPECT_TRUE(&oo3.value() == &o);
+
+    beman::optional26::optional<const O&> oo4 = lvalue_refwrapper;
+    EXPECT_TRUE(oo4.has_value());
+    oo4 = lvalue_refwrapper;
+    EXPECT_TRUE(oo4.has_value());
+    EXPECT_TRUE(&oo4.value() == &o);
+}
+
+TEST(OptionalRefTest, OverloadResolutionChecksDangling) {
+    extern int  check_dangling(beman::optional26::optional<const std::string&>);
+    extern void check_dangling(beman::optional26::optional<const char*>);
+    std::string lvalue_string = "abc";
+    static_assert(std::is_same_v<decltype(check_dangling(lvalue_string)), int>);
+    static_assert(std::is_same_v<decltype(check_dangling("abc")), void>);
 }
