@@ -704,3 +704,13 @@ TEST(OptionalRefTest, OverloadResolutionChecksDangling) {
     static_assert(std::is_same_v<decltype(check_dangling(lvalue_string)), int>);
     static_assert(std::is_same_v<decltype(check_dangling("abc")), void>);
 }
+
+TEST(OptionalRefTest, OverloadResolutionChecksDangling2) {
+    extern int  check_dangling(beman::optional26::optional<const std::string&>);
+    extern void check_dangling(beman::optional26::optional<const char*&>);
+
+    beman::optional26::optional<std::string> optional_string  = "abc";
+    beman::optional26::optional<const char*> optional_pointer = "abc";
+    static_assert(std::is_same_v<decltype(check_dangling(optional_string)), int>);
+    static_assert(std::is_same_v<decltype(check_dangling(optional_pointer)), void>);
+}
