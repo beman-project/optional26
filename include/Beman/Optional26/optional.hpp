@@ -232,24 +232,20 @@ template <class T>
 inline constexpr bool is_optional = false;
 template <class T>
 inline constexpr bool is_optional<optional<T>> = true;
+
+struct specification_barrier {
+    explicit specification_barrier() = default;
+};
 } // namespace detail
 
-template <typename T = void,
-          typename... Chomp,
-          typename U,
-          typename D = std::conditional_t<std::is_void_v<T>, std::decay_t<U>, T>>
-constexpr optional<D> make_optional(U&& u) noexcept(std::is_nothrow_constructible_v<D, U>)
-    requires std::is_constructible_v<D, U>
+template <detail::specification_barrier = detail::specification_barrier(), class T>
+constexpr optional<std::decay_t<T>> make_optional(T&& t) noexcept(std::is_nothrow_constructible_v<std::decay_t<T>, T>)
+    requires std::is_constructible_v<std::decay_t<T>, T>
 {
-    static_assert(sizeof...(Chomp) == 0, "make_optional takes at most one template argument");
-    if constexpr (!std::is_void_v<T>) {
-        static_assert(std::is_object_v<T>, "make_optional's template argument must be an object type");
-        static_assert(!std::is_array_v<T>, "make_optional's template argument must be a non-array object type");
-    }
-    return optional<D>(std::forward<U>(u));
+    return optional<std::decay_t<T>>(std::forward<T>(t));
 }
 
-template <typename T, typename... Args>
+template <class T, class... Args>
 constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
     requires std::is_constructible_v<T, Args...>
 {
@@ -258,7 +254,7 @@ constexpr optional<T> make_optional(Args&&... args) noexcept(std::is_nothrow_con
     return optional<T>(in_place, std::forward<Args>(args)...);
 }
 
-template <typename T, typename U, typename... Args>
+template <class T, class U, class... Args>
 constexpr optional<T>
 make_optional(std::initializer_list<U> il,
               Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
