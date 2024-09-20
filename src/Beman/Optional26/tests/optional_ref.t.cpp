@@ -311,9 +311,8 @@ TEST(OptionalRefTest, Triviality) {
         EXPECT_TRUE(std::is_trivially_move_assignable<beman::optional26::optional<T&>>::value);
         EXPECT_TRUE(std::is_trivially_destructible<beman::optional26::optional<T&>>::value);
 
-        EXPECT_TRUE((std::is_trivially_constructible<
-                    beman::optional26::optional<T&>,
-                    beman::optional26::optional<T&>&>::value));
+        EXPECT_TRUE((std::is_trivially_constructible<beman::optional26::optional<T&>,
+                                                     beman::optional26::optional<T&>&>::value));
     }
 }
 
@@ -779,7 +778,8 @@ TEST(OptionalRefTest, OverloadResolutionChecksDangling) {
 // beman::optional26::optional<int const&> foo() {
 //     beman::optional26::optional<int> o(10);
 //     return o; // Thanks to a simpler implicit move.
-//     /* error: use of deleted function ‘constexpr beman::optional26::optional<T&>::optional(beman::optional26::optional<U>&&) [with U = int; T = const int]’
+//     /* error: use of deleted function ‘constexpr
+//     beman::optional26::optional<T&>::optional(beman::optional26::optional<U>&&) [with U = int; T = const int]’
 //      */
 // }
 
