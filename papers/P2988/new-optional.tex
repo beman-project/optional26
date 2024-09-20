@@ -412,43 +412,39 @@ namespace std {
   template<class T>
   class optional<T&> {
     public:
-      using value_type     = T&;
+      using value_type     = T;
       using iterator       = @\impdefnc@; // see~\ref{optionalref.iterators}
-      using const_iterator = @\impdefnc@; // see~\ref{optionalref.iterators}
 
     public:
       // \ref{optionalref.ctor}, constructors
       constexpr optional() noexcept;
       constexpr optional(nullopt_t) noexcept;
       constexpr optional(const optional& rhs) noexcept = default;
-      constexpr optional(optional&& rhs) noexcept      = default;
+
       template <class Arg>
       constexpr explicit optional(in_place_t, Arg&& arg);
 
-      template <class U> constexpr explicit(@\seebelow@) optional(U&& u) noexcept;
-      template <class U> constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept;
+      template <class U> constexpr explicit(@\seebelow@) optional(U&& u) noexcept(@\seebelow@);
+
+      template <class U> constexpr explicit(@\seebelow@) optional(optional<U>& rhs) noexcept(@\seebelow@)
+      template <class U> constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept(@\seebelow@)
+      template <class U> constexpr explicit(@\seebelow@) optional(optional<U>&& rhs) noexcept(@\seebelow@)
+      template <class U> constexpr explicit(@\seebelow@) optional(const optional<U>&&& rhs) noexcept(@\seebelow@)
 
       constexpr ~optional() = default;
 
       // \ref{optionalref.assign}, assignment
       constexpr optional& operator=(nullopt_t) noexcept;
       constexpr optional& operator=(const optional& rhs) noexcept = default;
-      constexpr optional& operator=(optional&& rhs) noexcept      = default;
-      template <class U = T>
-        constexpr optional& operator=(U&& u);
 
-      template <class U> constexpr optional& operator=(const optional<U>& rhs) noexcept;
-      template <class U> constexpr optional& operator=(optional<U>&& rhs);
-      template <class U> constexpr optional& emplace(U&& u) noexcept;
+      template <class U> constexpr optional& emplace(U&& u) noexcept(@\seebelow@);
 
       // \ref{optionalref.swap}, swap
       constexpr void swap(optional& rhs) noexcept;
 
       // \ref{optional.iterators}, iterator support
-      constexpr iterator       begin() noexcept;
-      constexpr const_iterator begin() const noexcept;
-      constexpr iterator       end() noexcept;
-      constexpr const_iterator end() const noexcept;
+      constexpr iterator begin() const noexcept;
+      constexpr iterator end() const noexcept;
 
       // \ref{optionalref.observe}, observers
       constexpr T*       operator->() const noexcept;
@@ -456,7 +452,7 @@ namespace std {
       constexpr explicit operator bool() const noexcept;
       constexpr bool     has_value() const noexcept;
       constexpr T&       value() const;                                // freestanding-deleted
-      template <class U> constexpr T value_or(U&& u) const;
+      template <class U> constexpr remove_cv_t<T> value_or(U&& u) const;
 
       // \ref{optionalref.monadic}, monadic operations
       template <class F> constexpr auto and_then(F&& f) const;
