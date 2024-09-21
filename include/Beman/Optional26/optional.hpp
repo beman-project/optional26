@@ -1331,9 +1331,8 @@ constexpr optional<T&>& optional<T&>::operator=(nullopt_t) noexcept {
 
 template <class T>
 template <class U>
-constexpr T& optional<T&>::emplace(U&& u) noexcept
     requires(is_constructible_v<T&, U> && !detail::reference_constructs_from_temporary_v<T&, U>)
-{
+constexpr T& optional<T&>::emplace(U&& u) noexcept(is_nothrow_constructible_v<T&, U>) {
     value_ = std::addressof(static_cast<T&>(std::forward<U>(u)));
     return *value_;
 }
