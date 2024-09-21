@@ -1219,8 +1219,8 @@ class optional<T&> {
     constexpr optional& operator=(const optional& rhs) noexcept = default;
 
     template <class U>
-    constexpr T& emplace(U&& u) noexcept
-        requires(is_constructible_v<T&, U> && !detail::reference_constructs_from_temporary_v<T&, U>);
+        requires(is_constructible_v<T&, U> && !detail::reference_constructs_from_temporary_v<T&, U>)
+    constexpr T& emplace(U&& u) noexcept(is_nothrow_constructible_v<T&, U>);
 
     // \ref{optionalref.swap}, swap
     constexpr void swap(optional& rhs) noexcept;
@@ -1278,8 +1278,7 @@ template <class T>
 template <class U>
     requires(is_constructible_v<T&, U&> && !std::is_same_v<remove_cv_t<T>, optional<U>> && !std::is_same_v<T&, U> &&
              !detail::reference_constructs_from_temporary_v<T&, U&>)
-constexpr optional<T&>::optional(optional<U>& rhs) noexcept(
-    is_nothrow_constructible_v<T&, U&>) {
+constexpr optional<T&>::optional(optional<U>& rhs) noexcept(is_nothrow_constructible_v<T&, U&>) {
     if (rhs.has_value()) {
         value_ = addressof(static_cast<T&>(rhs.value()));
     } else {
@@ -1291,8 +1290,7 @@ template <class T>
 template <class U>
     requires(is_constructible_v<T&, const U&> && !std::is_same_v<remove_cv_t<T>, optional<U>> &&
              !std::is_same_v<T&, U> && !detail::reference_constructs_from_temporary_v<T&, const U&>)
-constexpr optional<T&>::optional(const optional<U>& rhs) noexcept(
-    is_nothrow_constructible_v<T&, const U&>) {
+constexpr optional<T&>::optional(const optional<U>& rhs) noexcept(is_nothrow_constructible_v<T&, const U&>) {
     if (rhs.has_value()) {
         value_ = addressof(static_cast<T&>(rhs.value()));
     } else {
@@ -1304,8 +1302,7 @@ template <class T>
 template <class U>
     requires(is_constructible_v<T&, U> && !std::is_same_v<remove_cv_t<T>, optional<U>> && !std::is_same_v<T&, U> &&
              !detail::reference_constructs_from_temporary_v<T&, U>)
-constexpr optional<T&>::optional(optional<U>&& rhs) noexcept(
-    noexcept(is_nothrow_constructible_v<T&, U>)) {
+constexpr optional<T&>::optional(optional<U>&& rhs) noexcept(noexcept(is_nothrow_constructible_v<T&, U>)) {
     if (rhs.has_value()) {
         value_ = addressof(static_cast<T&>(std::move(rhs).value()));
     } else {
@@ -1317,8 +1314,7 @@ template <class T>
 template <class U>
     requires(is_constructible_v<T&, const U> && !std::is_same_v<remove_cv_t<T>, optional<U>> &&
              !std::is_same_v<T&, U> && !detail::reference_constructs_from_temporary_v<T&, const U>)
-constexpr optional<T&>::optional(const optional<U>&& rhs) noexcept(
-    noexcept(is_nothrow_constructible_v<T&, const U>)) {
+constexpr optional<T&>::optional(const optional<U>&& rhs) noexcept(noexcept(is_nothrow_constructible_v<T&, const U>)) {
     if (rhs.has_value()) {
         value_ = addressof(static_cast<T&>(std::move(rhs).value()));
     } else {
