@@ -1412,6 +1412,9 @@ template <class T>
 template <class F>
 constexpr auto optional<T&>::transform(F&& f) const -> optional<invoke_result_t<F, T&>> {
     using U = invoke_result_t<F, T&>;
+    static_assert(!is_same_v<remove_cvref_t<U>, in_place_t>, "Result must not be in_place_t");
+    static_assert(!is_same_v<remove_cvref_t<U>, nullopt_t>, "Result must not be nullopt_t");
+    static_assert((is_object_v<U> && !is_array_v<U>) || is_lvalue_reference_v<U>, "Result must be an non-array object or an lvalue reference");
     if (has_value()) {
         return optional<U>{invoke(std::forward<F>(f), *value_)};
     } else {
