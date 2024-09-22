@@ -237,7 +237,6 @@ or a complete non-array object type, and \tcode{remove_cvref_t<X>} is a type oth
 
 \rSec3[optional.swap]{Swap}
 
-
 \rSec3[optional.iterators]{Iterator support}
 
 \rSec3[optional.observe]{Observers}
@@ -490,6 +489,10 @@ namespace std {
 
 }
 \end{codeblock}
+
+\pnum
+An instance of optional<T\&> contains a value if \tcode{val != nullptr} is \tcode{true}.
+
 \rSec3[optionalref.ctor]{Constructors}
 
 \begin{itemdecl}
@@ -674,7 +677,7 @@ constexpr explicit(@\seebelow@) optional(optional<U>&& rhs) noexcept(@\seebelow@
   \pnum
   \constraints
   \begin{itemize}
-  \item \tcode{is_constructible_v<T\&, U\&\&>} is \tcode{true}
+  \item \tcode{is_constructible_v<T\&, U>} is \tcode{true}
   \item \tcode{!std::is_same_v<remove_cv_t<T>, optional<U>>} is \tcode{true}
   \item \tcode{!std::is_same_v<T\&, U>} is \tcode{true}
   \end{itemize}
@@ -698,15 +701,15 @@ if (rhs.has_value()) {
   \remarks
   The expression inside \keyword{explicit} is equivalent to:
   \begin{codeblock}
-!is_convertible_v<U&&, T&>
+!is_convertible_v<U, T&>
   \end{codeblock}
   The expression inside \keyword{noexcept} is equivalent to:
   \begin{codeblock}
-is_nothrow_constructible_v<T&, U&&>
+is_nothrow_constructible_v<T&, U>
   \end{codeblock}
   This constructor is defined as deleted if
   \begin{codeblock}
-reference_constructs_from_temporary_v<T&, U&&>
+reference_constructs_from_temporary_v<T&, U>
   \end{codeblock}
   is \tcode{true}
 \end{itemdescr}
@@ -720,7 +723,7 @@ constexpr explicit(@\seebelow@) optional(const optional<U>&& rhs) noexcept(@\see
   \pnum
   \constraints
   \begin{itemize}
-  \item \tcode{is_constructible_v<T\&, const U\&\&>} is \tcode{true}
+  \item \tcode{is_constructible_v<T\&, const U>} is \tcode{true}
   \item \tcode{!std::is_same_v<remove_cv_t<T>, optional<U>>} is \tcode{true}
   \item \tcode{!std::is_same_v<T\&, U>} is \tcode{true}
   \end{itemize}
@@ -744,20 +747,19 @@ if (rhs.has_value()) {
   \remarks
   The expression inside \keyword{explicit} is equivalent to:
   \begin{codeblock}
-!is_convertible_v<const U&&, T&>
+!is_convertible_v<const U, T&>
   \end{codeblock}
   The expression inside \keyword{noexcept} is equivalent to:
   \begin{codeblock}
-is_nothrow_constructible_v<T&, const U&&>
+is_nothrow_constructible_v<T&, const U>
   \end{codeblock}
   This constructor is defined as deleted if
   \begin{codeblock}
-reference_constructs_from_temporary_v<T&, const U&&>
+reference_constructs_from_temporary_v<T&, const U>
   \end{codeblock}
   is \tcode{true}
 \end{itemdescr}
 
-::stopped
 
 \rSec3[optionalref.assign]{Assignment}
 
@@ -813,7 +815,10 @@ constexpr void swap(optional& rhs) noexcept;
 \begin{itemdescr}
   \pnum
   \effects
-  *this and *rhs will refer to each others initial referred to objects.
+  Equivalent to
+  \begin{codeblock}
+std::swap(val, rhs.val);
+  \end{codeblock}
 \end{itemdescr}
 
 
@@ -883,7 +888,7 @@ constexpr T& operator*() const noexcept;
 \begin{itemdescr}
    \pnum
    \expects
-   \tcode{*this} refers to a value.
+   \tcode{has_value()} is \tcode{true}
 
    \pnum
    \returns
@@ -898,7 +903,7 @@ constexpr explicit operator bool() const noexcept;
 \begin{itemdescr}
   \pnum
   \returns
-  \tcode{true} if and only if \tcode{*this} refers to a value.
+  \tcode{val != nullptr}
 \end{itemdescr}
 
 \begin{itemdecl}
@@ -908,7 +913,7 @@ constexpr bool has_value() const noexcept;
 \begin{itemdescr}
   \pnum
   \returns
-  \tcode{true} if and only if \tcode{*this} refers to a value.
+  \tcode{val != nullptr}
 \end{itemdescr}
 
 \begin{itemdecl}
@@ -990,6 +995,14 @@ constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
   Let \tcode{U} be \tcode{remove_cv_t<invoke_result_t<F, T\&>>}.
 
   \pnum
+  \mandates
+  \begin{itemize}
+    \item\tcode{!is_same_v<remove_cvref_t<U>, in_place_t>} is \tcode{true}
+    \item\tcode{!is_same_v<remove_cvref_t<U>, nullopt_t>} is \tcode{true}
+    \item\tcode{(is_object_v<U> \&\& !is_array_v<U>) || is_lvalue_reference_v<U>} is \tcode{true}
+  \end{itemize}
+
+  \pnum
   \effects
   Equivalent to:
   \begin{codeblock}
@@ -1032,8 +1045,12 @@ constexpr void reset() noexcept;
 
 \begin{itemdescr}
   \pnum
-  \ensures
-  \tcode{*this} does not refer to a value.
+  \effects
+  Equivalent to
+  \begin{codeblock}
+  val = nullptr;
+  \end{codeblock}
+  \tcode{val} does not refer to a value.
 \end{itemdescr}
 
 \end{addedblock}
@@ -1042,6 +1059,28 @@ constexpr void reset() noexcept;
 \rSec2[optional.bad.access]{Class \tcode{bad_optional_access}}
 \rSec2[optional.relops]{Relational operators}
 \rSec2[optional.specalg]{Specialized algorithms}
+\indexlibrarymember{swap}{optional}%
+\begin{itemdecl}
+template<class T>
+  constexpr void swap(optional<T>& x, optional<T>& y) noexcept(noexcept(x.swap(y)));
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\constraints
+\added{Either }
+\tcode{is_move_constructible_v<T>} is \tcode{true} and
+\tcode{is_swappable_v<T>} is \tcode{true}.
+
+\added{or}
+\added{\tcode{is_reference_v<T>} is \tcode{true}}
+
+\pnum
+\effects
+Calls \tcode{x.swap(y)}.
+\end{itemdescr}
+
+
 \rSec2[optional.hash]{Hash support}
 \indexlibrarymember{hash}{optional}%
 \begin{itemdecl}
