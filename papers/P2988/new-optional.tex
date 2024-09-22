@@ -251,7 +251,7 @@ template<class F> constexpr auto and_then(F&& f) const &;
 
 \begin{itemdescr}
 \pnum
-Let \tcode{U} be \tcode{invoke_result_t<F, decltype(*val)>}.
+Let \tcode{U} be \tcode{invoke_result_t<F, decltype(*\exposid{val})>}.
 
 \pnum
 \mandates
@@ -262,7 +262,7 @@ Let \tcode{U} be \tcode{invoke_result_t<F, decltype(*val)>}.
 Equivalent to:
 \begin{codeblock}
 if (*this) {
-  return invoke(std::forward<F>(f), *val);
+  return invoke(std::forward<F>(f), *@\exposid{val}@);
 } else {
   return remove_cvref_t<U>();
 }
@@ -277,7 +277,7 @@ template<class F> constexpr auto and_then(F&& f) const &&;
 
 \begin{itemdescr}
 \pnum
-Let \tcode{U} be \tcode{invoke_result_t<F, decltype(std::move(*val))>}.
+Let \tcode{U} be \tcode{invoke_result_t<F, decltype(std::move(*\exposid{val}))>}.
 
 \pnum
 \mandates
@@ -288,7 +288,7 @@ Let \tcode{U} be \tcode{invoke_result_t<F, decltype(std::move(*val))>}.
 Equivalent to:
 \begin{codeblock}
 if (*this) {
-  return invoke(std::forward<F>(f), std::move(*val));
+  return invoke(std::forward<F>(f), std::move(*\exposid{val}));
 } else {
   return remove_cvref_t<U>();
 }
@@ -303,7 +303,7 @@ template<class F> constexpr auto transform(F&& f) const &;
 
 \begin{itemdescr}
 \pnum
-Let \tcode{U} be \tcode{remove_cv_t<invoke_result_t<F, decltype(*val)>>}.
+Let \tcode{U} be \tcode{remove_cv_t<invoke_result_t<F, decltype(*\exposid{val})>>}.
 
 \pnum
 \mandates
@@ -316,7 +316,7 @@ other than \tcode{in_place_t} or \tcode{nullopt_t}.
 \end{addedblock}
 The declaration
 \begin{codeblock}
-U u(invoke(std::forward<F>(f), *val));
+U u(invoke(std::forward<F>(f), *@\exposid{val}@));
 \end{codeblock}
 is well-formed for some invented variable \tcode{u}.
 \begin{note}
@@ -327,7 +327,7 @@ There is no requirement that \tcode{U} is movable\iref{dcl.init.general}.
 \returns
 If \tcode{*this} contains a value, an \tcode{optional<U>} object
 whose contained value is direct-non-list-initialized with
-\tcode{invoke(std::forward<F>(f), *val)};
+\tcode{invoke(std::forward<F>(f), *\exposid{val})};
 otherwise, \tcode{optional<U>()}.
 \end{itemdescr}
 
@@ -340,7 +340,7 @@ template<class F> constexpr auto transform(F&& f) const &&;
 \begin{itemdescr}
 \pnum
 Let \tcode{U} be
-\tcode{remove_cv_t<invoke_result_t<F, decltype(std::move(*val))>>}.
+\tcode{remove_cv_t<invoke_result_t<F, decltype(std::move(*\exposid{val}))>>}.
 
 \pnum
 \mandates
@@ -353,7 +353,7 @@ other than \tcode{in_place_t} or \tcode{nullopt_t}.
 \end{addedblock}
 The declaration
 \begin{codeblock}
-U u(invoke(std::forward<F>(f), std::move(*val)));
+U u(invoke(std::forward<F>(f), std::move(*@\exposid{val}@)));
 \end{codeblock}
 is well-formed for some invented variable \tcode{u}.
 \begin{note}
@@ -364,7 +364,7 @@ There is no requirement that \tcode{U} is movable\iref{dcl.init.general}.
 \returns
 If \tcode{*this} contains a value, an \tcode{optional<U>} object
 whose contained value is direct-non-list-initialized with
-\tcode{invoke(std::forward<F>(f), std::move(*val))};
+\tcode{invoke(std::forward<F>(f), std::move(*\exposid{val}))};
 otherwise, \tcode{optional<U>()}.
 \end{itemdescr}
 
@@ -491,7 +491,7 @@ namespace std {
 \end{codeblock}
 
 \pnum
-An instance of optional<T\&> contains a value if \tcode{val != nullptr} is \tcode{true}.
+An instance of optional<T\&> contains a value if \tcode{\exposid{val} != nullptr} is \tcode{true}.
 
 \rSec3[optionalref.ctor]{Constructors}
 
@@ -526,7 +526,7 @@ constexpr explicit optional(in_place_t, Arg&& arg);
 
   \pnum
   \effects
-  Initializes val with \tcode{addressof(static_cast<T\&>(std::forward<Arg>(arg)))}
+  Initializes \exposid{val} with \tcode{addressof(static_cast<T\&>(std::forward<Arg>(arg)))}
 
   \pnum
   \ensures
@@ -549,7 +549,7 @@ template <class U>
 
   \pnum
   \effects
-  Initializes \tcode{val} with \tcode{addressof(static_cast<T\&>(std::forward<U>(u)))}.
+  Initializes \tcode{\exposid{val}} with \tcode{addressof(static_cast<T\&>(std::forward<U>(u)))}.
 
   \pnum
   \ensures
@@ -593,9 +593,9 @@ constexpr explicit(@\seebelow@) optional(optional<U>& rhs) noexcept(@\seebelow@)
   Equivalent to
   \begin{codeblock}
 if (rhs.has_value()) {
-    val = addressof(static_cast<T&>(rhs.value()));
+    @\exposid{val}@ = addressof(static_cast<T&>(rhs.value()));
 } else {
-    val = nullptr;
+    @\exposid{val}@ = nullptr;
 }
   \end{codeblock}
 
@@ -640,9 +640,9 @@ constexpr explicit(@\seebelow@) optional(const optional<U>& rhs) noexcept(@\seeb
   Equivalent to
   \begin{codeblock}
 if (rhs.has_value()) {
-    val = addressof(static_cast<T&>(rhs.value()));
+    @\exposid{val}@ = addressof(static_cast<T&>(rhs.value()));
 } else {
-    val = nullptr;
+    @\exposid{val}@ = nullptr;
 }
   \end{codeblock}
 
@@ -687,9 +687,9 @@ constexpr explicit(@\seebelow@) optional(optional<U>&& rhs) noexcept(@\seebelow@
   Equivalent to
   \begin{codeblock}
 if (rhs.has_value()) {
-    val = addressof(static_cast<T&>(std::move(rhs).value()));
+    @\exposid{val}@ = addressof(static_cast<T&>(std::move(rhs).value()));
 } else {
-    val = nullptr;
+    @\exposid{val}@ = nullptr;
 }
   \end{codeblock}
 
@@ -733,9 +733,9 @@ constexpr explicit(@\seebelow@) optional(const optional<U>&& rhs) noexcept(@\see
   Equivalent to
   \begin{codeblock}
 if (rhs.has_value()) {
-    val = addressof(static_cast<T&>(std::move(rhs).value()));
+    @\exposid{val}@ = addressof(static_cast<T&>(std::move(rhs).value()));
 } else {
-    val = nullptr;
+    @\exposid{val}@ = nullptr;
 }
   \end{codeblock}
 
@@ -793,7 +793,7 @@ constexpr T& emplace(U&& u) noexcept(@\seebelow@);
 
   \pnum
   \effects
-  Assigns \tcode{val} \tcode{addressof(static_cast<T\&>(std::forward<U>(u)))}
+  Assigns \tcode{\exposid{val}} \tcode{addressof(static_cast<T\&>(std::forward<U>(u)))}
 
   \pnum
   \ensures
@@ -817,7 +817,7 @@ constexpr void swap(optional& rhs) noexcept;
   \effects
   Equivalent to
   \begin{codeblock}
-std::swap(val, rhs.val);
+std::swap(@\exposid{val}@, rhs.@\exposid{val}@);
   \end{codeblock}
 \end{itemdescr}
 
@@ -877,7 +877,7 @@ constexpr T* operator->() const noexcept;
 \begin{itemdescr}
   \pnum
   \returns
-  \tcode{val}.
+  \tcode{\exposid{val}}.
 
 \end{itemdescr}
 
@@ -892,7 +892,7 @@ constexpr T& operator*() const noexcept;
 
    \pnum
    \returns
-   \tcode{*val}.
+   \tcode{*\exposid{val}}.
 
 \end{itemdescr}
 
@@ -903,7 +903,7 @@ constexpr explicit operator bool() const noexcept;
 \begin{itemdescr}
   \pnum
   \returns
-  \tcode{val != nullptr}
+  \tcode{\exposid{val} != nullptr}
 \end{itemdescr}
 
 \begin{itemdecl}
@@ -913,7 +913,7 @@ constexpr bool has_value() const noexcept;
 \begin{itemdescr}
   \pnum
   \returns
-  \tcode{val != nullptr}
+  \tcode{\exposid{val} != nullptr}
 \end{itemdescr}
 
 \begin{itemdecl}
@@ -926,7 +926,7 @@ constexpr T& value() const;
   Equivalent to:
   \begin{codeblock}
 if (has_value()) {
-  return *value_;
+  return *@\exposid{val}@;
 }
 throw bad_optional_access();
   \end{codeblock}
@@ -950,7 +950,7 @@ constexpr T value_or(U&& u) const;
   Equivalent to:
   \begin{codeblock}
 if (has_value()) {
-    return remove_cv_t<T>(*val);
+    return remove_cv_t<T>(*@\exposid{val}@);
 } else {
     return std::forward<U>(u);
 }
@@ -978,7 +978,7 @@ constexpr auto and_then(F&& f) const;
   Equivalent to:
   \begin{codeblock}
 if (has_value()) {
-    return invoke(std::forward<F>(f), *val);
+    return invoke(std::forward<F>(f), *@\exposid{val}@);
 } else {
     return remove_cvref_t<U>();
 }
@@ -1007,7 +1007,7 @@ constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
   Equivalent to:
   \begin{codeblock}
 if (has_value()) {
-    return optional<U>{invoke(std::forward<F>(f), *val)};
+    return optional<U>{invoke(std::forward<F>(f), *@\exposid{val}@)};
 } else {
     return optional<U>{};
 }
@@ -1029,7 +1029,7 @@ constexpr optional or_else(F&& f) const;
   Equivalent to:
   \begin{codeblock}
     if (has_value()) {
-        return *value_;
+        return *@\exposid{val}@;
     } else {
         return std::forward<F>(f)();
     }
@@ -1048,9 +1048,9 @@ constexpr void reset() noexcept;
   \effects
   Equivalent to
   \begin{codeblock}
-  val = nullptr;
+  @\exposid{val}@ = nullptr;
   \end{codeblock}
-  \tcode{val} does not refer to a value.
+  \tcode{\exposid{val}} does not refer to a value.
 \end{itemdescr}
 
 \end{addedblock}
