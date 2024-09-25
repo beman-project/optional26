@@ -43,18 +43,20 @@ struct contiguous_iterator : public base_contiguous_iterator<T, Container> {
     using typename base_type::reference;
 
     // Default constructor.
-    contiguous_iterator() noexcept : m_current() {}
+    constexpr contiguous_iterator() noexcept : m_current() {}
 
     // Pointer to iterator constructor.
-    contiguous_iterator(pointer it) noexcept : m_current(it) {}
+    constexpr contiguous_iterator(pointer it) noexcept : m_current(it) {}
 
     // As per P2727R4, for contiguous iterator we only need to provide operator*, operator+= and operator-.
-    reference operator*() const noexcept { return *m_current; }
-    auto&     operator+=(difference_type pos) noexcept {
+    constexpr reference operator*() const noexcept { return *m_current; }
+    constexpr auto&     operator+=(difference_type pos) noexcept {
         m_current += pos;
         return *this;
     }
-    difference_type operator-(contiguous_iterator other) const noexcept { return m_current - other.m_current; }
+    constexpr difference_type operator-(contiguous_iterator other) const noexcept {
+        return m_current - other.m_current;
+    }
 
   private:
     T* m_current;
