@@ -19,13 +19,13 @@ struct no_default_ctor {
     no_default_ctor(no_default_ctor&&)                 = default;
     no_default_ctor& operator=(const no_default_ctor&) = default;
     no_default_ctor& operator=(no_default_ctor&&)      = default;
-    no_default_ctor(empty) {};
+    constexpr no_default_ctor(empty) {};
 };
 
 struct int_ctor {
     int i_;
     int_ctor() = delete;
-    int_ctor(int i) : i_(i) {}
+    constexpr int_ctor(int i) : i_(i) {}
 };
 
 // Base class helper.
@@ -50,7 +50,7 @@ struct derived : public base {
 
 struct move_detector {
     move_detector() = default;
-    move_detector(move_detector&& rhs) { rhs.been_moved = true; }
+    constexpr move_detector(move_detector&& rhs) { rhs.been_moved = true; }
     bool been_moved = false;
 };
 
