@@ -563,10 +563,11 @@ class optional {
     template <class F>
     constexpr auto transform(F&& f) const&& {
         using U = std::invoke_result_t<F, const T&>;
-        static_assert(!std::is_array_v<U>);
-        static_assert(!std::is_same_v<U, in_place_t>);
-        static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+        static_assert(!std::is_array_v<U>, "U must not be an array");
+        static_assert(!std::is_same_v<U, in_place_t>, "U must not be an inplace type");
+        static_assert(!std::is_same_v<U, nullopt_t>, "U must not be nullopt_t type");
+        static_assert(std::is_object_v<U> || std::is_reference_v<U>,
+                      "U must be either an objecy or a reference"); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
@@ -654,7 +655,7 @@ class optional {
     /// one.
     template <class... Args>
     constexpr T& emplace(Args&&... args) {
-        static_assert(std::is_constructible_v<T, Args&&...>);
+        static_assert(std::is_constructible_v<T, Args&&...>, "each parameter pack must be constructible to T");
         *this = nullopt;
         construct(std::forward<Args>(args)...);
         return value();
@@ -676,7 +677,7 @@ class optional {
     /// valueless.
     constexpr void swap(optional& rhs) noexcept(std::is_nothrow_move_constructible<T>::value &&
                                                 std::is_nothrow_swappable<T>::value) {
-        static_assert(std::is_move_constructible_v<T>);
+        static_assert(std::is_move_constructible_v<T>, "T must be move-constructible");
         using std::swap;
         if (has_value()) {
             if (rhs.has_value()) {
@@ -1139,7 +1140,7 @@ class optional<T&> {
     template <class F>
     constexpr optional or_else(F&& f) const {
         using U = std::invoke_result_t<F>;
-        static_assert(std::is_same_v<std::remove_cvref_t<U>, optional>);
+        static_assert(std::is_same_v<std::remove_cvref_t<U>, optional>, "F must return an optional");
         return has_value() ? *value_ : std::forward<F>(f)();
     }
 
