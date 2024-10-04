@@ -487,7 +487,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) & {
         using U = std::invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>, "F must return an optional");
         if (has_value()) {
             return std::invoke(std::forward<F>(f), value_);
         } else {
@@ -498,7 +498,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) && {
         using U = std::invoke_result_t<F, T&&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>, "F must return an optional");
         if (has_value()) {
             return std::invoke(std::forward<F>(f), std::move(value_));
         } else {
@@ -509,7 +509,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) const& {
         using U = std::invoke_result_t<F, const T&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>, "F must return an optional");
         if (has_value()) {
             return std::invoke(std::forward<F>(f), value_);
         } else {
@@ -520,7 +520,7 @@ class optional {
     template <class F>
     constexpr auto and_then(F&& f) const&& {
         using U = std::invoke_result_t<F, const T&&>;
-        static_assert(detail::is_optional<std::remove_cvref_t<U>>);
+        static_assert(detail::is_optional<std::remove_cvref_t<U>>, "F must return an optional");
         if (has_value()) {
             return std::invoke(std::forward<F>(f), std::move(value_));
         } else {
