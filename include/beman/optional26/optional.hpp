@@ -544,7 +544,7 @@ class optional {
         using U = std::invoke_result_t<F, T&&>;
         static_assert(!std::is_array_v<U>, "U must not be an array");
         static_assert(!std::is_same_v<U, in_place_t>, "U must not be an inplace type");
-        static_assert(!std::is_same_v<U, nullopt_t>, "U must not be null_opt type");
+        static_assert(!std::is_same_v<U, nullopt_t>, "U must not be nullopt_t type");
         static_assert(std::is_object_v<U> || std::is_reference_v<U>, "U must be either an objecy or a reference"); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), std::move(value_))} : optional<U>{};
     }
@@ -552,10 +552,11 @@ class optional {
     template <class F>
     constexpr auto transform(F&& f) const& {
         using U = std::invoke_result_t<F, const T&>;
-        static_assert(!std::is_array_v<U>);
-        static_assert(!std::is_same_v<U, in_place_t>);
-        static_assert(!std::is_same_v<U, nullopt_t>);
-        static_assert(std::is_object_v<U> || std::is_reference_v<U>); /// References now allowed
+        static_assert(!std::is_array_v<U>, "U must not be an array");
+        static_assert(!std::is_same_v<U, in_place_t>, "U must not be an inplace type");
+        static_assert(!std::is_same_v<U, nullopt_t>, "U must not be nullopt_t type");
+        static_assert(std::is_object_v<U> || std::is_reference_v<U>,
+                      "U must be either an objecy or a reference"); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
