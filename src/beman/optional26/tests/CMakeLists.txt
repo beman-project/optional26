@@ -1,5 +1,5 @@
 # cmake-format: off
-# src/Beman/Optional26/tests/CMakeLists.txt -*-makefile-*-
+# src/beman/optional26/tests/CMakeLists.txt -*-makefile-*-
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # cmake-format: on
 

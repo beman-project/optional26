@@ -1,4 +1,4 @@
-// include/Beman/Optional26/optional.hpp -*-C++-*-
+// include/beman/optional26/optional.hpp -*-C++-*-
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #ifndef BEMAN_OPTIONAL26_OPTIONAL_HPP
@@ -175,7 +175,7 @@ namespace std {
 #include <type_traits>
 #include <utility>
 
-#include <Beman/Optional26/detail/iterator.hpp>
+#include <beman/optional26/detail/iterator.hpp>
 
 namespace beman::optional26 {
 
