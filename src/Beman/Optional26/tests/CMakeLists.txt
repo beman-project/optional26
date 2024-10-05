@@ -29,7 +29,7 @@ target_link_libraries(beman_optional26_test
 # Change also applied for CI flows.
 gtest_add_tests(TARGET beman_optional26_test "" AUTO)
 
-add_library(constructor_fails test_constuct_fail.cpp)
+add_library(constructor_fails test_constructor_fail.cpp)
 
 target_link_libraries(constructor_fails PRIVATE beman_optional26)
 
