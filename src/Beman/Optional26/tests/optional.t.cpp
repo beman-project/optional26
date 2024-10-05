@@ -596,6 +596,21 @@ TEST(OptionalTest, RangeTest) {
     }
 }
 
+TEST(OptionalTest, HashTest) {
+    beman::optional26::optional<int> o1 = beman::optional26::nullopt;
+    beman::optional26::optional<int> o2 = beman::optional26::nullopt;
+    beman::optional26::optional<int> o3 = 42;
+    beman::optional26::optional<int> o4 = 42;
+
+    auto h1 = std::hash<beman::optional26::optional<int>>{}(o1);
+    auto h2 = std::hash<beman::optional26::optional<int>>{}(o2);
+    auto h3 = std::hash<beman::optional26::optional<int>>{}(o3);
+    auto h4 = std::hash<beman::optional26::optional<int>>{}(o4);
+
+    EXPECT_EQ(h1, h2);
+    EXPECT_EQ(h3, h4);
+}
+
 TEST(ViewMaybeTest, Constructors) {
     std::ranges::single_view<std::optional<int>> s;
     std::ranges::single_view<std::optional<int>> s2{s};
