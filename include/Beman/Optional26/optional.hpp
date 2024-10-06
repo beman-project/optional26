@@ -1096,6 +1096,7 @@ make_optional(initializer_list<U> init_list,
               Args&&... args) noexcept(is_nothrow_constructible_v<T, initializer_list<U>&, Args...>)
     requires is_constructible_v<T, initializer_list<U>&, Args...>
 {
+    static_assert(!is_reference_v<U>, "Can not make optional from initializer_list of references.");
     return optional<T>{in_place, init_list, std::forward<Args>(args)...};
 }
 
@@ -1440,5 +1441,23 @@ constexpr void optional<T&>::reset() noexcept {
     value_ = nullptr;
 }
 } // namespace beman::optional26
+
+namespace std {
+template <typename T>
+    requires requires(T a) {
+        { std::hash<remove_const_t<T>>{}(a) } -> std::convertible_to<std::size_t>;
+    }
+struct hash<beman::optional26::optional<T>> {
+    static_assert(!is_reference_v<T>, "hash is not enabled for reference types");
+    size_t operator()(const beman::optional26::optional<T>& o) const
+        noexcept(noexcept(hash<remove_const_t<T>>{}(*o))) {
+        if (o) {
+            return std::hash<std::remove_const_t<T>>{}(*o);
+        } else {
+            return 0;
+        }
+    }
+};
+} // namespace std
 
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP

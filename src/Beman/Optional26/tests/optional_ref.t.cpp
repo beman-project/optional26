@@ -420,6 +420,8 @@ TEST(OptionalRefTest, MakeOptional) {
     EXPECT_TRUE((std::is_same_v<decltype(o6), beman::optional26::optional<int>>));
     EXPECT_TRUE(o6);
     EXPECT_TRUE(*o6 == 42);
+
+    auto n = beman::optional26::make_optional<int&>({var});
 }
 
 TEST(OptionalRefTest, Nullopt) {

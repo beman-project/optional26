@@ -1058,6 +1058,48 @@ Calls \tcode{x.swap(y)}.
 \end{itemdescr}
 
 
+\indexlibraryglobal{make_optional}%
+\begin{itemdecl}
+template<class T> constexpr optional<decay_t<T>> make_optional(T&& v);
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\returns
+\tcode{optional<decay_t<T>>(std::forward<T>(v))}.
+\end{itemdescr}
+
+\indexlibraryglobal{make_optional}%
+\begin{itemdecl}
+template<class T, class...Args>
+  constexpr optional<T> make_optional(Args&&... args);
+\end{itemdecl}
+
+\begin{itemdescr}
+\pnum
+\effects
+Equivalent to: \tcode{return optional<T>(in_place, std::forward<Args>(args)...);}
+\end{itemdescr}
+
+\indexlibraryglobal{make_optional}%
+\begin{itemdecl}
+template<class T, class U, class... Args>
+  constexpr optional<T> make_optional(initializer_list<U> il, Args&&... args);
+\end{itemdecl}
+
+\begin{itemdescr}
+\begin{addedblock}
+\pnum
+\mandates
+\tcode{is_reference_v<U>} is \tcode{false}.
+\end{addedblock}
+
+\pnum
+\effects
+Equivalent to: \tcode{return optional<T>(in_place, il, std::forward<Args>(args)...);}
+\end{itemdescr}
+
+
 \rSec2[optional.hash]{Hash support}
 \indexlibrarymember{hash}{optional}%
 \begin{itemdecl}
