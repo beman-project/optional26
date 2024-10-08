@@ -18,7 +18,7 @@
 
 \begin{flushright}
   \begin{tabular}{ll}
-    Document \#: & P2988R7 \\
+    Document \#: & D2988R8 \\
     Date: & \today \\
     Project: & Programming Language C++ \\
     Audience: & LEWG
@@ -36,13 +36,19 @@
 \chapter*{Changes Since Last Version}
 
 \begin{itemize}
-  \item \textbf{Changes since R6}
+\item \textbf{Changes since R7}
+  \begin{itemize}
+  \item Wording mandates/constraint fixes
+  \item Hash on T\& pulled out
+  \item Notes on wording rendering
+  \end{itemize}
+\item \textbf{Changes since R6}
   \begin{itemize}
   \item strike refref specialization
   \item add converting assignment operator
   \item add converting in place constructor
   \end{itemize}
-  \item \textbf{Changes since R5}
+\item \textbf{Changes since R5}
   \begin{itemize}
   \item refref specialization
   \item fix monadic constraints on base template
@@ -63,7 +69,7 @@
 \section{Using a raw pointer result for an element search function}
 
 This is the convention the C++ core guidelines suggest, to use a raw pointer for representing optional non-owning references.
-However, there is a user-required check against `nullptr`, no type safety meaning no safety against mis-interpreting such a raw pointer, for example by using pointer arithmetic on it.
+However, there is a user-required check against \tcode{nullptr}, no type safety meaning no safety against mis-interpreting such a raw pointer, for example by using pointer arithmetic on it.
 
 \begin{tabular}{ lr }
   \begin{minipage}[t]{0.45\columnwidth}
@@ -237,6 +243,135 @@ A similarly limited converting assignment operator is provided for cases where a
 \section{Compiler Explorer Playground}
 
 See \url{https://compiler-explorer.com/z/zKqE3sn87} for an updated playground with relevant Google Test functions and various optional implementations made available for cross reference including a flattend in-place version of the reference implementation.
+
+\chapter{Principles for Reification of Design}
+
+Optional must never construct a temporary, or knowingly take the address of an temporary or part of an temporary.
+
+It is always presumed safe to copy the pointer value from an optional, since by induction, it is not dangling.
+
+Optional has no storage, so should never construct a T, it may convert a U to a T, so long as that conversion does not create a temporary.
+
+Constructors that would convert from temporary are marked deleted. They should be sufficiently constrained that it was the correct choice and there is no more general, less constrained constructor that would not have created a dangling pointer.
+
+Failure to compile either by ambiguity or no eligible constructors in the overload set is preferable to optional being responsible for use after free or dangling.
+
+Assignment is always from an optional, which may have been an implicit construction. The assignment cannot throw, the construction/conversion may. The assignment may therefore need annotation converting the rhs if that constructor was explicit. This must not be necessary in the default case of creating an optional reference to an lvalue of the same type.
+
+The model for the constraints and mandates for \tcode{optional<T\&>} is taken from \tcode{std::tuple} over reference types. The type \tcode{std::tuple} takes the most care of types in the standard library in dealing with creation of temporaries.
+
+As \tcode{optional} is designed to be converting, to create instances from arguments that can be used to create the underlying type, constructors should be explicit only where the operations used to create the pointer or the notional reference would be or are explicit.
+
+
+
+\section{Construction from temporary}
+
+We disallow construction of \tcode{optional<T\&>} from any type U in which:
+\begin{itemize}
+\item the constructor body will create a temporary and bind it to a reference.
+\item a const lvalue reference would be bound to rvalue.
+\end{itemize}
+
+An example of the first case would be construction \tcode{optional<std::string const\&>} from \tcode{char const*}. These cases always dangle.
+
+An example of the second case would be a construction \tcode{std::optional<std::string const\&>} from temporary \tcode{std::string}.
+
+Prohibiting the second case does prevent some safe uses of the optional as the function parameter.
+
+Given:
+
+\tcode{void process(std::optional<std::string const\&> arg);}
+
+This will make a \tcode{process(std::string("sdfd"))} invocation ill-formed, despite the arg being safe to use from within the function body.
+
+This deviates from the design of the ``view'' parameters type, like \tcode{std::string_view} or \tcode{std::span}. However, we believe that this is the right choice due to the following:
+
+\begin{itemize}
+\item
+  Only a subset of cases would be working. As an illustration the very similar \tcode{process("text")} invocation is ill-formed, due to always being dangling.
+
+\item
+  Such design leads to the detection of reference to temporaries or local variables when \tcode{optional<T const\&>} is used as the return type.
+
+  \begin{tabular}{ lr }
+  \begin{minipage}[t]{0.45\columnwidth}
+    \begin{minted}[fontsize=\small]{c++}
+std::optional<std::string const&> getValue() {
+  std::string localString;
+  return localString; // Ill-formed.
+  std::optional<std::string> localOptionalString;
+  return localOptionalString; // ill-formed
+}
+        \end{minted}
+      \end{minipage}
+\end{tabular}
+
+One of the main motivational examples of \tcode{optional<T const\&>} is return from a lookup function, and eliminating dangling in such cases outweighs parameter cases.
+
+We are very grateful to Arthur O'Dwyer for his work on \cite{P2266R3} P2266R3 Simpler implicit move accepted in C++23, which makes it possible to implement this correctly.
+
+\item
+  We provide behavior consistent with \tcode{reference_wrapper<T const>}, that disallows binding to xvalues. We believe that \tcode{reference_wrapper<T>} is closer in spirit to \tcode{optional<T\&>} than any view type. It certainly shares some of the features.
+\end{itemize}
+
+\section{Deleting dangling overloads}
+
+To achieve the dangling safety expressed before, the constructor is marked deleted if it would lead to binding of the reference to temporary or the xvalue.
+However, deleted constructors are still considered to be candidates during overload resolution, leading to ambiguity in the following examples:
+
+\begin{tabular}{ lr }
+  \begin{minipage}[t]{0.45\columnwidth}
+    \begin{minted}[fontsize=\small]{c++}
+void process(std::optional<std::string const&>);
+void process(std::optional<char const* const&>);
+
+void test() {
+  char const* cstr = Text;
+  std::string s = cstr;
+  process(s); // Picks, optional<std::string const&> overload
+  process(cstr); // Ambiguous, but only std::optional<char const* const&> is not dangling
+}
+\end{minted}
+\end{minipage}
+\end{tabular}
+
+
+During the reflector discussion, an option of an alternate design was presented, where the dangling overload would be constrained, and eliminated from the overload set.
+
+We strongly oppose changing this behavior, as:
+\begin{itemize}
+\item We think that it is impossible to detect temporary binding to xvalue in such a design.
+
+\item The behavior we propose is consistent with the behavior for optional for object types
+
+\begin{tabular}{ lr }
+  \begin{minipage}[t]{0.45\columnwidth}
+    \begin{minted}[fontsize=\small]{c++}
+void processVal(std::optional<std::string>);
+void processVal(std::optional<char const*>);
+
+void test() {
+  char const* cstr = "Text";
+  std::string s = cstr;
+  processVal(s); // Picks std::string overload
+  processVal(cstr); // Ambiguous
+}
+\end{minted}
+\end{minipage}
+\end{tabular}
+\end{itemize}
+As language in general treats functions accepting by value and by const reference in the same manner during overload resolution, we believe achieving this consistency is a feature.
+
+The design that was introduced by \tcode{std::tuple}, and \tcode{std::pair}, for references, is followed, where the detection of dangling does not affect the results of overload resolution and instead makes a call that would dangle be ill-formed and diagnosed.
+
+\section{Assignment of optional<T\&>}
+
+In the case of \tcode{optional<T\&>}, any assignment operation is equivalent to assigning a pointer, and there is no observable difference between:
+using converting assignment from \tcode{U\&\&} or \tcode{optional<U>}
+constructing temporary \tcode{optional<T\&>}, and then assigning it to it.
+
+This observation allows us to provide only copy-assignment for \tcode{optional<T\&>}, instead of a set of converting assignments, that would need to replicate the signatures of constructors and their constraints. Assignment from any other value is handled by first implicitly constructing \tcode{optional<T\&>} and then using copy-assignment. Move-assignment is the same as copy-assignment, since only pointer copy is involved.
+
 
 \chapter{Proposal}
 
