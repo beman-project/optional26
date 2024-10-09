@@ -287,9 +287,9 @@ concept enable_assign_from_other =
 
 template <class T>
 class optional {
-    static_assert(
-        (!std::is_same_v<T, std::remove_cv_t<in_place_t>>)&&(!std::is_same_v<std::remove_cv_t<T>, nullopt_t>),
-        "T must not be in_place_t or nullopt_t");
+    static_assert((!std::is_same_v<T, std::remove_cv_t<in_place_t>>) &&
+                    (!std::is_same_v<std::remove_cv_t<T>, nullopt_t>),
+                "T must not be in_place_t or nullopt_t");
 
     struct empty {};
     union {
@@ -536,7 +536,8 @@ class optional {
         static_assert(!std::is_array_v<U>, "U must not be an array");
         static_assert(!std::is_same_v<U, in_place_t>, "U must not be an inplace type");
         static_assert(!std::is_same_v<U, nullopt_t>, "U must not be nullopt_t");
-        static_assert(std::is_object_v<U> || std::is_reference_v<U>, "U must be either an object or a reference"); /// References now allowed
+        static_assert(std::is_object_v<U> || std::is_reference_v<U>, 
+                      "U must be either an object or a reference"); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), value_)} : optional<U>{};
     }
 
@@ -546,7 +547,8 @@ class optional {
         static_assert(!std::is_array_v<U>, "U must not be an array");
         static_assert(!std::is_same_v<U, in_place_t>, "U must not be an inplace type");
         static_assert(!std::is_same_v<U, nullopt_t>, "U must not be nullopt_t type");
-        static_assert(std::is_object_v<U> || std::is_reference_v<U>, "U must be either an objecy or a reference"); /// References now allowed
+        static_assert(std::is_object_v<U> || std::is_reference_v<U>, 
+                      "U must be either an objecy or a reference"); /// References now allowed
         return (has_value()) ? optional<U>{std::invoke(std::forward<F>(f), std::move(value_))} : optional<U>{};
     }
 
