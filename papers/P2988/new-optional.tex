@@ -220,11 +220,11 @@ that meets the \oldconcept{Destructible} requirements (cpp17.destructible).
 
 \begin{addedblock}
 \pnum
-A type \tcode{X} is a valid value type for \tcode{optional} if \tcode{remove_cv_t<X>} is an lvalue reference type,
-or a complete non-array object type, and \tcode{remove_cvref_t<X>} is a type other than \cv{} \tcode{in_place_t} or \cv{} \tcode{nullopt_t}.
+A type \tcode{X} is a \defnx{valid element type}{valid element type!\idxcode{optional}} for \tcode{optional} if \tcode{remove_cv_t<X>} is an lvalue reference type,
+or a complete non-array object type, and \tcode{remove_cvref_t<X>} is a type other than \tcode{in_place_t} or \tcode{nullopt_t}.
 
 \pnum
-\tcode{T} shall be an object type that is valid value type for \tcode{optional} and meets the \oldconcept{Destructible} requirements (cpp17.destructible).
+\tcode{T} shall be an object type that is valid element type for \tcode{optional} and meets the \oldconcept{Destructible} requirements (cpp17.destructible).
 \end{addedblock}
 
 \rSec3[optional.ctor]{Constructors}
@@ -312,7 +312,7 @@ Let \tcode{U} be \tcode{remove_cv_t<invoke_result_t<F, decltype(*\exposid{val})>
 other than \tcode{in_place_t} or \tcode{nullopt_t}.
 \end{removedblock}
 \begin{addedblock}
-\tcode{U} is valid type for optional.
+\tcode{U} is valid element type for optional.
 \end{addedblock}
 The declaration
 \begin{codeblock}
@@ -349,7 +349,7 @@ Let \tcode{U} be
 other than \tcode{in_place_t} or \tcode{nullopt_t}.
 \end{removedblock}
 \begin{addedblock}
-\tcode{U} is valid type for optional.
+\tcode{U} is valid element type for optional.
 \end{addedblock}
 The declaration
 \begin{codeblock}
@@ -974,7 +974,7 @@ constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
 
   \pnum
   \mandates
-  \tcode{U} is a valid type for optional.
+  \tcode{U} is a valid element type for optional.
 
   \pnum
   \effects
