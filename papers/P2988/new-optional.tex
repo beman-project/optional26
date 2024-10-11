@@ -520,7 +520,7 @@ constexpr explicit optional(in_place_t, Arg&& arg);
   \constraints
   \begin{itemize}
   \item \tcode{is_constructible_v<T\&, remove_cv_t<Arg>>} is \tcode{true}
-  \item \tcode{detail::reference_constructs_from_temporary_v<T\&, Arg>)} is \tcode{false}
+  \item \tcode{reference_constructs_from_temporary_v<T\&, Arg>)} is \tcode{false}
   \end{itemize}
 
   \pnum
