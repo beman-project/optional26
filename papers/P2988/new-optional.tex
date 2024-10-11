@@ -288,7 +288,7 @@ Let \tcode{U} be \tcode{invoke_result_t<F, decltype(std::move(*\exposid{val}))>}
 Equivalent to:
 \begin{codeblock}
 if (*this) {
-  return invoke(std::forward<F>(f), std::move(*\exposid{val}));
+  return invoke(std::forward<F>(f), std::move(*@\exposid{val}@));
 } else {
   return remove_cvref_t<U>();
 }
@@ -749,7 +749,7 @@ constexpr optional& operator=(nullopt_t) noexcept;
   \effects
   Equivalent to
   \begin{codeblock}
-@exposid{val} = nullptr;
+@\exposid{val}@ = nullptr;
   \end{codeblock}
 
   \pnum
