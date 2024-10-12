@@ -216,7 +216,7 @@ template <class T>
 constexpr void swap(optional<T>& x, optional<T>& y) noexcept(noexcept(x.swap(y)))
     requires is_move_constructible_v<T> && is_swappable_v<T>;
 
-template <class T>
+template <int = 0, class T>
 constexpr optional<decay_t<T>> make_optional(T&&) noexcept(is_nothrow_constructible_v<optional<decay_t<T>>, T>)
     requires is_constructible_v<decay_t<T>, T>;
 
@@ -1076,7 +1076,7 @@ constexpr void swap(optional<T>& lhs, optional<T>& rhs) noexcept(noexcept(lhs.sw
     return lhs.swap(rhs);
 }
 
-template <class T>
+template <int, class T>
 constexpr optional<decay_t<T>> make_optional(T&& t) noexcept(is_nothrow_constructible_v<optional<decay_t<T>>, T>)
     requires is_constructible_v<decay_t<T>, T>
 {
@@ -1087,6 +1087,7 @@ template <typename T, typename... Args>
 constexpr optional<T> make_optional(Args&&... args) noexcept(is_nothrow_constructible_v<T, Args...>)
     requires is_constructible_v<T, Args...>
 {
+    static_assert(!is_reference_v<T>, "May not make an optional containing a reference");
     return optional<T>{in_place, std::forward<Args>(args)...};
 }
 
