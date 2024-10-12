@@ -9,5 +9,5 @@ set(GCOV_EXECUTABLE
     CACHE STRING "GCOV executable" FORCE)
 
 set(CMAKE_CXX_FLAGS_ASAN
-  "${CMAKE_CXX_FLAGS_ASAN} -Wno-maybe-uninitialized"
-  CACHE STRING "C++ ASAN Flags" FORCE)
+    "${CMAKE_CXX_FLAGS_ASAN} -Wno-maybe-uninitialized"
+    CACHE STRING "C++ ASAN Flags" FORCE)
