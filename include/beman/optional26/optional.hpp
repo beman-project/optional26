@@ -67,7 +67,7 @@ class optional; // partially freestanding
 template <class T>
 inline constexpr bool std::ranges::enable_view<beman::optional26::optional<T>> = true;
 
-// Itereators for optional<T&> have life times that are not tied to the optional.
+// Iterators for optional<T&> have life times that are not tied to the optional.
 template <class T>
 inline constexpr bool std::ranges::enable_borrowed_range<beman::optional26::optional<T>> = std::is_reference_v<T>;
 

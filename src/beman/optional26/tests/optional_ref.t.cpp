@@ -822,5 +822,5 @@ TEST(OptionalRefTest, OverloadResolutionChecksDangling) {
 //     char const* cstr = "Text";
 //     std::string s       = cstr;
 //     process(s);    // Picks, `optional<std::string const&>` overload
-//     // process(cstr); // Ambigous, but only std::optional<char const* const&>
+//     // process(cstr); // Ambiguous, but only std::optional<char const* const&>
 // }
