@@ -326,8 +326,8 @@ constexpr auto optional<T&>::and_then(F&& f) const {
 
 template <class T>
 template <class F>
-constexpr auto optional<T&>::transform(F&& f) const
-    -> optional<invoke_result_t<F, T&>> {
+constexpr auto
+optional<T&>::transform(F&& f) const -> optional<invoke_result_t<F, T&>> {
     using U = invoke_result_t<F, T&>;
     if (has_value()) {
         return optional<U>{invoke(std::forward<F>(f), *value_)};
