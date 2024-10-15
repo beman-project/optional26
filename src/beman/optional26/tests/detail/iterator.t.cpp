@@ -10,18 +10,27 @@
 #include <tests/test_types.hpp>
 
 #include <concepts>
+#include <cstdlib>
 #include <type_traits>
 #include <set>
 #include <vector>
 
-namespace beman::optional26::test {
+#define CONSTEXPR_EXPECT_EQ(val1, val2)   \
+    if (::std::is_constant_evaluated()) { \
+        if (!((val1) == (val2))) {        \
+            ::std::abort();               \
+        }                                 \
+    } else                                \
+        EXPECT_EQ(val1, val2)
+
+namespace beman::optional26::tests {
 
 // Dummy containers helper.
 struct container {};
 
-} // namespace beman::optional26::test
+} // namespace beman::optional26::tests
 
-using namespace beman::optional26::test;
+using namespace beman::optional26::tests;
 
 TEST(IteratorTest, IteratorConcepts) {
     const auto test = [](auto&& it) {
@@ -53,88 +62,104 @@ TEST(IteratorTest, IteratorConcepts) {
 }
 
 TEST(IteratorTest, DereferenceOperator) {
-    std::vector<int> v{10, 20, 30, 40, 50};
-    auto             it = beman::optional26::detail::contiguous_iterator<int, decltype(v)>{v.data()};
+    auto lambda = [&] {
+        std::vector<int> v{10, 20, 30, 40, 50};
+        auto             it = beman::optional26::detail::contiguous_iterator<int, decltype(v)>{v.data()};
 
-    EXPECT_EQ(*it, 10);
-    *it = 100;
-    EXPECT_EQ(*it, 100);
+        CONSTEXPR_EXPECT_EQ(*it, 10);
+        *it = 100;
+        CONSTEXPR_EXPECT_EQ(*it, 100);
 
-    it += 2;
-    EXPECT_EQ(*it, 30);
+        it += 2;
+        CONSTEXPR_EXPECT_EQ(*it, 30);
 
-    *it = 300;
-    EXPECT_EQ(*it, 300);
+        *it = 300;
+        CONSTEXPR_EXPECT_EQ(*it, 300);
+    };
+    static_assert((lambda(), true));
+    lambda();
 }
 
 TEST(IteratorTest, ForwardIterator) {
-    std::vector<int>       v{10, 20, 30, 40, 50};
-    const std::vector<int> cv{10, 20, 30, 40, 50};
+    auto lambda = [&] {
+        std::vector<int>       v{10, 20, 30, 40, 50};
+        const std::vector<int> cv{10, 20, 30, 40, 50};
 
-    const auto test = [](auto&& it) {
-        EXPECT_EQ(*it, 10);
+        const auto test = [](auto&& it) {
+            CONSTEXPR_EXPECT_EQ(*it, 10);
 
-        ++it; // prefixed increment
-        EXPECT_EQ(*it, 20);
+            ++it; // prefixed increment
+            CONSTEXPR_EXPECT_EQ(*it, 20);
 
-        it++; // postfixed increment
-        EXPECT_EQ(*it, 30);
+            it++; // postfixed increment
+            CONSTEXPR_EXPECT_EQ(*it, 30);
 
-        it++;
-        EXPECT_EQ(*it, 40);
+            it++;
+            CONSTEXPR_EXPECT_EQ(*it, 40);
 
-        ++it;
-        EXPECT_EQ(*it, 50);
+            ++it;
+            CONSTEXPR_EXPECT_EQ(*it, 50);
+        };
+
+        test(beman::optional26::detail::contiguous_iterator<int, decltype(v)>{v.data()});
+        test(beman::optional26::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
     };
-
-    test(beman::optional26::detail::contiguous_iterator<int, decltype(v)>{v.data()});
-    test(beman::optional26::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
+    static_assert((lambda(), true));
+    lambda();
 }
 
 TEST(IteratorTest, BidirectionalIterator) {
-    std::vector<int>       v{10, 20, 30, 40, 50};
-    const std::vector<int> cv{10, 20, 30, 40, 50};
-    const auto             test = [](auto&& it) {
-        it++;
-        it++;
-        EXPECT_EQ(*it, 30);
+    auto lambda = [&] {
+        std::vector<int>       v{10, 20, 30, 40, 50};
+        const std::vector<int> cv{10, 20, 30, 40, 50};
+        const auto             test = [](auto&& it) {
+            it++;
+            it++;
+            CONSTEXPR_EXPECT_EQ(*it, 30);
 
-        --it; // prefixed decrement
-        EXPECT_EQ(*it, 20);
+            --it; // prefixed decrement
+            CONSTEXPR_EXPECT_EQ(*it, 20);
 
-        it--; // postfixed decrement
-        EXPECT_EQ(*it, 10);
+            it--; // postfixed decrement
+            CONSTEXPR_EXPECT_EQ(*it, 10);
+        };
+
+        test(beman::optional26::detail::contiguous_iterator<int, decltype(v)>{v.data()});
+        test(beman::optional26::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
     };
-
-    test(beman::optional26::detail::contiguous_iterator<int, decltype(v)>{v.data()});
-    test(beman::optional26::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
+    static_assert((lambda(), true));
+    lambda();
 }
 
 TEST(IteratorTest, RandomAccessIterator) {
-    std::vector<int>       v{10, 20, 30, 40, 50};
-    const std::vector<int> cv{10, 20, 30, 40, 50};
-    const auto             test = [](auto&& it) {
-        EXPECT_EQ(it[0], 10);
-        EXPECT_EQ(it[1], 20);
-        EXPECT_EQ(it[2], 30);
-        EXPECT_EQ(it[3], 40);
-        EXPECT_EQ(it[4], 50);
+    auto lambda = [&] {
+        std::vector<int>       v{10, 20, 30, 40, 50};
+        const std::vector<int> cv{10, 20, 30, 40, 50};
+        const auto             test = [](auto&& it) {
+            CONSTEXPR_EXPECT_EQ(it[0], 10);
+            CONSTEXPR_EXPECT_EQ(it[1], 20);
+            CONSTEXPR_EXPECT_EQ(it[2], 30);
+            CONSTEXPR_EXPECT_EQ(it[3], 40);
+            CONSTEXPR_EXPECT_EQ(it[4], 50);
 
-        it += 2;
-        EXPECT_EQ(*it, 30);
+            it += 2;
+            CONSTEXPR_EXPECT_EQ(*it, 30);
 
-        it -= 1;
-        EXPECT_EQ(*it, 20);
+            it -= 1;
+            CONSTEXPR_EXPECT_EQ(*it, 20);
 
-        it = it + 2;
-        EXPECT_EQ(*it, 40);
+            it = it + 2;
+            CONSTEXPR_EXPECT_EQ(*it, 40);
 
-        it = it - 1;
-        EXPECT_EQ(*it, 30);
+            it = it - 1;
+            CONSTEXPR_EXPECT_EQ(*it, 30);
+        };
+
+        test(beman::optional26::detail::contiguous_iterator<int, decltype(v)>{v.data()});
+        test(beman::optional26::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
     };
-
-    test(beman::optional26::detail::contiguous_iterator<int, decltype(v)>{v.data()});
-    test(beman::optional26::detail::contiguous_iterator<const int, decltype(v)>{cv.data()});
+    static_assert((lambda(), true));
+    lambda();
 }
 
 TEST(IteratorTest, ContainerType) {
