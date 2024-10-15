@@ -1064,6 +1064,14 @@ template<class T> constexpr optional<decay_t<T>> make_optional(T&& v);
 \end{itemdecl}
 
 \begin{itemdescr}
+\begin{addedblock}
+\pnum
+\constraints
+The call to \tcode{make_optional} does not use
+an explicit \grammarterm{template-argument-list} that
+begins with a type \grammarterm{template-argument}.
+\end{addedblock}
+
 \pnum
 \returns
 \tcode{optional<decay_t<T>>(std::forward<T>(v))}.
@@ -1076,6 +1084,12 @@ template<class T, class...Args>
 \end{itemdecl}
 
 \begin{itemdescr}
+\begin{addedblock}
+\pnum
+\mandates
+\tcode{is_reference_v<T>} is false.
+\end{addedblock}
+
 \pnum
 \effects
 Equivalent to: \tcode{return optional<T>(in_place, std::forward<Args>(args)...);}

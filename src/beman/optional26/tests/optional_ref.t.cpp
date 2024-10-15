@@ -383,47 +383,6 @@ struct takes_init_and_variadic {
     takes_init_and_variadic(std::initializer_list<int> l, Args&&... args) : v(l), t(std::forward<Args>(args)...) {}
 };
 
-TEST(OptionalRefTest, MakeOptional) {
-    int  var{42};
-    auto o1 = beman::optional26::make_optional<int&>(var);
-    auto o2 = beman::optional26::optional<int&>(var);
-
-    constexpr bool is_same = std::is_same<decltype(o1), beman::optional26::optional<int>>::value;
-    EXPECT_TRUE(is_same);
-    EXPECT_TRUE(o1 == o2);
-
-    std::tuple<int, int, int, int> tvar{0, 1, 2, 3};
-    auto                           o3 = beman::optional26::make_optional<std::tuple<int, int, int, int>&>(tvar);
-    EXPECT_TRUE(std::get<0>(*o3) == 0);
-    EXPECT_TRUE(std::get<1>(*o3) == 1);
-    EXPECT_TRUE(std::get<2>(*o3) == 2);
-    EXPECT_TRUE(std::get<3>(*o3) == 3);
-
-    std::vector<int> ivec{0, 1, 2, 3};
-    auto             o4 = beman::optional26::make_optional<std::vector<int>&>(ivec);
-    EXPECT_TRUE(o4.value()[0] == 0);
-    EXPECT_TRUE(o4.value()[1] == 1);
-    EXPECT_TRUE(o4.value()[2] == 2);
-    EXPECT_TRUE(o4.value()[3] == 3);
-
-    takes_init_and_variadic tiv{{0, 1}, 2, 3};
-    auto                    o5 = beman::optional26::make_optional<takes_init_and_variadic&>(tiv);
-    EXPECT_TRUE(o5->v[0] == 0);
-    EXPECT_TRUE(o5->v[1] == 1);
-    EXPECT_TRUE(std::get<0>(o5->t) == 2);
-    EXPECT_TRUE(std::get<1>(o5->t) == 3);
-
-    auto i  = 42;
-    auto o6 = beman::optional26::make_optional<int&>(i);
-    static_assert(std::is_same_v<decltype(o6), beman::optional26::optional<int>>);
-
-    EXPECT_TRUE((std::is_same_v<decltype(o6), beman::optional26::optional<int>>));
-    EXPECT_TRUE(o6);
-    EXPECT_TRUE(*o6 == 42);
-
-    auto n = beman::optional26::make_optional<int&>({var});
-}
-
 TEST(OptionalRefTest, Nullopt) {
     beman::optional26::optional<int&> o1 = beman::optional26::nullopt;
     beman::optional26::optional<int&> o2{beman::optional26::nullopt};
