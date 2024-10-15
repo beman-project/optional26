@@ -18,7 +18,7 @@
 
 \begin{flushright}
   \begin{tabular}{ll}
-    Document \#: & P2988R5 \\
+    Document \#: & P2988R8 \\
     Date: & \today \\
     Project: & Programming Language C++ \\
     Audience: & LEWG
@@ -36,6 +36,24 @@
 \chapter*{Changes Since Last Version}
 
 \begin{itemize}
+\item \textbf{Changes since R7}
+  \begin{itemize}
+  \item Wording mandates/constraint fixes
+  \item Hash on T\& pulled out
+  \item Notes on wording rendering
+  \item ``Fix'' make_optional<T\&>
+  \end{itemize}
+\item \textbf{Changes since R6}
+  \begin{itemize}
+  \item strike refref specialization
+  \item add converting assignment operator
+  \item add converting in place constructor
+  \end{itemize}
+\item \textbf{Changes since R5}
+  \begin{itemize}
+  \item refref specialization
+  \item fix monadic constraints on base template
+  \end{itemize}
 \item \textbf{Changes since R4}
   \begin{itemize}
   \item feature test macro
@@ -52,7 +70,7 @@
 \section{Using a raw pointer result for an element search function}
 
 This is the convention the C++ core guidelines suggest, to use a raw pointer for representing optional non-owning references.
-However, there is a user-required check against `nullptr`, no type safety meaning no safety against mis-interpreting such a raw pointer, for example by using pointer arithmetic on it.
+However, there is a user-required check against \tcode{nullptr}, no type safety meaning no safety against mis-interpreting such a raw pointer, for example by using pointer arithmetic on it.
 
 \begin{tabular}{ lr }
   \begin{minipage}[t]{0.45\columnwidth}
@@ -187,11 +205,22 @@ In place construction is not supported as it would just be a way of providing im
 The definitions of the relational operators are the same as for the base template. Interoperable comparisons between T and optional<T\&> work as expected. This is not true for the boost optional<T\&>.
 
 \section{make_optional}
-Because of existing code, \tcode{make_optional<T\&>} must return optional<T> rather than optional<T\&>. Returning optional<T\&> is consistent and defensible, and a few optional implementations in production make this choice. It is, however, quite easy to construct a make_optional expression that deduces a different category causing possibly dangerous changes to code.
+\begin{removedblock}
+\sout{Because of existing code, \tcode{make_optional<T\&>} must return optional<T> rather than optional<T\&>. Returning optional<T\&> is consistent and defensible, and a few optional implementations in production make this choice. It is, however, quite easy to construct a make_optional expression that deduces a different category causing possibly dangerous changes to code.}
 
-There was some discussion about using library technology to allow selection of the reference overload via the literal spelling \tcode{make_optional<int\&>}. There was anti-consensus to do so. There are exising instances of that spelling that today return an \tcode{optional<T>}, although it is very likely these are mistakes or possibly other optionals. The spelling \tcode{optional<T\&>\{\}} is acceptable as there is no multi-argument emplacement version as there is no location to construct such an instance.
+\sout{There was some discussion about using library technology to allow selection of the reference overload via the literal spelling \tcode{make_optional<int\&>}. There was anti-consensus to do so. There are existing instances of that spelling that today return an \tcode{optional<T>}, although it is very likely these are mistakes or possibly other optionals. The spelling \tcode{optional<T\&>\{\}} is acceptable as there is no multi-argument emplacement version as there is no location to construct such an instance.}
+\end{removedblock}
 
-There was also discussion of using \tcode{std::referenece_wrapper} to indicate reference use, in analogy with std::tuple. Unfortunately there are existing uses of optional over reference_wrapper as a workaround for lack of reference specialiazation, and it would be a breaking change for such code.
+\begin{addedblock}
+With further research, the existing uses of make_optional<X\&> seem to be primarily test cases, and deliberate use seems to be exceedingly rare in the wild. Reflector review was much more positive about removing the misleading ability to create an \tcode{optional<X>} via \tcode{make_optional<X\&>(x)}. In addition, the multiple argument forms can be used to attempt to construct a optional that contains a reference, but this becomes ill formed because of existing mandates at the type level. In order to preserve existing behavior, where make_optional is not well formed if it constructs a reference, changes to \tcode{make_optional} should be made.
+
+Adding a non-type template parameter as the first template parameter to the single argument \tcode{make_optional} and mandating that the multi-argument version not request a reference type as the parameter, will diagnose mistaken use of \tcode{make_optional} and preserve the existing behavior.
+
+Since construction of an object in order to make a reference to it to construct an optional containing a reference would always dangle, there do not seem to be any use cases for the multi-argument or initializer list forms of make_optional for reference types, and the constructor form seems to satisfy all cases for single argument construction of a optional containing a reference, there does not seem to be a need for a factory function for optional over reference.
+
+\end{addedblock}
+
+There was also discussion of using \tcode{std::reference_wrapper} to indicate reference use, in analogy with std::tuple. Unfortunately there are existing uses of optional over reference_wrapper as a workaround for lack of reference specialization, and it would be a breaking change for such code.
 
 \section{Trivial construction}
 Construction of \tcode{optional<T\&>} should be trivial, because it is straightforward to implement, and \tcode{optional<T>} is trivial. Boost is not.
@@ -211,19 +240,154 @@ As in the base template, \tcode{explicit} is made conditional on the type used t
 \section{value_or}
 \removed{Have \tcode{value_or} return a \tcode{T\&}. Check that the supplied value can be bound to a T\&.}
 
-After extensive discussion, it seems there is no particularly wonderful solution for \tcode{value_or} that does not involve a time machine. Implemntations of optionals that support reference semantics diverge over the return type, and the current one is arguabley wrong, and should use something based on \tcode{common_reference_type}, which of course did not exist when \tcode{optional} was standardized.
+After extensive discussion, it seems there is no particularly wonderful solution for \tcode{value_or} that does not involve a time machine. Implementations of optionals that support reference semantics diverge over the return type, and the current one is arguably wrong, and should use something based on \tcode{common_reference_type}, which of course did not exist when \tcode{optional} was standardized.
 
-The weak consensus is to return a \tcode{T} from \tcode{optional<T\&>::value_or} as this is least likely to cause issues. There was at least one strong objection to this choice, but all other choices had more objections. The author indends to propose free functions \tcode{reference_or}, \tcode{value_or}, \tcode{or_invoke}, and \tcode{yield_if} over all types modeling optional-like, \tcode{concept std::maybe}, in the next revision of \cite{P1255R12}. This would cover \tcode{optional}, \tcode{expected}, and pointer types.
+The weak consensus is to return a \tcode{T} from \tcode{optional<T\&>::value_or} as this is least likely to cause issues. There was at least one strong objection to this choice, but all other choices had more objections. The author intends to propose free functions \tcode{reference_or}, \tcode{value_or}, \tcode{or_invoke}, and \tcode{yield_if} over all types modeling optional-like, \tcode{concept std::maybe}, in the next revision of \cite{P1255R12}. This would cover \tcode{optional}, \tcode{expected}, and pointer types.
 
 Having \tcode{value_or} return by value also allows the common case of using a literal as the alternative to be expressed concisely.
 
+\section{in_place_t construction}
+The reference specialization allows a limited form of in_place construction where the argument can be converted to the appropriate reference without creation of a temporary. As the reference specialization is non-owning, there is no ``place'' for a temporary to be constructed that will not dangle. For cases where the lifetime of the constructed object would match the lifetime of the optional, the temporary can be constructed explicitly, instead.
+
+\section{Converting assignment}
+A similarly limited converting assignment operator is provided for cases where an optional<U> has a value or refers to a value which can be converted to a T\& without construction of a temporary. In particular, converting an optional<T\&> to an optional<T const\&> is supported.
+
 \section{Compiler Explorer Playground}
 
-See \url{https://godbolt.org/z/n5oooK58W} for a playground with relevant Google Test functions and various optional implementations made available for cross reference.
+See \url{https://compiler-explorer.com/z/zKqE3sn87} for an updated playground with relevant Google Test functions and various optional implementations made available for cross reference including a flattened in-place version of the reference implementation.
+
+\chapter{Principles for Reification of Design}
+
+Optional must never construct a temporary, or knowingly take the address of an temporary or part of an temporary.
+
+It is always presumed safe to copy the pointer value from an optional, since by induction, it is not dangling.
+
+Optional has no storage, so should never construct a T, it may convert a U to a T, so long as that conversion does not create a temporary.
+
+Constructors that would convert from temporary are marked deleted. They should be sufficiently constrained that it was the correct choice and there is no more general, less constrained constructor that would not have created a dangling pointer.
+
+Failure to compile either by ambiguity or no eligible constructors in the overload set is preferable to optional being responsible for use after free or dangling.
+
+Assignment is always from an optional, which may have been an implicit construction. The assignment cannot throw, the construction/conversion may. The assignment may therefore need annotation converting the rhs if that constructor was explicit. This must not be necessary in the default case of creating an optional reference to an lvalue of the same type.
+
+The model for the constraints and mandates for \tcode{optional<T\&>} is taken from \tcode{std::tuple} over reference types. The type \tcode{std::tuple} takes the most care of types in the standard library in dealing with creation of temporaries.
+
+As \tcode{optional} is designed to be converting, to create instances from arguments that can be used to create the underlying type, constructors should be explicit only where the operations used to create the pointer or the notional reference would be or are explicit.
+
+
+
+\section{Construction from temporary}
+
+We disallow construction of \tcode{optional<T\&>} from any type U in which:
+\begin{itemize}
+\item the constructor body will create a temporary and bind it to a reference.
+\item a const lvalue reference would be bound to rvalue.
+\end{itemize}
+
+An example of the first case would be construction \tcode{optional<std::string const\&>} from \tcode{char const*}. These cases always dangle.
+
+An example of the second case would be a construction \tcode{std::optional<std::string const\&>} from temporary \tcode{std::string}.
+
+Prohibiting the second case does prevent some safe uses of the optional as the function parameter.
+
+Given:
+
+\tcode{void process(std::optional<std::string const\&> arg);}
+
+This will make a \tcode{process(std::string("sdfd"))} invocation ill-formed, despite the arg being safe to use from within the function body.
+
+This deviates from the design of the ``view'' parameters type, like \tcode{std::string_view} or \tcode{std::span}. However, we believe that this is the right choice due to the following:
+
+\begin{itemize}
+\item
+  Only a subset of cases would be working. As an illustration the very similar \tcode{process("text")} invocation is ill-formed, due to always being dangling.
+
+\item
+  Such design leads to the detection of reference to temporaries or local variables when \tcode{optional<T const\&>} is used as the return type.
+
+  \begin{tabular}{ lr }
+  \begin{minipage}[t]{0.45\columnwidth}
+    \begin{minted}[fontsize=\small]{c++}
+std::optional<std::string const&> getValue() {
+  std::string localString;
+  return localString; // Ill-formed.
+  std::optional<std::string> localOptionalString;
+  return localOptionalString; // ill-formed
+}
+        \end{minted}
+      \end{minipage}
+\end{tabular}
+
+One of the main motivational examples of \tcode{optional<T const\&>} is return from a lookup function, and eliminating dangling in such cases outweighs parameter cases.
+
+We are very grateful to Arthur O'Dwyer for his work on \cite{P2266R3} P2266R3 Simpler implicit move accepted in C++23, which makes it possible to implement this correctly.
+
+\item
+  We provide behavior consistent with \tcode{reference_wrapper<T const>}, that disallows binding to xvalues. We believe that \tcode{reference_wrapper<T>} is closer in spirit to \tcode{optional<T\&>} than any view type. It certainly shares some of the features.
+\end{itemize}
+
+\section{Deleting dangling overloads}
+
+To achieve the dangling safety expressed before, the constructor is marked deleted if it would lead to binding of the reference to temporary or the xvalue.
+However, deleted constructors are still considered to be candidates during overload resolution, leading to ambiguity in the following examples:
+
+\begin{tabular}{ lr }
+  \begin{minipage}[t]{0.45\columnwidth}
+    \begin{minted}[fontsize=\small]{c++}
+void process(std::optional<std::string const&>);
+void process(std::optional<char const* const&>);
+
+void test() {
+  char const* cstr = Text;
+  std::string s = cstr;
+  process(s); // Picks, optional<std::string const&> overload
+  process(cstr); // Ambiguous, but only std::optional<char const* const&> is not dangling
+}
+\end{minted}
+\end{minipage}
+\end{tabular}
+
+
+During the reflector discussion, an option of an alternate design was presented, where the dangling overload would be constrained, and eliminated from the overload set.
+
+We strongly oppose changing this behavior, as:
+\begin{itemize}
+\item We think that it is impossible to detect temporary binding to xvalue in such a design.
+
+\item The behavior we propose is consistent with the behavior for optional for object types
+
+\begin{tabular}{ lr }
+  \begin{minipage}[t]{0.45\columnwidth}
+    \begin{minted}[fontsize=\small]{c++}
+void processVal(std::optional<std::string>);
+void processVal(std::optional<char const*>);
+
+void test() {
+  char const* cstr = "Text";
+  std::string s = cstr;
+  processVal(s); // Picks std::string overload
+  processVal(cstr); // Ambiguous
+}
+\end{minted}
+\end{minipage}
+\end{tabular}
+\end{itemize}
+As language in general treats functions accepting by value and by const reference in the same manner during overload resolution, we believe achieving this consistency is a feature.
+
+The design that was introduced by \tcode{std::tuple}, and \tcode{std::pair}, for references, is followed, where the detection of dangling does not affect the results of overload resolution and instead makes a call that would dangle be ill-formed and diagnosed.
+
+\section{Assignment of optional<T\&>}
+
+In the case of \tcode{optional<T\&>}, any assignment operation is equivalent to assigning a pointer, and there is no observable difference between:
+using converting assignment from \tcode{U\&\&} or \tcode{optional<U>}
+constructing temporary \tcode{optional<T\&>}, and then assigning it to it.
+
+This observation allows us to provide only copy-assignment for \tcode{optional<T\&>}, instead of a set of converting assignments, that would need to replicate the signatures of constructors and their constraints. Assignment from any other value is handled by first implicitly constructing \tcode{optional<T\&>} and then using copy-assignment. Move-assignment is the same as copy-assignment, since only pointer copy is involved.
+
 
 \chapter{Proposal}
 
-Add a reference specialization for the std::optional template.
+Add an lvalue reference specialization for the std::optional template.
 
 \chapter{Wording}
 
@@ -232,662 +396,7 @@ The wording here cross references and adopts the wording in \cite{P3091R2}.
 
 \begin{wording}
 
-
-  \rSec2[optional.optional]{Class template \tcode{optional}}
-
-  \rSec3[optional.optional.general]{General}
-
-  \indexlibraryglobal{optional}%
-  \indexlibrarymember{value_type}{optional}%
-  \begin{removedblock}
-    \begin{codeblock}
-template<class U> constexpr T value_or(U&&) const &;
-template<class U> constexpr T value_or(U&&) &&;
-\end{codeblock}
-\end{removedblock}
-
-\begin{addedblock}
-  \begin{codeblock}
-template <class U = remove_cvref_t<T>, class Self, class... Args>
-    U value_or(this Self&& self, Args&&... args);
-
-template <class U = remove_cvref_t<T>, class Self, class X, class... Args>
-    U value_or(this Self&& self, initializer_list<X> il, Args&&... args);
-  \end{codeblock}
-\end{addedblock}
-  \begin{addedblock}
-  \begin{codeblock}
-    namespace std {
-      template <class T>
-      class optional<T&> {
-      public:
-        using value_type = T&;
-
-        // \ref{optional.ctor}, constructors
-        constexpr optional() noexcept;
-        constexpr optional(nullopt_t) noexcept;
-        constexpr optional(const optional&) = default;
-        constexpr optional(optional&&) noexcept = default;
-        template<class U>
-        constexpr explicit(@\seebelow@) optional(U&&);
-        template<class U>
-        constexpr explicit(@\seebelow@) optional(const optional<U>&);
-
-        // \ref{optional.dtor}, destructor
-        constexpr ~optional();
-
-        // \ref{optional.assign}, assignment
-        constexpr optional& operator=(nullopt_t) noexcept;
-        constexpr optional& operator=(const optional&) noexcept = default;
-        constexpr optional& operator=(optional&&) noexcept = default;
-        template<class U = T> constexpr optional& operator=(U&&);
-        template<class U> constexpr optional& operator=(const optional<U>&);
-
-        template<class U> constexpr T& emplace(U&&);
-
-        // \ref{optional.swap}, swap
-        constexpr void swap(optional&) noexcept;
-
-        // \ref{optional.observe}, observers
-        constexpr T* operator->() const noexcept;
-        constexpr T& operator*() const noexcept;
-        constexpr explicit operator bool() const noexcept;
-        constexpr bool has_value() const noexcept;
-        constexpr const T& value() const;                                 // freestanding-deleted
-
-        // Without P3091
-        template<class U> constexpr T value_or(U&&) const;
-
-        // With P3091
-        template <class U = remove_cv_t<T>, class... Args>
-          U value_or(Args&&...) const;
-        template <class U = remove_cv_t<T>, class X, class... Args>
-          U constexpr value_or(initializer_list<X>, Args&&...) const;
-
-        // \ref{optional.monadic}, monadic operations
-        template<class F> constexpr auto and_then(F&& f) const;
-        template<class F> constexpr auto transform(F&& f) const;
-        template<class F> constexpr optional or_else(F&& f) const;
-
-        // \ref{optional.mod}, modifiers
-        constexpr void reset() noexcept;
-
-      private:
-        T *val;         // \expos
-      };
-    }
-  \end{codeblock}
-
-  \pnum
-  Any instance of \tcode{optional<T\&>} at any given time either refers to a value or does not refer to a value.
-  When an instance of \tcode{optional<T\&>} \defnx{refers to a value}{refers to a value!\idxcode{optional}},
-  it means that an object of type \tcode{T}, referred to as the optional object's \defnx{referred to value}{referred to value!\idxcode{optional}},
-  is pointed to from the storage of the optional object.
-  When an object of type \tcode{optional<T\&>} is contextually converted to \tcode{bool},
-  the conversion returns \tcode{true} if the object refers to a value;
-  otherwise the conversion returns \tcode{false}.
-
-  \pnum
-  When an \tcode{optional<T\&>} object refers to a value,
-  member \tcode{val} points to the referred to object.
-  \end{addedblock}
-
-  From P3091
-
-At the end of 22.5.3.6 [optional.observe] in the Working Draft, modify the definition of value_or:
-
-\begin{removedblock}
-  \begin{itemdecl}
-  template<class U> constexpr T value_or(U&&) const &;
-  \end{itemdecl}
-  Description ...
-
-  \begin{itemdecl}
-  template<class U> constexpr T value_or(U&&) &&;
-  \end{itemdecl}
-  Description ...
-\end{removedblock}
-
-\begin{addedblock}
-  \begin{itemdecl}
-template <class U = remove_cvref_t<T>, class Self, class... Args>
-U value_or(this Self&& self, Args&&... args);
-\end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \mandates
-    is_constructible_v<U, decltype(*std::forward<Self>(self))> \&\&
-is_constructible_v<U, Args...> is true. If U is a reference type, then sizeof...(Args) is 1 and, for v being a value of the single type in Args, the initialization U u(v); is well formed and does not bind u to a temporary whose lifetime is extended (6.7.7 [class.temporary]).
-
-    \pnum
-    \effects
-    Equivalent to:
-
-return self.has_value() ? U(*std::forward<Self>(self)) : U(std::forward<Args>(args)...);
-\end{itemdescr}
-
-  \begin{itemdecl}
-template <class U = remove_cvref_t<T>, class Self, class X, class... Args>
-    U value_or(this Self&& self, initializer_list<X> il, Args&&... args);
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \mandates
- ! is_reference_v<U> \&\& is_constructible_v<U, initializer_list<X>, Args...> \&\&
-is_constructible_v<U, decltype(*std::forward<Self>(self))> is true.
-
-    \pnum
-    \effects
- Equivalent to:
-
-return self.has_value() ? U(*std::forward<Self>(self)) : U(il, std::forward<Args>(args)...);
-\end{itemdescr}
-\end{addedblock}
-
-  \rSec3[optional.ctor]{Constructors}
-
-  \indexlibraryctor{optional}%
-  \begin{itemdecl}
-    constexpr optional() noexcept;
-    constexpr optional(nullopt_t) noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \ensures
-    \tcode{*this} does not refer to a value.
-
-    \pnum
-    \remarks
-    For every object type \tcode{T} these constructors are constexpr constructors\iref{dcl.constexpr}.
-  \end{itemdescr}
-
-  \indexlibraryctor{optional}%
-  \begin{itemdecl}
-    constexpr optional(const optional& rhs) noexecpt = default;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \effects
-    Initializes \tcode{val} with the value of \tcode{rhs.val}.
-
-    \pnum
-    \ensures
-    \tcode{rhs.has_value() == this->has_value()}.
-
-    \pnum
-    \throws
-    Nothing
-
-    \pnum
-    \remarks
-    This constructor is trivial.
-
-  \end{itemdescr}
-
-  \indexlibraryctor{optional}%
-  \begin{itemdecl}
-    constexpr optional(optional&& rhs) noexcept = default;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-
-    \pnum
-    \effects
-    Initializes \tcode{val} with the value of \tcode{rhs.val}.
-    \tcode{rhs.has_value()} is unchanged.
-
-    \pnum
-    \ensures
-    \tcode{rhs.has_value() == this->has_value()}.
-
-    \pnum
-    \remarks
-    This constructor is trivial.
-
-  \end{itemdescr}
-
-
-
-  \indexlibraryctor{optional}%
-  \begin{itemdecl}
-    template<class U = T> constexpr explicit(@\seebelow@) optional(U&& v);
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \constraints
-    \begin{itemize}
-    \item \tcode{is_same_v<remove_cvref_t<U>, optional>} is \tcode{false}, and
-    \item if \tcode{T} is \cv{} \tcode{bool},
-      \tcode{remove_cvref_t<U>} is not a specialization of \tcode{optional}.
-    \end{itemize}
-
-    \pnum
-    \mandates
-    \begin{itemize}
-    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
-    \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
-    \end{itemize}
-
-    \pnum
-    \effects
-    Direct-non-list-initializes the referred to value with \tcode{addressof(v)}.
-
-    \pnum
-    \ensures
-    \tcode{*this} refers to a value.
-
-  \end{itemdescr}
-
-  \indexlibraryctor{optional}%
-  \begin{itemdecl}
-    template<class U> constexpr explicit(@\seebelow@) optional(const optional<U>& rhs);
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \constraints
-    \begin{itemize}
-    \item \tcode{is_same_v<remove_cvref_t<U>, optional>} is \tcode{false}.
-    \end{itemize}
-
-    \pnum
-    \effects
-    If \tcode{rhs} refers to a value,
-    initializes \tcode{val} with the value of\tcode{addressof(rhs.value()))}.
-
-    \pnum
-    \ensures
-    \tcode{rhs.has_value() == this->has_value()}.
-
-    \pnum
-    \remarks
-    The expression inside \keyword{explicit} is equivalent to:
-    \begin{codeblock}
-      !is_convertible_v<U, T>
-    \end{codeblock}
-
-  \end{itemdescr}
-
-
-  \rSec3[optional.dtor]{Destructor}
-
-  \indexlibrarydtor{optional}%
-  \begin{itemdecl}
-    constexpr ~optional() = default;
-  \end{itemdecl}
-\begin{itemdescr}
-\pnum
-\remarks
-This destructor is trivial.
-\end{itemdescr}
-
-  \rSec3[optional.assign]{Assignment}
-
-  \indexlibrarymember{operator=}{optional}%
-  \begin{itemdecl}
-    optional& operator=(nullopt_t) noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \ensures
-    \tcode{*this} does not refer to a value.
-
-    \pnum
-    \returns
-    \tcode{*this}.
-  \end{itemdescr}
-
-  \indexlibrarymember{operator=}{optional}%
-  \begin{itemdecl}
-    constexpr optional<T>& operator=(const optional& rhs) noexcept = default;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \ensures
-    \tcode{rhs.has_value() == this->has_value()}.
-
-    \pnum
-    \returns
-    \tcode{*this}.
-
-  \end{itemdescr}
-
-  \indexlibrarymember{operator=}{optional}%
-  \begin{itemdecl}
-    constexpr optional& operator=(optional&& rhs) noexcept = default;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \ensures
-    \tcode{rhs.has_value() == this->has_value()}.
-
-    \pnum
-    \returns
-    \tcode{*this}.
-  \end{itemdescr}
-
-  \indexlibrarymember{operator=}{optional}%
-  \begin{itemdecl}
-    template<class U = T> constexpr optional<T>& operator=(U&& v);
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \constraints
-    \begin{itemize}
-    \item \tcode{is_same_v<remove_cvref_t<U>, optional>} is \tcode{false}
-    \item \tcode{conjunction_v<is_scalar<T>, is_same<T, decay_t<U>>>} is \tcode{false}
-    \end{itemize}
-
-    \pnum
-    \mandates
-    \begin{itemize}
-    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
-    \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
-    \end{itemize}
-
-    \pnum
-    \effects
-    Assigns the \tcode{val} the value of \tcode{addressof(v)}.
-
-    \pnum
-    \ensures
-    \tcode{*this} refers to a value.
-
-  \end{itemdescr}
-
-  \indexlibrarymember{operator=}{optional}%
-  \begin{itemdecl}
-    template<class U> constexpr optional<T>& operator=(const optional<U>& rhs);
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \mandates
-    \begin{itemize}
-    \item \tcode{is_constructible_v<add_lvalue_reference_t<T>, U>} is \tcode{true}
-    \item \tcode{is_lvalue_reference<U>::value>} is \tcode{true}
-    \end{itemize}
-
-    \pnum
-    \ensures
-    \tcode{rhs.has_value() == this->has_value()}.
-
-    \pnum
-    \returns
-    \tcode{*this}.
-
-  \end{itemdescr}
-
-
-  \indexlibrarymember{emplace}{optional}%
-  \begin{itemdecl}
-    template <class U = T> optional& emplace(U&& u) noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \constraints
-    \begin{itemize}
-    \item \tcode{is_same_v<remove_cvref_t<U>, optional>} is \tcode{false}, and
-    \item if \tcode{T} is \cv{} \tcode{bool},
-      \tcode{remove_cvref_t<U>} is not a specialization of \tcode{optional}.
-    \end{itemize}
-    \pnum
-    \effects
-    Assigns \tcode{*this} \tcode{forward<U>(u)}
-
-    \pnum
-    \ensures
-    \tcode{*this} refers to a value.
-
-  \end{itemdescr}
-
-  \rSec3[optional.swap]{Swap}
-
-  \indexlibrarymember{swap}{optional}%
-  \begin{itemdecl}
-    constexpr void swap(optional& rhs) noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-
-    \pnum
-    \effects
-    *this and *rhs will refer to each others initial referred to objects.
-
-  \end{itemdescr}
-
-
-  \rSec3[optional.observe]{Observers}
-
-  \indexlibrarymember{operator->}{optional}%
-  \begin{itemdecl}
-    constexpr T* operator->() const noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \returns
-    \tcode{val}.
-
-    \pnum
-    \remarks
-    These functions are constexpr functions.
-  \end{itemdescr}
-
-  \indexlibrarymember{operator*}{optional}%
-  \begin{itemdecl}
-    constexpr T&  operator*() const noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \expects
-    \tcode{*this} refers to a value.
-
-    \pnum
-    \returns
-    \tcode{*val}.
-
-    \pnum
-    \remarks
-    These functions are constexpr functions.
-  \end{itemdescr}
-
-  \indexlibrarymember{operator bool}{optional}%
-  \begin{itemdecl}
-    constexpr explicit operator bool() const noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \returns
-    \tcode{true} if and only if \tcode{*this} refers to a value.
-
-    \pnum
-    \remarks
-    This function is a constexpr function.
-  \end{itemdescr}
-
-  \indexlibrarymember{has_value}{optional}%
-  \begin{itemdecl}
-    constexpr bool has_value() const noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \returns
-    \tcode{true} if and only if \tcode{*this} refers to a value.
-
-    \pnum
-    \remarks
-    This function is a constexpr function.
-  \end{itemdescr}
-
-  \indexlibrarymember{value}{optional}%
-  \begin{itemdecl}
-    constexpr T& value() const;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \effects
-    Equivalent to:
-    \begin{codeblock}
-      if (has_value())
-          return *value_;
-      throw bad_optional_access();
-    \end{codeblock}
-  \end{itemdescr}
-
-  Without P3091
-  \indexlibrarymember{value_or}{optional}%
-  \begin{itemdecl}
-    template<class U> constexpr T value_or(U&& v) const;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \mandates
-    \tcode{is_constructible_v<add_lvalue_reference_t<T>, decltype(v)>} is \tcode{true}.
-
-    \pnum
-    \effects
-    Equivalent to:
-
-    return has_value() ? U(**this) : U(std::forward<Args>(args)...);
-  \end{itemdescr}
-
-  With P3091
-  \indexlibrarymember{value_or}{optional}%
-  \begin{itemdecl}
-  template <class U = T, class... Args>
-    U value_or(Args&&...args) const;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \mandates
-    is_constructible_v<U, decltype(**this)> \&\& is_constructible_v<U, Args...>
-is true. If U is a reference type, then sizeof...(Args) is 1 and, for v being a value of the single type in Args, the initialization U u(v); is well formed and does not bind u to a temporary whose lifetime is extended (6.7.7 [class.temporary]).
-
-\pnum
-\effects
-Equivalent to:
-
-return has_value() ? U(**this) : U(std::forward<Args>(args)...);
-  \end{itemdescr}
-
-  \begin{itemdecl}
-template <class U = remove_cv_t<T>, class X, class... Args>
-  U constexpr value_or(initializer_list<X> il, Args&&...) const;
-\end{itemdecl}
-
-\begin{itemdescr}
-    \pnum
-    \mandates
-   ! is_reference_v<U> \&\& is_constructible_v<U, initializer_list<X>, Args...> \&\&
-is_constructible_v<U, decltype(**this)> is true.
-
-  \pnum
-    \effects
-   Equivalent to:
-
-   return has_value() ? U(**this) : U(il, std::forward<Args>(args)...);
-\end{itemdescr}
-
-  \rSec3[optional.monadic]{Monadic operations}
-
-  \indexlibrarymember{and_then}{optional}
-  \begin{itemdecl}
-    template<class F> constexpr auto and_then(F&& f) const;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    Let \tcode{U} be \tcode{invoke_result_t<F, T\&>}.
-
-    \pnum
-    \mandates
-    \tcode{remove_cvref_t<U>} is a specialization of \tcode{optional}.
-
-    \pnum
-    \effects
-    Equivalent to:
-    \begin{codeblock}
-      return has_value() ? invoke(forward<F>(f), value()) : result(nullopt);
-    \end{codeblock}
-  \end{itemdescr}
-
-  \indexlibrarymember{transform}{optional}
-  \begin{itemdecl}
-    template<class F> constexpr auto transform(F&& f) const;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    Let \tcode{U} be \tcode{remove_cv_t<invoke_result_t<F, T\&>>}.
-
-
-    \pnum
-    \returns
-    If \tcode{*this} refers to a value, an \tcode{optional<U>} object
-    whose refered to value is the result of
-    \tcode{invoke(forward<F>(f), *val)};
-    otherwise, \tcode{optional<U>()}.
-  \end{itemdescr}
-
-  \indexlibrarymember{or_else}{optional}
-  \begin{itemdecl}
-    template<class F> constexpr optional or_else(F&& f) const;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-    \pnum
-    \mandates
-    \tcode{is_same_v<remove_cvref_t<invoke_result_t<F>>, optional>} is \tcode{true}.
-
-    \pnum
-    \effects
-    Equivalent to:
-    \begin{codeblock}
-      if (has_value()))
-        return value()
-      else
-        return forward<F>(f)();
-      }
-    \end{codeblock}
-  \end{itemdescr}
-
-  \rSec3[optional.mod]{Modifiers}
-
-  \indexlibrarymember{reset}{optional}%
-  \begin{itemdecl}
-    constexpr void reset() noexcept;
-  \end{itemdecl}
-
-  \begin{itemdescr}
-
-    \pnum
-    \ensures
-    \tcode{*this} does not refer to a value.
-  \end{itemdescr}
-
-\Sec2[version.syn]{Feature-test macro}
-Add the following macro definition to [version.syn], header <version> synopsis, with the value selected by the editor to reflect the date of adoption of this paper:
-
-\begin{codeblock}
-  #define __cpp_lib_optional_ref 20XXXXL // also in <ranges>, <tuple>, <utility>
-\end{codeblock}
+\include{new-optional}
 
 \end{wording}
 
@@ -914,213 +423,311 @@ The proposed changes are relative to the current working draft \cite{N4910}.
 \bibliographystyle{abstract}
 \bibliography{wg21,mybiblio}
 
-\chapter*{Changes Log}
-
-\begin{itemize}
-\item \textbf{Changes since R1}
-  \begin{itemize}
-  \item Design points called out
-  \end{itemize}
-\end{itemize}
 
 \backmatter
 \chapter*{Implementation}
 
 \begin{minted}{c++}
-namespace detail {
+  // ----------------------
+  // BASE AND DETAILS ELIDED
+  // ----------------------
 
-template <class T>
-struct is_optional_impl : std::false_type {};
+  /****************/
+  /* optional<T&> */
+  /****************/
 
-template <class T>
-struct is_optional_impl<optional<T>> : std::true_type {};
-
-template <class T>
-using is_optional = is_optional_impl<std::decay_t<T>>;
-
-} // namespace detail
-
-/****************/
-/* optional<T&> */
-/****************/
-
-template <class T>
-class optional<T&> {
-  public:
+  template <class T>
+  class optional<T&> {
+    public:
     using value_type = T&;
+    using iterator =
+    detail::contiguous_iterator<T,
+    optional>; // see [optionalref.iterators]
+    using const_iterator =
+    detail::contiguous_iterator<const T,
+    optional>; // see [optionalref.iterators]
 
-  private:
-    T* value_; // exposition only
+    private:
+    template <class R, class Arg>
+    constexpr R make_reference(Arg&& arg) // exposition only
+    requires is_constructible_v<R, Arg>;
 
-  public:
-    //  \rSec3[optional.ctor]{Constructors}
+    public:
+    // \ref{optionalref.ctor}, constructors
 
-    constexpr optional() noexcept : value_(nullptr) {}
-
-    constexpr optional(nullopt_t) noexcept : value_(nullptr) {}
-
+    constexpr optional() noexcept;
+    constexpr optional(nullopt_t) noexcept;
     constexpr optional(const optional& rhs) noexcept = default;
     constexpr optional(optional&& rhs) noexcept      = default;
 
+    template <class Arg>
+    constexpr explicit optional(in_place_t, Arg&& arg)
+    requires is_constructible_v<add_lvalue_reference_t<T>, Arg>;
+
     template <class U = T>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
-    constexpr explicit(!std::is_convertible_v<U, T>) optional(U&& u) noexcept
-        : value_(std::addressof(u)) {
-        static_assert(
-            std::is_constructible_v<std::add_lvalue_reference_t<T>, U>,
-            "Must be able to bind U to T&");
-        static_assert(std::is_lvalue_reference<U>::value,
-                      "U must be an lvalue");
-    }
-
+    requires(!detail::is_optional<decay_t<U>>)
+    constexpr explicit(!is_convertible_v<U, T>) optional(U&& u) noexcept;
     template <class U>
-    constexpr explicit(!std::is_convertible_v<U, T>)
-        optional(const optional<U>& rhs) noexcept
-        : optional(*rhs) {}
+    constexpr explicit(!is_convertible_v<U, T>)
+    optional(const optional<U>& rhs) noexcept;
 
-    //  \rSec3[optional.dtor]{Destructor}
-
+    // \ref{optionalref.dtor}, destructor
     constexpr ~optional() = default;
 
-    // \rSec3[optional.assign]{Assignment}
-
-    constexpr optional& operator=(nullopt_t) noexcept {
-        value_ = nullptr;
-        return *this;
-    }
+    // \ref{optionalref.assign}, assignment
+    constexpr optional& operator=(nullopt_t) noexcept;
 
     constexpr optional& operator=(const optional& rhs) noexcept = default;
     constexpr optional& operator=(optional&& rhs) noexcept      = default;
 
     template <class U = T>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
-    constexpr optional& operator=(U&& u) {
-        static_assert(
-            std::is_constructible_v<std::add_lvalue_reference_t<T>, U>,
-            "Must be able to bind U to T&");
-        static_assert(std::is_lvalue_reference<U>::value,
-                      "U must be an lvalue");
-        value_ = std::addressof(u);
-        return *this;
-    }
+    requires(!detail::is_optional<decay_t<U>>)
+    constexpr optional& operator=(U&& u);
 
     template <class U>
-    constexpr optional& operator=(const optional<U>& rhs) noexcept {
-        static_assert(
-            std::is_constructible_v<std::add_lvalue_reference_t<T>, U>,
-            "Must be able to bind U to T&");
-        value_ = std::addressof(rhs.value());
-        return *this;
-    }
+    constexpr optional& operator=(const optional<U>& rhs) noexcept;
 
     template <class U>
-        requires(!detail::is_optional<std::decay_t<U>>::value)
-    constexpr optional& emplace(U&& u) noexcept {
-        return *this = std::forward<U>(u);
-    }
-
-    //   \rSec3[optional.swap]{Swap}
-
-    constexpr void swap(optional& rhs) noexcept {
-        std::swap(value_, rhs.value_);
-    }
-
-    // \rSec3[optional.observe]{Observers}
-    constexpr T* operator->() const noexcept { return value_; }
-
-    constexpr T& operator*() const noexcept { return *value_; }
-
-    constexpr explicit operator bool() const noexcept {
-        return value_ != nullptr;
-    }
-    constexpr bool has_value() const noexcept { return value_ != nullptr; }
-
-    constexpr T& value() const {
-        if (has_value())
-            return *value_;
-        throw bad_optional_access();
-    }
+    constexpr optional& operator=(optional<U>&& rhs);
 
     template <class U>
-    constexpr T value_or(U&& u) const {
-        static_assert(std::is_constructible_v<std::add_lvalue_reference_t<T>,
-                                              decltype(u)>,
-                      "Must be able to bind u to T&");
-        return has_value() ? *value_ : std::forward<U>(u);
-    }
+    requires(!detail::is_optional<decay_t<U>>)
+    constexpr optional& emplace(U&& u) noexcept;
 
-    //   \rSec3[optional.monadic]{Monadic operations}
+    // \ref{optionalref.swap}, swap
+    constexpr void swap(optional& rhs) noexcept;
 
+    // \ref{optional.iterators}, iterator support
+    constexpr iterator       begin() noexcept;
+    constexpr const_iterator begin() const noexcept;
+    constexpr iterator       end() noexcept;
+    constexpr const_iterator end() const noexcept;
+
+    // \ref{optionalref.observe}, observers
+    constexpr T*       operator->() const noexcept;
+    constexpr T&       operator*() const noexcept;
+    constexpr explicit operator bool() const noexcept;
+    constexpr bool     has_value() const noexcept;
+    constexpr T&       value() const;
+    template <class U>
+    constexpr T value_or(U&& u) const;
+
+    // \ref{optionalref.monadic}, monadic operations
     template <class F>
-    constexpr auto and_then(F&& f) const {
-        using U = std::invoke_result_t<F, T&>;
-        static_assert(detail::is_optional<U>::value,
-                      "F must return an optional");
-        return (has_value()) ? std::invoke(std::forward<F>(f), *value_)
-                             : std::remove_cvref_t<U>();
-    }
-
+    constexpr auto and_then(F&& f) const;
     template <class F>
-    constexpr auto
-    transform(F&& f) const -> optional<std::invoke_result_t<F, T&>> {
-        using U = std::invoke_result_t<F, T&>;
-        return (has_value())
-                   ? optional<U>{std::invoke(std::forward<F>(f), *value_)}
-                   : optional<U>{};
-    }
-
+    constexpr auto transform(F&& f) const -> optional<invoke_result_t<F, T&>>;
     template <class F>
-    constexpr optional or_else(F&& f) const {
-        using U = std::invoke_result_t<F>;
-        static_assert(std::is_same_v<std::remove_cvref_t<U>, optional>);
-        return has_value() ? *value_ : std::forward<F>(f)();
-    }
+    constexpr optional or_else(F&& f) const;
 
-    constexpr void reset() noexcept { value_ = nullptr; }
-    using iterator       = T*;
-    using const_iterator = const T*;
+    // \ref{optional.mod}, modifiers
+    constexpr void reset() noexcept;
 
-    // [optional.iterators], iterator support
-    constexpr T* begin() noexcept {
-        if (has_value()) {
-            return value_;
-        } else {
-            return nullptr;
-        }
-    }
-    constexpr const T* begin() const noexcept {
-        if (has_value()) {
-            return value_;
-        } else {
-            return nullptr;
-        }
-    }
-    constexpr T* end() noexcept { return begin() + has_value(); }
+    private:
+    T* value_; // exposition only
+  };
 
-    constexpr const T* end() const noexcept { return begin() + has_value(); }
+  template <class T>
+  template <class R, class Arg>
+  constexpr R optional<T&>::make_reference(Arg&& arg)
+  requires is_constructible_v<R, Arg>
+  {
+    static_assert(std::is_reference_v<R>);
+    #if (__cpp_lib_reference_from_temporary >= 202202L)
+    static_assert(!std::reference_converts_from_temporary_v<R, Arg>,
+    "Reference conversion from temporary not allowed.");
+    #endif
+    R r(std::forward<Arg>(arg));
+    return r;
+  }
 
-    constexpr std::reverse_iterator<T*> rbegin() noexcept {
-        return reverse_iterator(end());
-    }
-    constexpr std::reverse_iterator<const T*> rbegin() const noexcept {
-        return reverse_iterator(end());
-    }
-    constexpr std::reverse_iterator<T*> rend() noexcept {
-        return reverse_iterator(begin());
-    }
-    constexpr std::reverse_iterator<const T*> rend() const noexcept {
-        return reverse_iterator(begin());
-    }
+  //  \rSec3[optionalref.ctor]{Constructors}
+  template <class T>
+  constexpr optional<T&>::optional() noexcept : value_(nullptr) {}
 
-    constexpr const T* cbegin() const noexcept { return begin(); }
-    constexpr const T* cend() const noexcept { return end(); }
-    constexpr std::reverse_iterator<const T*> crbegin() const noexcept {
-        return rbegin();
-    }
-    constexpr std::reverse_iterator<const T*> crend() const noexcept {
-        return rend();
-    }
-};
+  template <class T>
+  constexpr optional<T&>::optional(nullopt_t) noexcept : value_(nullptr) {}
+
+  template <class T>
+  template <class Arg>
+  constexpr optional<T&>::optional(in_place_t, Arg&& arg)
+  requires is_constructible_v<add_lvalue_reference_t<T>, Arg>
+  : value_(addressof(
+  make_reference<add_lvalue_reference_t<T>>(std::forward<Arg>(arg)))) {
+  }
+
+  template <class T>
+  template <class U>
+  requires(!detail::is_optional<decay_t<U>>)
+  constexpr optional<T&>::optional(U&& u) noexcept : value_(addressof(u)) {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>,
+    "Must be able to bind U to T&");
+    static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
+  }
+
+  template <class T>
+  template <class U>
+  constexpr optional<T&>::optional(const optional<U>& rhs) noexcept {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>,
+    "Must be able to bind U to T&");
+    if (rhs.has_value())
+    value_ = to_address(rhs);
+    else
+    value_ = nullptr;
+  }
+
+  // \rSec3[optionalref.assign]{Assignment}
+  template <class T>
+  constexpr optional<T&>& optional<T&>::operator=(nullopt_t) noexcept {
+    value_ = nullptr;
+    return *this;
+  }
+
+  template <class T>
+  template <class U>
+  requires(!detail::is_optional<decay_t<U>>)
+  constexpr optional<T&>& optional<T&>::operator=(U&& u) {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>,
+    "Must be able to bind U to T&");
+    static_assert(is_lvalue_reference<U>::value, "U must be an lvalue");
+    value_ = addressof(u);
+    return *this;
+  }
+
+  template <class T>
+  template <class U>
+  constexpr optional<T&>&
+  optional<T&>::operator=(const optional<U>& rhs) noexcept {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>,
+    "Must be able to bind U to T&");
+    if (rhs.has_value())
+    value_ = to_address(rhs);
+    else
+    value_ = nullptr;
+    return *this;
+  }
+
+  template <class T>
+  template <class U>
+  constexpr optional<T&>& optional<T&>::operator=(optional<U>&& rhs) {
+    static_assert(is_constructible_v<add_lvalue_reference_t<T>, U>,
+    "Must be able to bind U to T&");
+    #if (__cpp_lib_reference_from_temporary >= 202202L)
+    static_assert(
+    !std::reference_converts_from_temporary_v<add_lvalue_reference_t<T>,
+    U>,
+    "Reference conversion from temporary not allowed.");
+    #endif
+    if (rhs.has_value())
+    value_ = to_address(rhs);
+    else
+    value_ = nullptr;
+    return *this;
+  }
+
+  template <class T>
+  template <class U>
+  requires(!detail::is_optional<decay_t<U>>)
+  constexpr optional<T&>& optional<T&>::emplace(U&& u) noexcept {
+    return *this = std::forward<U>(u);
+  }
+
+  //   \rSec3[optionalref.swap]{Swap}
+
+  template <class T>
+  constexpr void optional<T&>::swap(optional<T&>& rhs) noexcept {
+    std::swap(value_, rhs.value_);
+  }
+
+  // \rSec3[optionalref.iterators]{Iterator Support}
+  template <class T>
+  constexpr optional<T&>::iterator optional<T&>::begin() noexcept {
+    return iterator(has_value() ? value_ : nullptr);
+  };
+
+  template <class T>
+  constexpr optional<T&>::const_iterator optional<T&>::begin() const noexcept {
+    return const_iterator(has_value() ? value_ : nullptr);
+  };
+
+  template <class T>
+  constexpr optional<T&>::iterator optional<T&>::end() noexcept {
+    return begin() + has_value();
+  }
+
+  template <class T>
+  constexpr optional<T&>::const_iterator optional<T&>::end() const noexcept {
+    return begin() + has_value();
+  }
+
+  // \rSec3[optionalref.observe]{Observers}
+  template <class T>
+  constexpr T* optional<T&>::operator->() const noexcept {
+    return value_;
+  }
+
+  template <class T>
+  constexpr T& optional<T&>::operator*() const noexcept {
+    return *value_;
+  }
+
+  template <class T>
+  constexpr optional<T&>::operator bool() const noexcept {
+    return value_ != nullptr;
+  }
+  template <class T>
+  constexpr bool optional<T&>::has_value() const noexcept {
+    return value_ != nullptr;
+  }
+
+  template <class T>
+  constexpr T& optional<T&>::value() const {
+    if (has_value())
+    return *value_;
+    throw bad_optional_access();
+  }
+
+  template <class T>
+  template <class U>
+  constexpr T optional<T&>::value_or(U&& u) const {
+    static_assert(is_copy_constructible_v<T>, "T must be copy constructible");
+    static_assert(is_convertible_v<decltype(u), T>,
+    "Must be able to convert u to T");
+    return has_value() ? *value_ : std::forward<U>(u);
+  }
+
+  //   \rSec3[optionalref.monadic]{Monadic operations}
+  template <class T>
+  template <class F>
+  constexpr auto optional<T&>::and_then(F&& f) const {
+    using U = invoke_result_t<F, T&>;
+    static_assert(detail::is_optional<U>, "F must return an optional");
+    return (has_value()) ? invoke(std::forward<F>(f), *value_)
+    : remove_cvref_t<U>();
+  }
+
+  template <class T>
+  template <class F>
+  constexpr auto optional<T&>::transform(F&& f) const
+  -> optional<invoke_result_t<F, T&>> {
+    using U = invoke_result_t<F, T&>;
+    return (has_value()) ? optional<U>{invoke(std::forward<F>(f), *value_)}
+    : optional<U>{};
+  }
+
+  template <class T>
+  template <class F>
+  constexpr optional<T&> optional<T&>::or_else(F&& f) const {
+    using U = invoke_result_t<F>;
+    static_assert(is_same_v<remove_cvref_t<U>, optional>);
+    return has_value() ? *value_ : std::forward<F>(f)();
+  }
+
+  // \rSec3[optional.mod]{modifiers}
+  template <class T>
+  constexpr void optional<T&>::reset() noexcept {
+    value_ = nullptr;
+  }
+
 \end{minted}
-
 \end{document}

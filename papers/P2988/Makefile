@@ -31,6 +31,13 @@ papers: optional_ref_wording.pdf ## Compile papers
 optional_ref_wording.pdf : optional_ref_wording.tex wg21.bib $(DEPS_DIR) | $(VENV)
 	$(SOURCE_VENV) latexmk -f -shell-escape -pdflua -use-make -deps -deps-out=$(DEPS_DIR)/$@.d -MP optional_ref_wording.tex
 
+base.pdf : base.tex wg21.bib $(DEPS_DIR) | $(VENV)
+	$(SOURCE_VENV) latexmk -f -shell-escape -pdflua -use-make -deps -deps-out=$(DEPS_DIR)/$@.d -MP base.tex
+
+new.pdf : new.tex wg21.bib $(DEPS_DIR) | $(VENV)
+	$(SOURCE_VENV) latexmk -f -shell-escape -pdflua -use-make -deps -deps-out=$(DEPS_DIR)/$@.d -MP new.tex
+
+
 define curl_cmd =
 	curl https://wg21.link/index.bib > wg21.bib
 endef
@@ -46,10 +53,11 @@ curl-bib:  ## Download wg21.bib from wg21.link
 clean:
 	latexmk -c
 	@$(MAKE) -f wg21/Makefile clean
+	-rm *.pdf
 
 # Include dependencies
-$(foreach file,$(TARGET),$(eval -include $(DEPS_DIR)/$(file).d))
-
+# $(foreach file,$(TARGET),$(eval -include $(DEPS_DIR)/$(file).d))
+-include $(DEPS_DIR)/*.d
 
 help: ## Show this help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST)  | sort

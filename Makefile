@@ -59,6 +59,7 @@ $(_build_path)/CMakeCache.txt: | $(_build_path) .gitmodules
 	-rm compile_commands.json
 	ln -s $(_build_path)/compile_commands.json
 
+TARGET:=all
 compile: $(_build_path)/CMakeCache.txt ## Compile the project
 	cmake --build $(_build_path)  --config $(CONFIG) --target all -- -k 0
 
@@ -90,6 +91,9 @@ env:
 .PHONY: papers
 papers:
 	$(MAKE) -C papers/P2988 papers
+
+.DEFAULT: $(_build_path)/CMakeCache.txt ## Other targets passed through to cmake
+	cmake --build $(_build_path)  --config $(CONFIG) --target $@ -- -k 0
 
 PYEXECPATH ?= $(shell which python3.12 || which python3.11 || which python3.10 || which python3.9 || which python3.8 || which python3.7 || which python3)
 PYTHON ?= $(shell basename $(PYEXECPATH))
@@ -167,4 +171,4 @@ coverage: venv
 # Help target
 .PHONY: help
 help: ## Show this help.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST) | sort
+	@awk 'BEGIN {FS = ":.*?## "} /^[.a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'  $(MAKEFILE_LIST) | sort

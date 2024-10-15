@@ -118,12 +118,45 @@ TEST(OptionalTest, NonDefaultConstruct) {
     std::ignore = v2;
 }
 
+TEST(OptionalTest, OptionalOfOptional) {
+    using O = beman::optional26::optional<int>;
+    O                              o;
+    beman::optional26::optional<O> oo1 = o;
+    EXPECT_TRUE(oo1.has_value());
+    oo1 = o;
+    EXPECT_TRUE(oo1.has_value());
+    EXPECT_FALSE(oo1->has_value());
+
+    beman::optional26::optional<O> oo2 = std::move(o);
+    EXPECT_TRUE(oo2.has_value());
+    oo2 = o;
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_FALSE(oo2->has_value());
+
+    // emplace constructs the inner optional
+    oo2.emplace(beman::optional26::nullopt);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_FALSE(oo2->has_value());
+    oo2.emplace(beman::optional26::in_place, 41);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(oo2.value() == 41);
+    oo2.emplace(42);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(oo2.value() == 42);
+    oo2.emplace(o);
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_FALSE(oo2->has_value());
+    oo2.emplace(O(43));
+    EXPECT_TRUE(oo2.has_value());
+    EXPECT_TRUE(oo2.value() == 43);
+}
+
 TEST(OptionalTest, AssignmentValue) {
     beman::optional26::optional<int> o1 = 42;
     beman::optional26::optional<int> o2 = 12;
     beman::optional26::optional<int> o3;
 
-    o1 = o1;
+    o1 = static_cast<beman::optional26::optional<int>&>(o1);
     EXPECT_TRUE(*o1 == 42);
 
     o1 = o2;
@@ -337,13 +370,6 @@ TEST(OptionalTest, MakeOptional) {
     EXPECT_TRUE(std::get<0>(o5->t) == 2);
     EXPECT_TRUE(std::get<1>(o5->t) == 3);
 
-    auto i  = 42;
-    auto o6 = beman::optional26::make_optional<int&>(i);
-    static_assert(std::is_same<decltype(o6), beman::optional26::optional<int>>::value);
-
-    EXPECT_TRUE((std::is_same<decltype(o6), beman::optional26::optional<int>>::value));
-    EXPECT_TRUE(o6);
-    EXPECT_TRUE(*o6 == 42);
 }
 
 TEST(OptionalTest, Nullopt) {
@@ -594,6 +620,21 @@ TEST(OptionalTest, RangeTest) {
     for (auto k : o2) {
         EXPECT_EQ(k, 42);
     }
+}
+
+TEST(OptionalTest, HashTest) {
+    beman::optional26::optional<int> o1 = beman::optional26::nullopt;
+    beman::optional26::optional<int> o2 = beman::optional26::nullopt;
+    beman::optional26::optional<int> o3 = 42;
+    beman::optional26::optional<int> o4 = 42;
+
+    auto h1 = std::hash<beman::optional26::optional<int>>{}(o1);
+    auto h2 = std::hash<beman::optional26::optional<int>>{}(o2);
+    auto h3 = std::hash<beman::optional26::optional<int>>{}(o3);
+    auto h4 = std::hash<beman::optional26::optional<int>>{}(o4);
+
+    EXPECT_EQ(h1, h2);
+    EXPECT_EQ(h3, h4);
 }
 
 TEST(ViewMaybeTest, Constructors) {
