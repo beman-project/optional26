@@ -1147,4 +1147,21 @@ class optional<T&> {
 
 } // namespace beman::optional26
 
+namespace std {
+template <typename T>
+    requires requires(T a) {
+        { std::hash<remove_const_t<T>>{}(a) } -> std::convertible_to<std::size_t>;
+    }
+struct hash<beman::optional26::optional<T>> {
+    static_assert(!is_reference_v<T>, "hash is not enabled for reference types");
+    size_t operator()(const beman::optional26::optional<T>& o) const
+        noexcept(noexcept(hash<remove_const_t<T>>{}(*o))) {
+        if (o) {
+            return std::hash<std::remove_const_t<T>>{}(*o);
+        } else {
+            return 0;
+        }
+    }
+};
+} // namespace std
 #endif // BEMAN_OPTIONAL26_OPTIONAL_HPP
