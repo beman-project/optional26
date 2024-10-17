@@ -837,7 +837,7 @@ TEST(OptionalTest, HashTest) {
     EXPECT_EQ(h3, h4);
     EXPECT_NE(h1, h3);
 
-    for(int i : std::views::iota(0, 1000)) {
+    for (int i : std::views::iota(0, 1000)) {
         auto h1 = std::hash<beman::optional26::optional<int>>{}(i);
         auto h2 = std::hash<int>{}(i);
         EXPECT_EQ(h1, h2);
