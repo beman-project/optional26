@@ -288,8 +288,8 @@ concept enable_assign_from_other =
 template <class T>
 class optional {
     static_assert((!std::is_same_v<T, std::remove_cv_t<in_place_t>>) &&
-                    (!std::is_same_v<std::remove_cv_t<T>, nullopt_t>),
-                "T must not be in_place_t or nullopt_t");
+                      (!std::is_same_v<std::remove_cv_t<T>, nullopt_t>),
+                  "T must not be in_place_t or nullopt_t");
 
     struct empty {};
     union {
