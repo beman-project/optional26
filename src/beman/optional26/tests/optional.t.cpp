@@ -10,6 +10,7 @@
 #include <functional>
 #include <ranges>
 #include <tuple>
+#include <algorithm>
 
 #include <gtest/gtest.h>
 
@@ -622,22 +623,7 @@ TEST(OptionalTest, RangeTest) {
     }
 }
 
-TEST(OptionalTest, HashTest) {
-    beman::optional26::optional<int> o1 = beman::optional26::nullopt;
-    beman::optional26::optional<int> o2 = beman::optional26::nullopt;
-    beman::optional26::optional<int> o3 = 42;
-    beman::optional26::optional<int> o4 = 42;
-
-    auto h1 = std::hash<beman::optional26::optional<int>>{}(o1);
-    auto h2 = std::hash<beman::optional26::optional<int>>{}(o2);
-    auto h3 = std::hash<beman::optional26::optional<int>>{}(o3);
-    auto h4 = std::hash<beman::optional26::optional<int>>{}(o4);
-
-    EXPECT_EQ(h1, h2);
-    EXPECT_EQ(h3, h4);
-}
-
-TEST(ViewMaybeTest, Constructors) {
+TEST(OptionalTest, RangeConstructors) {
     std::ranges::single_view<std::optional<int>> s;
     std::ranges::single_view<std::optional<int>> s2{s};
     std::ranges::single_view<std::optional<int>> s3{std::optional<int>{}};
@@ -651,7 +637,7 @@ TEST(ViewMaybeTest, Constructors) {
     std::ignore = n3;
 }
 
-TEST(ViewMaybeTest, ConceptCheckRef) {
+TEST(OptionalTest, ConceptCheckRef) {
     static_assert(std::ranges::range<beman::optional26::optional<int&>>);
     static_assert(std::ranges::view<beman::optional26::optional<int&>>);
     static_assert(std::ranges::input_range<beman::optional26::optional<int&>>);
@@ -687,7 +673,7 @@ TEST(ViewMaybeTest, ConceptCheckRef) {
     static_assert(std::ranges::random_access_range<beman::optional26::optional<ref>>);
 }
 
-TEST(ViewMaybeTest, BreathingTest) {
+TEST(OptionalTest, BreathingTest) {
     beman::optional26::optional<int> m;
     beman::optional26::optional<int> m1{1};
 
@@ -705,7 +691,7 @@ TEST(ViewMaybeTest, BreathingTest) {
     ASSERT_EQ(*std::begin(d0), 1.0);
 }
 
-TEST(ViewMaybeTest, BreathingTestRef) {
+TEST(OptionalTest, BreathingTestRef) {
     beman::optional26::optional<int&> m;
 
     int                               one = 1;
@@ -724,7 +710,7 @@ TEST(ViewMaybeTest, BreathingTestRef) {
     ASSERT_EQ(*std::begin(d0), 1.0);
 }
 
-TEST(ViewMaybe, CompTest) {
+TEST(OptionalTest, CompTest) {
     beman::optional26::optional<int> m;
     beman::optional26::optional<int> m0{0};
     beman::optional26::optional<int> m1{1};
@@ -744,7 +730,7 @@ TEST(ViewMaybe, CompTest) {
     ASSERT_TRUE(m1 <= m1a);
 }
 
-TEST(ViewMaybe, CompTestRef) {
+TEST(OptionalTest, CompTestRef) {
     beman::optional26::optional<int&> m;
     int                               zero  = 0;
     int                               one   = 1;
@@ -784,7 +770,7 @@ inline constexpr auto yield_if = []<class T>(bool b, T x) {
     return b ? beman::optional26::optional<T>{std::move(x)} : beman::optional26::nullopt;
 };
 
-TEST(ViewMaybeTest, PythTripleTest) {
+TEST(OptionalTest, PythTripleTest) {
     using std::views::iota;
     auto triples = and_then(iota(1), [](int z) {
         return and_then(iota(1, z + 1), [=](int x) {
@@ -798,7 +784,7 @@ TEST(ViewMaybeTest, PythTripleTest) {
 
 using namespace beman;
 
-TEST(ViewMaybeTest, ValueBase) {
+TEST(OptionalTest, ValueBase) {
     int                              i = 7;
     beman::optional26::optional<int> v1{};
 
@@ -810,7 +796,7 @@ TEST(ViewMaybeTest, ValueBase) {
         ASSERT_EQ(i, 7);
 }
 
-TEST(ViewMaybeTest, RefWrapper) {
+TEST(OptionalTest, RefWrapper) {
     int i = 7;
 
     beman::optional26::optional<int> v2{std::ref(i)};
@@ -819,7 +805,7 @@ TEST(ViewMaybeTest, RefWrapper) {
         ASSERT_EQ(i, 7);
 }
 
-TEST(ViewMaybeTest, ValueNonDefaultConstruct) {
+TEST(OptionalTest, ValueNonDefaultConstruct) {
     using beman::optional26::tests::int_ctor;
     int_ctor                              i = 7;
     beman::optional26::optional<int_ctor> v1{};
@@ -828,7 +814,7 @@ TEST(ViewMaybeTest, ValueNonDefaultConstruct) {
     std::ignore = v2;
 }
 
-TEST(ViewMaybeTest, RefBase) {
+TEST(OptionalTest, RefBase) {
     int                               i = 7;
     beman::optional26::optional<int&> v1{};
     // ASSERT_TRUE(v1.size() == 0);
@@ -860,4 +846,26 @@ TEST(ViewMaybeTest, RefBase) {
         ASSERT_EQ(i, 9);
     }
     ASSERT_EQ(s, 9);
+}
+
+TEST(OptionalTest, HashTest) {
+    beman::optional26::optional<int> o1 = beman::optional26::nullopt;
+    beman::optional26::optional<int> o2 = beman::optional26::nullopt;
+    beman::optional26::optional<int> o3 = 42;
+    beman::optional26::optional<int> o4 = 42;
+
+    auto h1 = std::hash<beman::optional26::optional<int>>{}(o1);
+    auto h2 = std::hash<beman::optional26::optional<int>>{}(o2);
+    auto h3 = std::hash<beman::optional26::optional<int>>{}(o3);
+    auto h4 = std::hash<beman::optional26::optional<int>>{}(o4);
+
+    EXPECT_EQ(h1, h2);
+    EXPECT_EQ(h3, h4);
+    EXPECT_NE(h1, h3);
+
+    for (int i : std::views::iota(0, 1000)) {
+        auto h1 = std::hash<beman::optional26::optional<int>>{}(i);
+        auto h2 = std::hash<int>{}(i);
+        EXPECT_EQ(h1, h2);
+    }
 }
