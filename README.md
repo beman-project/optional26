@@ -6,7 +6,10 @@ SPDX-License-Identifier: 2.0 license with LLVM exceptions
 
 ![CI Tests](https://github.com/beman-project/Optional26/actions/workflows/ci.yml/badge.svg)
 
-This repository implements `std::optional` extensions targeting C++26. The `beman.optional26` library aims to evaluate the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in major standard library compilers.
+This repository implements `std::optional` extensions targeting C++26. The `beman.optional26` library aims to evaluate
+the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21
+into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in
+major standard library compilers.
 
 **Implements**:
 
@@ -41,9 +44,11 @@ Documentation and associated papers are licensed with the Creative Commons Attri
 
 // SPDX-License-Identifier: CC-BY-4.0
 
-The intent is that the source and documentation are available for use by people implementing their own optional types as well as people using the optional presented here as-is.
+The intent is that the source and documentation are available for use by people implementing their own optional types
+as well as people using the optional presented here as-is.
 
-The README itself is licensed with CC0 1.0 Universal. Copy the contents and incorporate in your own work as you see fit.
+The README itself is licensed with CC0 1.0 Universal. Copy the contents and incorporate in your own work as you see
+fit.
 
 // SPDX-License-Identifier: CC0-1.0
 
@@ -53,7 +58,7 @@ Full runable examples can be found in `examples/` - please check [./examples/REA
 
 ### range_loop
 
-The next code snippet shows optional range support added in [Give *std::optional* Range Support (P3168R2)](https://wg21.link/P3168R2):
+The next code snippet shows optional range support added in [Give *std::optional* Range Support(P3168R2)](https://wg21.link/P3168R2):
 
 ```cpp
 #include <Beman/Optional26/optional.hpp>
@@ -74,11 +79,13 @@ for (const auto& i : opt) {
 }
 ```
 
-Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp). Build and run instructions in [./examples/README.md](./examples/README.md).  Or [try it on Compiler Explorer](https://godbolt.org/z/b5ThEqqhf).
+Full code can be found in [./examples/range_loop.cpp](./examples/range_loop.cpp). Build and run instructions in
+[./examples/README.md](./examples/README.md). Or [try it on Compiler Explorer](https://godbolt.org/z/b5ThEqqhf).
 
 ### optional_ref
 
-The next code snippet shows optional reference support added in [`std::optional<T&>` (P2988R5)](https://wg21.link/P2988R5):
+The next code snippet shows optional reference support added in [`std::optional<T&>`
+(P2988R5)](https://wg21.link/P2988R5):
 
 ```cpp
 #include <Beman/Optional26/optional.hpp>
@@ -117,7 +124,8 @@ Default build: `C++23`. Please check `etc/${compiler}-flags.cmake`.
 
 ### Dependencies
 
-This project is mainly tested on `Ubuntu 22.04` and `Ubuntu 24.04`, but it should be as portable as CMake is. This project has no C or C++ dependencies.
+This project is mainly tested on `Ubuntu 22.04` and `Ubuntu 24.04`, but it should be as portable as CMake is. This
+project has no C or C++ dependencies.
 
 Build-time dependencies:
 
@@ -143,7 +151,8 @@ Full set of supported toolchains can be found in [.github/workflows/ci.yml](.git
 
 #### Preset CMake Flows
 
-This project strives to be as normal and simple a CMake project as possible. This build workflow in particular will work, producing a static `beman_optional26` library, ready to package:
+This project strives to be as normal and simple a CMake project as possible. This build workflow in particular will
+work, producing a static `beman_optional26` library, ready to package:
 
 ```shell
 # List available preset configurations:
@@ -238,11 +247,18 @@ No tests were found!!!
 ```
 
 #### Pre-Commit for Linting
-Various linting tools are configured and installed via the [pre-commit](https://pre-commit.com/) framework. This requires a working python environment, but also allows the tools, such as clang-format and cmake-lint, to be versioned on a per project basis rather than being installed globally. Version changes in lint checks often means differences in success or failure between the versions in CI and the versions used by a developer. By using the same configurations, this problem is avoided.
 
-In order to set up a python environment, using a python virtual environment can simplify maintaining different configurations between projects. There is no particular dependency on a particular python3 version.
+Various linting tools are configured and installed via the [pre-commit](https://pre-commit.com/) framework. This
+requires a working python environment, but also allows the tools, such as clang-format and cmake-lint, to be versioned
+on a per project basis rather than being installed globally. Version changes in lint checks often means differences in
+success or failure between the versions in CI and the versions used by a developer. By using the same configurations,
+this problem is avoided.
+
+In order to set up a python environment, using a python virtual environment can simplify maintaining different
+configurations between projects. There is no particular dependency on a particular python3 version.
 
 ##### Creating and configuring a venv
+
 ```shell
 python3 -m venv .venv
 . .venv/bin/activate && python3 -m pip install --upgrade pip setuptools wheel
@@ -252,9 +268,11 @@ python3 -m venv .venv
 . .venv/bin/activate && exec bash
 ```
 
-This will create the venv, install the python and python development tools, and run bash with the PATH and other environment variables set to use the venv preferentially.
+This will create the venv, install the python and python development tools, and run bash with the PATH and other
+environment variables set to use the venv preferentially.
 
 ##### Running the linting tools
+
 ```shell
 pre-commit run -a
 ```
