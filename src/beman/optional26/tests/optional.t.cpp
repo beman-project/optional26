@@ -370,7 +370,6 @@ TEST(OptionalTest, MakeOptional) {
     EXPECT_TRUE(o5->v[1] == 1);
     EXPECT_TRUE(std::get<0>(o5->t) == 2);
     EXPECT_TRUE(std::get<1>(o5->t) == 3);
-
 }
 
 TEST(OptionalTest, Nullopt) {
