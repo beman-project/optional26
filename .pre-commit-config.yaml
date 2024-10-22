@@ -62,13 +62,13 @@ repos:
             papers/.*
           )$
 
-  # CMake formatting
-  - repo: https://github.com/cheshirekow/cmake-format-precommit
-    rev: "v0.6.13"
-    hooks:
-      - id: cmake-format
-        additional_dependencies: [pyyaml]
-      - id: cmake-lint
+  # # CMake formatting
+  # - repo: https://github.com/cheshirekow/cmake-format-precommit
+  #   rev: "v0.6.13"
+  #   hooks:
+  #     - id: cmake-format
+  #       additional_dependencies: [pyyaml]
+  #     - id: cmake-lint
 
   - repo: https://github.com/jorisroovers/gitlint
     rev: v0.19.1
