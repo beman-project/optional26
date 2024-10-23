@@ -203,7 +203,10 @@ CI current build and test flows:
 
 ```shell
 # Configure build: default build production code + tests (BUILD_TESTING=ON by default).
-$ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -B .build -S .
+$ cmake -G "Ninja Multi-Config" \
+      -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" \
+      -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake \
+      -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...
 -- Build files have been written to: /path/to/Optional26/.build
@@ -229,7 +232,11 @@ By default, we build and run tests. You can provide `-DBUILD_TESTING=OFF` and co
 
 ```shell
 # Configure build: build production code, skip tests (BUILD_TESTING=OFF).
-$ cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake -DBUILD_TESTING=OFF -B .build -S .
+$ cmake -G "Ninja Multi-Config" \
+      -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" \
+      -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake \
+      -DBUILD_TESTING=OFF \
+      -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...
 -- Build files have been written to: /path/to/Optional26/.build
@@ -289,7 +296,8 @@ make lint
 
 Latest revision(s) of the papers can be built / found at:
 
-* [give-std-optional-range-support](https://github.com/neatudarius/give-std-optional-range-support/) for `Give *std::optional* Range Support (P3168)`
+* [give-std-optional-range-support](https://github.com/neatudarius/give-std-optional-range-support/) for
+`Give *std::optional* Range Support (P3168)`
   * issue: [#1831](https://github.com/cplusplus/papers/issues/1831)
   * LEWG:
     * Reviewed in Tokyo 2024.

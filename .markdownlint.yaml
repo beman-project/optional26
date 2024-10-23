@@ -8,5 +8,7 @@ MD033: false
 MD013:
   line_length: 119
 
+# MD024/no-duplicate-heading : https://github.com/DavidAnson/markdownlint/blob/main/doc/md024.md
+# Supress warning about the same heading twice unless they are in the same block
 MD024:
   siblings_only: true
