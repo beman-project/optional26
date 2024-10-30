@@ -8,22 +8,30 @@ set(BEMAN_OPTIONAL26_LIBRARY "beman_optional26")
 include(GNUInstallDirs)
 
 # List of all buildable examples.
-set(EXAMPLES concept_checks optional_ref pythagorean_triples range_loop sample
-             std_vs_beman)
+set(EXAMPLES
+    concept_checks
+    optional_ref
+    pythagorean_triples
+    range_loop
+    sample
+    std_vs_beman
+)
 
 foreach(example ${EXAMPLES})
-  # Add example executable.
-  add_executable(${example} "")
+    # Add example executable.
+    add_executable(${example} "")
 
-  # Add example source file.
-  target_sources(${example} PRIVATE ${example}.cpp)
+    # Add example source file.
+    target_sources(${example} PRIVATE ${example}.cpp)
 
-  # Link example with the library.
-  target_link_libraries(${example} "${BEMAN_OPTIONAL26_LIBRARY}")
+    # Link example with the library.
+    target_link_libraries(${example} "${BEMAN_OPTIONAL26_LIBRARY}")
 
-  # Install .
-  install(
-    TARGETS ${example}
-    EXPORT ${TARGETS_EXPORT_NAME}
-    DESTINATION ${CMAKE_INSTALL_BINDIR})
+    # Install .
+    install(
+        TARGETS ${example}
+        EXPORT ${TARGETS_EXPORT_NAME}
+        DESTINATION
+        ${CMAKE_INSTALL_BINDIR}
+    )
 endforeach()
