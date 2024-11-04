@@ -2,83 +2,33 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
-      - id: check-added-large-files
-      - id: check-case-conflict
-      - id: check-executables-have-shebangs
-      - id: check-json
-      - id: check-merge-conflict
-      - id: check-symlinks
-      - id: check-toml
-      - id: check-xml
-      - id: check-yaml
-      - id: detect-private-key
-      - id: end-of-file-fixer
-        exclude: '^(.*\.svg)$'
-      - id: mixed-line-ending
-        args: ['--fix=lf']
-        exclude: '^(.*\.svg)$'
-      - id: trailing-whitespace
-        exclude: '^(|.*\.svg)$'
-      - id: fix-byte-order-marker
-      - id: no-commit-to-branch
-      - id: requirements-txt-fixer
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
 
-  - repo: local
+    # Clang-format for C++
+    # This brings in a portable version of clang-format.
+    # See also: https://github.com/ssciwr/clang-format-wheel
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v18.1.8
     hooks:
-      - id: clang-format-fix
-        name: clang-format-fix
-        entry: clang-format-18
-        files: ^(src/|include/)
-        types_or: [c++, c]
-        language: system
-        args: ['-i']
-        stages: [manual]
+    - id: clang-format
+      types_or: [c++, c]
 
-  - repo: https://github.com/pocc/pre-commit-hooks
-    rev: v1.3.5
+    # CMake linting and formatting
+  - repo: https://github.com/BlankSpruce/gersemi
+    rev: 0.15.1
     hooks:
-      - id: clang-format
-        additional_dependencies: ['clang-format==18.1.8']
-      # - id: oclint
-      # - id: cppcheck
-      # - id: cpplint
+    - id: gersemi
+      name: CMake linting
 
-  - repo: https://github.com/pocc/pre-commit-hooks
-    rev: v1.3.5
+    # Markdown linting
+    # Config file: .markdownlint.yaml
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.41.0
     hooks:
-      - id: clang-tidy
-        stages: [manual]
-        additional_dependencies: ['clang-tidy==18.1.8']
-
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
-    hooks:
-      - id: codespell
-        args: ['-I', '.codespell_ignore', '--uri-ignore-words-list']
-        exclude: |
-          (?x)^(
-            papers/.*
-          )$
-
-  # # CMake formatting
-  # - repo: https://github.com/cheshirekow/cmake-format-precommit
-  #   rev: "v0.6.13"
-  #   hooks:
-  #     - id: cmake-format
-  #       additional_dependencies: [pyyaml]
-  #     - id: cmake-lint
-
-  - repo: https://github.com/jorisroovers/gitlint
-    rev: v0.19.1
-    hooks:
-      - id: gitlint
-      - id: gitlint-ci
-
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
-    hooks:
-      - id: shellcheck
-
-exclude: 'vendor'
+    - id: markdownlint
+      exclude: ^papers/
