@@ -20,3 +20,26 @@
   \settocdepth{section}
 
 }
+
+\newenvironment{addedcode}
+{
+\color{addclr}
+\begin{codeblock}
+}
+{
+\end{codeblock}
+\color{black}
+}
+
+\newenvironment{removedcode}
+{
+\color{remclr}
+\begin{codeblock}
+}
+{
+\end{codeblock}
+\color{black}
+}
+
+\newcommand{\todo}[1]{}
+\renewcommand{\todo}[1]{{\color{red} TODO: {#1}}}

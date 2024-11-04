@@ -29,7 +29,7 @@ set(CMAKE_CXX_FLAGS_TSAN
     FORCE
 )
 set(CMAKE_CXX_FLAGS_ASAN
-    "-O3 -g -DNDEBUG -fsanitize=undefined"
+    "-O3 -g -DNDEBUG -fsanitize=address,undefined,leak"
     CACHE STRING
     "C++ ASAN Flags"
     FORCE
