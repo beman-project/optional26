@@ -6,7 +6,8 @@ SPDX-License-Identifier: 2.0 license with LLVM exceptions
 
 ## CI flows
 
-CI flows are found in [.github/workflows/](.github/workflows/). Usually, they are run when generating a Git Action (e.g. at `push`).
+CI flows are found in [.github/workflows/](.github/workflows/). Usually, they
+are run when generating a Git Action (e.g. at `push`).
 
 WIP to add flows for tests, linting etc.
 
