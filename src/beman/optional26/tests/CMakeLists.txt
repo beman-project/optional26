@@ -9,8 +9,8 @@ include(GoogleTest)
 add_executable(beman_optional26_test)
 
 target_sources(
-  beman_optional26_test
-  PRIVATE
+    beman_optional26_test
+    PRIVATE
         optional.t.cpp
         optional_constexpr.t.cpp
         optional_monadic.t.cpp
@@ -38,12 +38,16 @@ add_library(constructor_fails test_constructor_fail.cpp)
 target_link_libraries(constructor_fails PRIVATE beman_optional26)
 
 set_target_properties(
-  constructor_fails PROPERTIES EXCLUDE_FROM_ALL true EXCLUDE_FROM_DEFAULT_BUILD
-                                                     true)
+    constructor_fails
+    PROPERTIES EXCLUDE_FROM_ALL true EXCLUDE_FROM_DEFAULT_BUILD true
+)
 
-add_test(NAME constructor_fails
-         COMMAND ${CMAKE_COMMAND} --build "${CMAKE_BINARY_DIR}" --target
-                 constructor_fails --config $<CONFIGURATION>)
+add_test(
+    NAME constructor_fails
+    COMMAND
+        ${CMAKE_COMMAND} --build "${CMAKE_BINARY_DIR}" --target
+        constructor_fails --config $<CONFIGURATION>
+)
 
 set_tests_properties(constructor_fails PROPERTIES WILL_FAIL true)
 # Alternatively -- check for a particular regex to pass
