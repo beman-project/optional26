@@ -12,11 +12,16 @@ include(FetchContent)
 
 set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
-# Build the tests only if enabled via the CLI flag: BUILD_TESTING.
-if(BUILD_TESTING)
+option(OPTIONAL26_ENABLE_TESTING
+  "Enable building tests and test infrastructure"
+  ${PROJECT_IS_TOP_LEVEL})
+
+# Build the tests if enabled via the option OPTIONAL26_ENABLE_TESTING
+if(OPTIONAL26_ENABLE_TESTING)
     # Fetch GoogleTest
     FetchContent_Declare(
         googletest
+        EXCLUDE_FROM_ALL
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG
             e39786088138f2749d64e9e90e0f9902daa77c40 # release-1.15.0
@@ -24,39 +29,32 @@ if(BUILD_TESTING)
     FetchContent_MakeAvailable(googletest)
 endif()
 
+# Create the library target and named header set for beman_optional26
+add_library(beman_optional26 STATIC)
+target_sources(beman_optional26
+  PUBLIC
+  FILE_SET beman_optional26_headers TYPE HEADERS
+  BASE_DIRS
+  src
+  include
+)
+
+if(OPTIONAL26_ENABLE_TESTING)
+# Create the library target and named header set for testing beman_optional26
+# and mark the set private
+add_executable(beman_optional26_test)
+target_sources(beman_optional26_test
+  PRIVATE
+  FILE_SET beman_optional26_test_headers TYPE HEADERS
+  BASE_DIRS
+  src
+)
+endif()
+
 add_subdirectory(src/beman/optional26)
+add_subdirectory(include/beman/optional26)
+
 add_subdirectory(examples)
-
-include(GNUInstallDirs)
-
-set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake)
-
-install(
-    EXPORT ${TARGETS_EXPORT_NAME}
-    NAMESPACE ${CMAKE_PROJECT_NAME}
-    DESTINATION ${INSTALL_CONFIGDIR}
-)
-
-include(CMakePackageConfigHelpers)
-
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY AnyNewerVersion
-)
-
-configure_package_config_file(
-    "cmake/Config.cmake.in"
-    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
-)
-
-install(
-    FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-    DESTINATION ${INSTALL_CONFIGDIR}
-)
 
 # Coverage
 configure_file("cmake/gcovr.cfg.in" gcovr.cfg @ONLY)

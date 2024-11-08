@@ -202,7 +202,7 @@ This should build and run the tests with GCC 14 with the address and undefined b
 CI current build and test flows:
 
 ```shell
-# Configure build: default build production code + tests (BUILD_TESTING=ON by default).
+# Configure build: default build production code + tests (OPTIONAL26_ENABLE_TESTING=ON by default).
 $ cmake -G "Ninja Multi-Config" \
       -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" \
       -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake \
@@ -228,14 +228,14 @@ Total Test time (real) =   0.67 sec
 
 ##### Build Production, but Skip Tests
 
-By default, we build and run tests. You can provide `-DBUILD_TESTING=OFF` and completely disable building tests:
+By default, we build and run tests. You can provide `-DOPTIONAL26_ENABLE_TESTING=OFF` and completely disable building tests:
 
 ```shell
-# Configure build: build production code, skip tests (BUILD_TESTING=OFF).
+# Configure build: build production code, skip tests (OPTIONAL26_ENABLE_TESTING=OFF).
 $ cmake -G "Ninja Multi-Config" \
       -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Asan" \
       -DCMAKE_TOOLCHAIN_FILE=etc/clang-19-toolchain.cmake \
-      -DBUILD_TESTING=OFF \
+      -DOPTIONAL26_ENABLE_TESTING=OFF \
       -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...

@@ -30,7 +30,7 @@ foreach(example ${EXAMPLES})
     # Install .
     install(
         TARGETS ${example}
-        EXPORT ${TARGETS_EXPORT_NAME}
+        COMPONENT beman_optional26_examples
         DESTINATION
         ${CMAKE_INSTALL_BINDIR}
     )
