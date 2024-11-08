@@ -12,9 +12,11 @@ include(FetchContent)
 
 set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
 
-option(OPTIONAL26_ENABLE_TESTING
-  "Enable building tests and test infrastructure"
-  ${PROJECT_IS_TOP_LEVEL})
+option(
+    OPTIONAL26_ENABLE_TESTING
+    "Enable building tests and test infrastructure"
+    ${PROJECT_IS_TOP_LEVEL}
+)
 
 # Build the tests if enabled via the option OPTIONAL26_ENABLE_TESTING
 if(OPTIONAL26_ENABLE_TESTING)
@@ -31,24 +33,22 @@ endif()
 
 # Create the library target and named header set for beman_optional26
 add_library(beman_optional26 STATIC)
-target_sources(beman_optional26
-  PUBLIC
-  FILE_SET beman_optional26_headers TYPE HEADERS
-  BASE_DIRS
-  src
-  include
+target_sources(
+    beman_optional26
+    PUBLIC FILE_SET beman_optional26_headers TYPE HEADERS BASE_DIRS src include
 )
 
 if(OPTIONAL26_ENABLE_TESTING)
-# Create the library target and named header set for testing beman_optional26
-# and mark the set private
-add_executable(beman_optional26_test)
-target_sources(beman_optional26_test
-  PRIVATE
-  FILE_SET beman_optional26_test_headers TYPE HEADERS
-  BASE_DIRS
-  src
-)
+    # Create the library target and named header set for testing beman_optional26
+    # and mark the set private
+    add_executable(beman_optional26_test)
+    target_sources(
+        beman_optional26_test
+        PRIVATE
+            FILE_SET beman_optional26_test_headers
+            TYPE HEADERS
+            BASE_DIRS src
+    )
 endif()
 
 add_subdirectory(src/beman/optional26)

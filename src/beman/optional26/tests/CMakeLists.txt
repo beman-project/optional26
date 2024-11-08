@@ -21,13 +21,12 @@ target_sources(
         test_utilities.cpp
 )
 
-
-target_sources(beman_optional26_test
-  PRIVATE
-  FILE_SET beman_optional26_test_headers TYPE HEADERS
-  FILES
-  test_types.hpp
-  test_utilities.hpp
+target_sources(
+    beman_optional26_test
+    PRIVATE
+        FILE_SET beman_optional26_test_headers
+        TYPE HEADERS
+        FILES test_types.hpp test_utilities.hpp
 )
 
 target_link_libraries(
