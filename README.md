@@ -61,7 +61,7 @@ Full runable examples can be found in `examples/` - please check [./examples/REA
 The next code snippet shows optional range support added in [Give *std::optional* Range Support(P3168R2)](https://wg21.link/P3168R2):
 
 ```cpp
-#include <Beman/Optional26/optional.hpp>
+#include <beman/optional26/optional.hpp>
 ...
 
 // Example from P3168R2: basic range loop over C++26 optional.
