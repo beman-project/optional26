@@ -4,7 +4,7 @@
 SPDX-License-Identifier: 2.0 license with LLVM exceptions
 -->
 
-![CI Tests](https://github.com/beman-project/Optional26/actions/workflows/ci.yml/badge.svg)
+![CI Tests](https://github.com/beman-project/optional26/actions/workflows/ci.yml/badge.svg)
 
 This repository implements `std::optional` extensions targeting C++26. The `beman.optional26` library aims to evaluate
 the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21
@@ -88,7 +88,7 @@ The next code snippet shows optional reference support added in [`std::optional<
 (P2988R5)](https://wg21.link/P2988R5):
 
 ```cpp
-#include <Beman/Optional26/optional.hpp>
+#include <beman/optional26/optional.hpp>
 ...
 
 {
@@ -209,7 +209,7 @@ $ cmake -G "Ninja Multi-Config" \
       -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...
--- Build files have been written to: /path/to/Optional26/.build
+-- Build files have been written to: /path/to/optional26/.build
 
 # Build.
 $ cmake --build .build --config Asan --target all -- -k 0
@@ -218,8 +218,8 @@ $ cmake --build .build --config Asan --target all -- -k 0
 
 # Run tests.
 $ ctest --build-config Asan --output-on-failure --test-dir .build
-Internal ctest changing into directory: /path/to/Optional26/.build
-Test project /path/to/Optional26/.build
+Internal ctest changing into directory: /path/to/optional26/.build
+Test project /path/to/optional26/.build
 ...
 100% tests passed, 0 tests failed out of 82
 
@@ -239,7 +239,7 @@ $ cmake -G "Ninja Multi-Config" \
       -B .build -S .
 -- The CXX compiler identification is Clang 19.0.0
 ...
--- Build files have been written to: /path/to/Optional26/.build
+-- Build files have been written to: /path/to/optional26/.build
 
 # Build.
 $ cmake --build .build --config Asan --target all -- -k 0
