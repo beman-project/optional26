@@ -61,6 +61,7 @@ $(_build_path)/CMakeCache.txt: | $(_build_path) .gitmodules
 
 TARGET:=all
 compile: $(_build_path)/CMakeCache.txt ## Compile the project
+	cmake --build $(_build_path)  --config $(CONFIG) --target all_verify_interface_header_sets -- -k 0
 	cmake --build $(_build_path)  --config $(CONFIG) --target all -- -k 0
 
 install: $(_build_path)/CMakeCache.txt compile ## Install the project
