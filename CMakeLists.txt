@@ -37,7 +37,7 @@ set(CMAKE_VERIFY_INTERFACE_HEADER_SETS ON)
 add_library(beman_optional26 INTERFACE)
 target_sources(
     beman_optional26
-    PUBLIC FILE_SET beman_optional26_headers TYPE HEADERS BASE_DIRS src include
+    PUBLIC FILE_SET beman_optional26_headers TYPE HEADERS BASE_DIRS include
 )
 
 if(OPTIONAL26_ENABLE_TESTING)

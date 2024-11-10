@@ -20,3 +20,22 @@ install(
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         COMPONENT beman_optional26_development
 )
+
+install(
+    TARGETS beman_optional26
+    EXPORT beman_optional26_export
+    DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}
+    FILE_SET beman_optional26_headers
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        COMPONENT beman_optional26_development
+)
+
+install(
+    EXPORT beman_optional26_export
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/beman/optional26/
+    NAMESPACE Beman::Optional26::
+    FILE beman_optional26.cmake
+    EXPORT_LINK_INTERFACE_LIBRARIES
+    COMPONENT beman_optional26_development
+)
