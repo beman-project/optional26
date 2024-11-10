@@ -51,9 +51,10 @@ if(OPTIONAL26_ENABLE_TESTING)
             TYPE HEADERS
             BASE_DIRS src
     )
+
+  add_subdirectory(src/beman/optional26/tests)
 endif()
 
-add_subdirectory(src/beman/optional26)
 add_subdirectory(include/beman/optional26)
 
 add_subdirectory(examples)

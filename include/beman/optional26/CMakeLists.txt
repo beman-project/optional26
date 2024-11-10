@@ -13,3 +13,10 @@ target_sources(
             detail/stl_interfaces/fwd.hpp
             detail/stl_interfaces/iterator_interface.hpp
 )
+
+install(
+  TARGETS beman_optional26
+  FILE_SET beman_optional26_headers
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT beman_optional26_development
+)
