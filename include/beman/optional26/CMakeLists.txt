@@ -15,8 +15,8 @@ target_sources(
 )
 
 install(
-  TARGETS beman_optional26
-  FILE_SET beman_optional26_headers
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT beman_optional26_development
+    TARGETS beman_optional26
+    FILE_SET beman_optional26_headers
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        COMPONENT beman_optional26_development
 )

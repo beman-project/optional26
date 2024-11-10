@@ -52,7 +52,7 @@ if(OPTIONAL26_ENABLE_TESTING)
             BASE_DIRS src
     )
 
-  add_subdirectory(src/beman/optional26/tests)
+    add_subdirectory(src/beman/optional26/tests)
 endif()
 
 add_subdirectory(include/beman/optional26)
