@@ -6,7 +6,7 @@
 include(GoogleTest)
 
 # Tests
-add_executable(beman_optional26_test)
+# add_executable(beman_optional26_test)
 
 target_sources(
     beman_optional26_test
@@ -19,6 +19,14 @@ target_sources(
         optional_ref_monadic.t.cpp
         test_types.cpp
         test_utilities.cpp
+)
+
+target_sources(
+    beman_optional26_test
+    PRIVATE
+        FILE_SET beman_optional26_test_headers
+        TYPE HEADERS
+        FILES test_types.hpp test_utilities.hpp
 )
 
 target_link_libraries(
