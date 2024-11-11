@@ -72,6 +72,13 @@
       "displayName": "Clang 17",
       "description": "Build with Clang 17 compilers",
       "toolchainFile": "${sourceDir}/etc/clang-17-toolchain.cmake"
+    },
+    {
+      "name": "clang-16",
+      "inherits": "common",
+      "displayName": "Clang 16",
+      "description": "Build with Clang 16 compilers",
+      "toolchainFile": "${sourceDir}/etc/clang-16-toolchain.cmake"
     }
   ],
   "buildPresets": [
@@ -119,6 +126,11 @@
       "name": "clang-17",
       "inherits": "common",
       "configurePreset": "clang-17"
+    },
+    {
+      "name": "clang-16",
+      "inherits": "common",
+      "configurePreset": "clang-16"
     }
   ],
   "testPresets": [
@@ -173,6 +185,11 @@
       "name": "clang-17",
       "inherits": "common",
       "configurePreset": "clang-17"
+    },
+    {
+      "name": "clang-16",
+      "inherits": "common",
+      "configurePreset": "clang-16"
     }
   ],
   "workflowPresets": [
@@ -309,6 +326,23 @@
         {
           "type": "test",
           "name": "clang-17"
+        }
+      ]
+    },
+    {
+      "name": "clang-16",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang-16"
+        },
+        {
+          "type": "build",
+          "name": "clang-16"
+        },
+        {
+          "type": "test",
+          "name": "clang-16"
         }
       ]
     }
