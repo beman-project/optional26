@@ -59,6 +59,24 @@ add_subdirectory(include/beman/optional26)
 
 add_subdirectory(examples)
 
+
+include(CMakePackageConfigHelpers)
+
+# This will be used to replace @PACKAGE_cmakeModulesDir@
+set(cmakeModulesDir cmake/beman)
+configure_package_config_file(
+  cmake/Config.cmake.in BemanOptional26Config.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/beman/optional26/
+  PATH_VARS cmakeModulesDir
+  NO_SET_AND_CHECK_MACRO
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/BemanOptional26Config.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/beman/optional26/
+  COMPONENT beman_optional26_development
+)
+
 # Coverage
 configure_file("cmake/gcovr.cfg.in" gcovr.cfg @ONLY)
 
