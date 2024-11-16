@@ -2,15 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.27...3.31)
 
 project(beman_optional26 VERSION 0.0.0 LANGUAGES CXX)
 
-# Includes
-include(CTest)
-include(FetchContent)
-
-set(TARGETS_EXPORT_NAME ${CMAKE_PROJECT_NAME}Targets)
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "In-source builds are not allowed!")
+endif()
 
 option(
     OPTIONAL26_ENABLE_TESTING
@@ -18,8 +16,20 @@ option(
     ${PROJECT_IS_TOP_LEVEL}
 )
 
+# Includes
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+set(TARGET_PACKAGE_NAME ${PROJECT_NAME})
+set(TARGETS_EXPORT_NAME ${TARGET_PACKAGE_NAME}-targets)
+set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_PACKAGE_NAME})
+
 # Build the tests if enabled via the option OPTIONAL26_ENABLE_TESTING
 if(OPTIONAL26_ENABLE_TESTING)
+    include(FetchContent)
+
+    enable_testing()
+
     # Fetch GoogleTest
     FetchContent_Declare(
         googletest
@@ -33,9 +43,16 @@ endif()
 
 # Create the library target and named header set for beman_optional26
 add_library(beman_optional26 STATIC)
+add_library(beman_optional26::beman_optional26 ALIAS beman_optional26)
 target_sources(
     beman_optional26
-    PUBLIC FILE_SET beman_optional26_headers TYPE HEADERS BASE_DIRS src include
+    PUBLIC FILE_SET beman_optional26_includes TYPE HEADERS BASE_DIRS src include
+    # FILES ... ?
+)
+
+set_target_properties(
+    beman_optional26
+    PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON
 )
 
 if(OPTIONAL26_ENABLE_TESTING)
@@ -48,6 +65,7 @@ if(OPTIONAL26_ENABLE_TESTING)
             FILE_SET beman_optional26_test_headers
             TYPE HEADERS
             BASE_DIRS src
+        # FILES ... ?
     )
 endif()
 
@@ -66,3 +84,26 @@ add_custom_target(
     COMMAND mkdir -p coverage
     COMMAND gcovr --config gcovr.cfg .
 )
+
+# install
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_PACKAGE_NAME}-version.cmake
+    VERSION ${CMAKE_PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+    cmake/Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_PACKAGE_NAME}.cmake
+    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_PACKAGE_NAME}.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_PACKAGE_NAME}-version.cmake
+    DESTINATION ${INSTALL_CONFIGDIR}
+)
+
+set(CPACK_GENERATOR TGZ)
+include(CPack)

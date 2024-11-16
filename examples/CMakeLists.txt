@@ -3,10 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 # cmake-format: on
 
-set(BEMAN_OPTIONAL26_LIBRARY "beman_optional26")
-
-include(GNUInstallDirs)
-
 # List of all buildable examples.
 set(EXAMPLES
     concept_checks
@@ -25,7 +21,7 @@ foreach(example ${EXAMPLES})
     target_sources(${example} PRIVATE ${example}.cpp)
 
     # Link example with the library.
-    target_link_libraries(${example} "${BEMAN_OPTIONAL26_LIBRARY}")
+    target_link_libraries(${example} beman_optional26::beman_optional26)
 
     # Install .
     install(
