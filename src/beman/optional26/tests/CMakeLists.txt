@@ -29,7 +29,7 @@ target_sources(
 
 target_link_libraries(
     beman_optional26_test
-    PRIVATE beman_optional26 GTest::gtest GTest::gtest_main
+    PRIVATE Beman::Optional26::beman_optional26 GTest::gtest GTest::gtest_main
 )
 
 # Issue #32: Re-enable ASAN run CI/clang-19.
@@ -41,7 +41,10 @@ gtest_add_tests(TARGET beman_optional26_test "" AUTO)
 
 add_library(constructor_fails test_constructor_fail.cpp)
 
-target_link_libraries(constructor_fails PRIVATE beman_optional26)
+target_link_libraries(
+    constructor_fails
+    PRIVATE Beman::Optional26::beman_optional26
+)
 
 set_target_properties(
     constructor_fails
