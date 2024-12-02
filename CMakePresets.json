@@ -39,6 +39,20 @@
       "toolchainFile": "${sourceDir}/etc/gcc-13-toolchain.cmake"
     },
     {
+      "name": "gcc-12",
+      "inherits": "common",
+      "displayName": "GCC 12",
+      "description": "Build with GCC 12 compilers",
+      "toolchainFile": "${sourceDir}/etc/gcc-12-toolchain.cmake"
+    },
+    {
+      "name": "clang-20",
+      "inherits": "common",
+      "displayName": "Clang 20",
+      "description": "Build with Clang 20 compilers",
+      "toolchainFile": "${sourceDir}/etc/clang-20-toolchain.cmake"
+    },
+    {
       "name": "clang-19",
       "inherits": "common",
       "displayName": "Clang 19",
@@ -58,6 +72,13 @@
       "displayName": "Clang 17",
       "description": "Build with Clang 17 compilers",
       "toolchainFile": "${sourceDir}/etc/clang-17-toolchain.cmake"
+    },
+    {
+      "name": "clang-16",
+      "inherits": "common",
+      "displayName": "Clang 16",
+      "description": "Build with Clang 16 compilers",
+      "toolchainFile": "${sourceDir}/etc/clang-16-toolchain.cmake"
     }
   ],
   "buildPresets": [
@@ -98,6 +119,16 @@
       ]
     },
     {
+      "name": "gcc-12",
+      "inherits": "common",
+      "configurePreset": "gcc-12"
+    },
+    {
+      "name": "clang-20",
+      "inherits": "common",
+      "configurePreset": "clang-20"
+    },
+    {
       "name": "clang-19",
       "inherits": "common",
       "configurePreset": "clang-19",
@@ -119,6 +150,15 @@
       "name": "clang-17",
       "inherits": "common",
       "configurePreset": "clang-17",
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
+    },
+    {
+      "name": "clang-16",
+      "inherits": "common",
+      "configurePreset": "clang-16"
       "targets": [
         "all_verify_interface_header_sets",
         "all"
@@ -154,6 +194,16 @@
       "configurePreset": "gcc-13"
     },
     {
+      "name": "gcc-12",
+      "inherits": "common",
+      "configurePreset": "gcc-12"
+    },
+    {
+      "name": "clang-20",
+      "inherits": "common",
+      "configurePreset": "clang-20"
+    },
+    {
       "name": "clang-19",
       "inherits": "common",
       "configurePreset": "clang-19"
@@ -167,6 +217,11 @@
       "name": "clang-17",
       "inherits": "common",
       "configurePreset": "clang-17"
+    },
+    {
+      "name": "clang-16",
+      "inherits": "common",
+      "configurePreset": "clang-16"
     }
   ],
   "workflowPresets": [
@@ -222,6 +277,40 @@
       ]
     },
     {
+      "name": "gcc-12",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "gcc-12"
+        },
+        {
+          "type": "build",
+          "name": "gcc-12"
+        },
+        {
+          "type": "test",
+          "name": "gcc-12"
+        }
+      ]
+    },
+    {
+      "name": "clang-20",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang-20"
+        },
+        {
+          "type": "build",
+          "name": "clang-20"
+        },
+        {
+          "type": "test",
+          "name": "clang-20"
+        }
+      ]
+    },
+    {
       "name": "clang-19",
       "steps": [
         {
@@ -269,6 +358,23 @@
         {
           "type": "test",
           "name": "clang-17"
+        }
+      ]
+    },
+    {
+      "name": "clang-16",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang-16"
+        },
+        {
+          "type": "build",
+          "name": "clang-16"
+        },
+        {
+          "type": "test",
+          "name": "clang-16"
         }
       ]
     }
