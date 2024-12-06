@@ -83,13 +83,27 @@ jobs:
           echo ${{ matrix.config.cmake_args }}
           echo ${{ matrix.config.toolchain }}
           rm -rf .build
-          cmake ${{ matrix.config.cmake_args }} -DCMAKE_TOOLCHAIN_FILE="etc/${{ matrix.config.toolchain }}-toolchain.cmake" -B .build -S .
-      - name: CMake Build
+          cmake ${{ matrix.config.cmake_args }} -DCMAKE_INSTALL_PREFIX=.install -DCMAKE_TOOLCHAIN_FILE="etc/${{ matrix.config.toolchain }}-toolchain.cmake" -B .build -S .
+      - name: CMake ASAN Build
         run: |
           set -x
+          cmake --build .build --config Asan --target all_verify_interface_header_sets -- -k 0
           cmake --build .build --config Asan --target all -- -k 0
-      - name: CMake Test
+      - name: CMake ASAN Test
         run: |
           set -x
           [[ ! -z "${{ matrix.config.asan_options }}" ]]  && export ASAN_OPTIONS="${{ matrix.config.asan_options }}"
           ctest --build-config Asan --output-on-failure --test-dir .build
+      - name: CMake RWDI Build
+        run: |
+          set -x
+          cmake --build .build --config RelWithDebInfo --target all_verify_interface_header_sets -- -k 0
+          cmake --build .build --config RelWithDebInfo --target all -- -k 0
+      - name: CMake RWDI Test
+        run: |
+          set -x
+          ctest --build-config RelWithDebInfo --output-on-failure --test-dir .build
+      - name: Install
+        run: |
+          set -x
+          cmake --install .build --config RelWithDebInfo --component beman_optional26_development --verbose

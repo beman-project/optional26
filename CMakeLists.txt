@@ -31,11 +31,13 @@ if(OPTIONAL26_ENABLE_TESTING)
     FetchContent_MakeAvailable(googletest)
 endif()
 
+set(CMAKE_VERIFY_INTERFACE_HEADER_SETS ON)
+
 # Create the library target and named header set for beman_optional26
-add_library(beman_optional26 STATIC)
+add_library(beman_optional26 INTERFACE)
 target_sources(
     beman_optional26
-    PUBLIC FILE_SET beman_optional26_headers TYPE HEADERS BASE_DIRS src include
+    PUBLIC FILE_SET beman_optional26_headers TYPE HEADERS BASE_DIRS include
 )
 
 if(OPTIONAL26_ENABLE_TESTING)
@@ -49,12 +51,32 @@ if(OPTIONAL26_ENABLE_TESTING)
             TYPE HEADERS
             BASE_DIRS src
     )
+
+    add_subdirectory(src/beman/optional26/tests)
 endif()
 
-add_subdirectory(src/beman/optional26)
 add_subdirectory(include/beman/optional26)
 
 add_subdirectory(examples)
+
+include(CMakePackageConfigHelpers)
+
+# This will be used to replace @PACKAGE_cmakeModulesDir@
+set(cmakeModulesDir cmake/beman)
+configure_package_config_file(
+    cmake/Config.cmake.in
+    BemanOptional26Config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/beman/optional26/
+    PATH_VARS cmakeModulesDir
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/BemanOptional26Config.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/beman/optional26/
+    COMPONENT beman_optional26_development
+)
 
 # Coverage
 configure_file("cmake/gcovr.cfg.in" gcovr.cfg @ONLY)

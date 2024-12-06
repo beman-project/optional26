@@ -85,22 +85,38 @@
     {
       "name": "common",
       "hidden": true,
-      "configuration": "Asan"
+      "configuration": "Asan",
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
     },
     {
       "name": "system",
       "inherits": "common",
-      "configurePreset": "system"
+      "configurePreset": "system",
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
     },
     {
       "name": "gcc-14",
       "inherits": "common",
-      "configurePreset": "gcc-14"
+      "configurePreset": "gcc-14",
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
     },
     {
       "name": "gcc-13",
       "inherits": "common",
-      "configurePreset": "gcc-13"
+      "configurePreset": "gcc-13",
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
     },
     {
       "name": "gcc-12",
@@ -115,22 +131,38 @@
     {
       "name": "clang-19",
       "inherits": "common",
-      "configurePreset": "clang-19"
+      "configurePreset": "clang-19",
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
     },
     {
       "name": "clang-18",
       "inherits": "common",
-      "configurePreset": "clang-18"
+      "configurePreset": "clang-18",
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
     },
     {
       "name": "clang-17",
       "inherits": "common",
-      "configurePreset": "clang-17"
+      "configurePreset": "clang-17",
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
     },
     {
       "name": "clang-16",
       "inherits": "common",
       "configurePreset": "clang-16"
+      "targets": [
+        "all_verify_interface_header_sets",
+        "all"
+      ]
     }
   ],
   "testPresets": [

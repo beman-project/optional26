@@ -17,8 +17,6 @@ target_sources(
         optional_range_support.t.cpp
         optional_ref.t.cpp
         optional_ref_monadic.t.cpp
-        test_types.cpp
-        test_utilities.cpp
 )
 
 target_sources(
