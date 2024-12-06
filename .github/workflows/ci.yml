@@ -83,7 +83,7 @@ jobs:
           echo ${{ matrix.config.cmake_args }}
           echo ${{ matrix.config.toolchain }}
           rm -rf .build
-          cmake ${{ matrix.config.cmake_args }} -DCMAKE_INSTALL_PREFIX=.install -DCMAKE_TOOLCHAIN_FILE="etc/${{ matrix.config.toolchain }}-toolchain.cmake" -B .build -S .
+          cmake ${{ matrix.config.cmake_args }} -DCMAKE_INSTALL_PREFIX=.install -DCMAKE_PREFIX_PATH=.install -DCMAKE_TOOLCHAIN_FILE="etc/${{ matrix.config.toolchain }}-toolchain.cmake" -B .build -S .
       - name: CMake ASAN Build
         run: |
           set -x
@@ -106,4 +106,8 @@ jobs:
       - name: Install
         run: |
           set -x
-          cmake --install .build --config RelWithDebInfo --component beman_optional26_development --verbose
+          cmake --install .build --config RelWithDebInfo --verbose
+      - name: CMake Debug Test
+        run: |
+          set -x
+          cmake --build .build --config Debug --target test -- -k 0
