@@ -18,6 +18,7 @@
           "type": "path",
           "value": "${sourceDir}/.install/${presetName}"
         },
+        "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo;Debug;Tsan;Asan",
         "CMAKE_CXX_EXTENSIONS": false,
         "CMAKE_CXX_STANDARD": "20",
