@@ -64,6 +64,7 @@ jobs:
           [[ ${CLANG_VERSION} = 17 ]] && sudo apt-get install libc++-dev libc++1 libc++abi-dev libc++abi1
           find /usr/lib/x86_64-linux-gnu/ -name libc++.so* || true
           clang++-${CLANG_VERSION} --version
+          type clang++-${CLANG_VERSION}
       - name: Install GCC
         if: startsWith(matrix.config.name, 'Ubuntu GCC')
         run: |
@@ -77,6 +78,7 @@ jobs:
           sudo apt-get install g++-${GCC_VERSION} gcc-${GCC_VERSION}
           find /usr/lib/x86_64-linux-gnu/ -name libstdc++.so*
           g++-${GCC_VERSION} --version
+          type g++-${GCC_VERSION}
       - name: CMake Configure
         run: |
           set -x
@@ -110,4 +112,4 @@ jobs:
       - name: CMake Debug Workflow
         run: |
           set -x
-          cmake --workflow --preset clang-19
+          cmake --workflow --preset ${{ matrix.config.toolchain }}
