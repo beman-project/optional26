@@ -229,7 +229,7 @@ BEMAN_OPTIONAL26_DETAIL_STL_INTERFACES_NAMESPACE_V1 {
         template <typename D = Derived>
         constexpr auto operator->() const
             noexcept(noexcept(detail::make_pointer<pointer, reference>(*std::declval<const D&>())))
-            -> decltype(detail::make_pointer<pointer, reference>(*std::declval<const D&>())) {
+                -> decltype(detail::make_pointer<pointer, reference>(*std::declval<const D&>())) {
             return detail::make_pointer<pointer, reference>(*derived());
         }
 
