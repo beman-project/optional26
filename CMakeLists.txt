@@ -4,9 +4,9 @@
 
 set(CMAKE_SKIP_TEST_ALL_DEPENDENCY FALSE)
 
-cmake_minimum_required(VERSION 3.27...3.31)
+cmake_minimum_required(VERSION 3.29...3.31)
 
-project(beman_optional26 VERSION 0.0.0 LANGUAGES CXX)
+project(beman_optional26 VERSION 0.0.1 LANGUAGES CXX)
 
 # Includes
 include(CPack)
@@ -98,4 +98,5 @@ add_custom_target(
     COMMENT "Running gcovr to process coverage results"
     COMMAND mkdir -p coverage
     COMMAND gcovr --config gcovr.cfg .
+    DEPENDS test
 )

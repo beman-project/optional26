@@ -107,7 +107,7 @@ jobs:
         run: |
           set -x
           cmake --install .build --config RelWithDebInfo --verbose
-      - name: CMake Debug Test
+      - name: CMake Debug Workflow
         run: |
           set -x
-          cmake --build .build --config Debug --target test -- -k 0
+          cmake --workflow --preset clang-19
