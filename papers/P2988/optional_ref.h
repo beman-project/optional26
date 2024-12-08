@@ -132,8 +132,8 @@ class optional<T&> {
     }
 
     template <class F>
-    constexpr auto transform(F&& f) const
-        -> optional<std::invoke_result_t<F, T&>> {
+    constexpr auto
+    transform(F&& f) const -> optional<std::invoke_result_t<F, T&>> {
         using U = std::invoke_result_t<F, T&>;
         return (has_value())
                    ? optional<U>{std::invoke(std::forward<F>(f), *value_)}
