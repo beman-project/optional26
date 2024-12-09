@@ -9,3 +9,5 @@ html-self-contained = yes
 print-summary = yes
 filter = .*/beman/optional26/.*
 exclude = .*\.t\.cpp
+coveralls = coverage.json
+coveralls-pretty = yes

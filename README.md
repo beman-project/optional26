@@ -4,7 +4,7 @@
 SPDX-License-Identifier: 2.0 license with LLVM exceptions
 -->
 
-![CI Tests](https://github.com/bemanproject/optional26/actions/workflows/ci.yml/badge.svg)
+![CI Tests](https://github.com/bemanproject/optional26/actions/workflows/ci.yml/badge.svg) [![Coverage](https://coveralls.io/repos/github/bemanproject/optional26/badge.svg?branch=main)](https://coveralls.io/github/bemanproject/optional26?branch=main)
 
 This repository implements `std::optional` extensions targeting C++26. The `beman.optional26` library aims to evaluate
 the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21
