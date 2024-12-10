@@ -38,3 +38,14 @@ repos:
     rev: v0.10.0.1
     hooks:
       - id: shellcheck
+
+    # Config file: .codespell_ignore
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        args: ['-I', '.codespell_ignore', '--uri-ignore-words-list']
+        exclude: |
+          (?x)^(
+            papers/.*
+          )$
