@@ -19,8 +19,8 @@ jobs:
           - {name: "Ubuntu Clang 18", os: ubuntu-24.04, toolchain: "clang-18", clang_version: 18, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
           - {name: "Ubuntu Clang 17", os: ubuntu-24.04, toolchain: "clang-17", clang_version: 17, installed_clang_version: 17, cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
           - {name: "Ubuntu GCC 14", os: ubuntu-24.04, toolchain: "gcc-14", cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan;Gcov\" ", coverage: true}
-          - {name: "Ubuntu GCC 13", os: ubuntu-24.04, toolchain: "gcc-13",  cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
-          - {name: "Ubuntu GCC 12", os: ubuntu-24.04, toolchain: "gcc-12",  cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu GCC 13", os: ubuntu-24.04, toolchain: "gcc-13", cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
+          - {name: "Ubuntu GCC 12", os: ubuntu-24.04, toolchain: "gcc-12", cmake_args: "-G \"Ninja Multi-Config\" -DCMAKE_CONFIGURATION_TYPES=\"RelWithDebInfo;Asan\" "}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -78,6 +78,7 @@ jobs:
           sudo apt-get install g++-${GCC_VERSION} gcc-${GCC_VERSION}
           find /usr/lib/x86_64-linux-gnu/ -name libstdc++.so*
           g++-${GCC_VERSION} --version
+          type g++-${GCC_VERSION}
       - name: Install Gcovr
         if: matrix.config.coverage
         run: |
@@ -135,7 +136,6 @@ jobs:
         with:
           file: ${{runner.workspace}}/optional26/.build/coverage.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          cmake --install .build --config RelWithDebInfo --verbose
       - name: CMake Debug Workflow
         run: |
           set -x
