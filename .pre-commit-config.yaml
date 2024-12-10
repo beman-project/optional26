@@ -32,3 +32,9 @@ repos:
     hooks:
     - id: markdownlint
       exclude: ^papers/
+
+    # Config file: .shellcheckrc
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
