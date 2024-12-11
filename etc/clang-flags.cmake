@@ -33,12 +33,22 @@ set(CMAKE_CXX_FLAGS_TSAN
     "C++ TSAN Flags"
     FORCE
 )
-set(CMAKE_CXX_FLAGS_ASAN
-    "-O3 -g -DNDEBUG -fsanitize=address,undefined,leak"
-    CACHE STRING
-    "C++ ASAN Flags"
-    FORCE
-)
+if(APPLE)
+    set(CMAKE_CXX_FLAGS_ASAN
+        "-O3 -g -DNDEBUG -fsanitize=address,undefined"
+        CACHE STRING
+        "C++ ASAN Flags"
+        FORCE
+    )
+else()
+    set(CMAKE_CXX_FLAGS_ASAN
+        "-O3 -g -DNDEBUG -fsanitize=address,undefined,leak"
+        CACHE STRING
+        "C++ ASAN Flags"
+        FORCE
+    )
+endif()
+
 set(CMAKE_CXX_FLAGS_GCOV
     "-O0 -fno-inline -g --coverage"
     CACHE STRING
