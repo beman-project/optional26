@@ -145,7 +145,7 @@
     {
       "name": "clang-16",
       "inherits": "common",
-      "configurePreset": "clang-16",
+      "configurePreset": "clang-16"
     }
   ],
   "testPresets": [
