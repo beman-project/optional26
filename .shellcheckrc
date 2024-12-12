@@ -1,4 +1,0 @@
-# shellcheck
-# allow for non-alphanumeric filenames
-disable=SC2038
-external-sources=true
