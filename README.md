@@ -4,35 +4,18 @@
 SPDX-License-Identifier: 2.0 license with LLVM exceptions
 -->
 
-![CI Tests](https://github.com/bemanproject/optional26/actions/workflows/ci.yml/badge.svg) [![Coverage](https://coveralls.io/repos/github/bemanproject/optional26/badge.svg?branch=main)](https://coveralls.io/github/bemanproject/optional26?branch=main)
+<!-- markdownlint-disable -->
+<img src="https://github.com/bemanproject/beman/blob/main/images/logos/beman_logo-beman_library_production_ready_api_may_undergo_changes.png" style="width:5%; height:auto;"> ![CI Tests](https://github.com/bemanproject/optional26/actions/workflows/ci.yml/badge.svg) [![Coverage](https://coveralls.io/repos/github/bemanproject/optional26/badge.svg?branch=main)](https://coveralls.io/github/bemanproject/optional26?branch=main)
+<!-- markdownlint-enable -->
 
 This repository implements `std::optional` extensions targeting C++26. The `beman.optional26` library aims to evaluate
 the stability, the usability, and the performance of these proposed changes before they are officially adopted by WG21
 into the C++ Working Draft. Additionally, it allows developers to use these new features before they are implemented in
 major standard library compilers.
 
-**Implements**:
+**Implements**: [Give *std::optional* Range Support (P3168R2)](https://wg21.link/P3168R2) and [`std::optional<T&>` (P2988R5)](https://wg21.link/P2988R5)
 
-* [Give *std::optional* Range Support (P3168R2)](https://wg21.link/P3168R2)
-* [`std::optional<T&>` (P2988R5)](https://wg21.link/P2988R5)
-
-## Table of Contents
-
-* [beman.optional26: C++26 Extensions for std::optional](#bemanoptional26-c26-extensions-for-stdoptional)
-  * [Table of Contents](#table-of-contents)
-  * [License](#license)
-  * [Examples](#examples)
-    * [range\_loop](#range_loop)
-    * [optional\_ref](#optional_ref)
-  * [How to Build](#how-to-build)
-    * [Compiler Support](#compiler-support)
-    * [Dependencies](#dependencies)
-    * [Instructions](#instructions)
-      * [Preset CMake Flows](#preset-cmake-flows)
-      * [Custom CMake Flows](#custom-cmake-flows)
-        * [Build and Run Tests](#build-and-run-tests)
-        * [Build Production, but Skip Tests](#build-production-but-skip-tests)
-  * [Papers](#papers)
+**Status**: [Production ready. API may undergo changes.](https://github.com/bemanproject/beman/blob/main/docs/BEMAN_LIBRARY_MATURITY_MODEL.md#production-ready-api-may-undergo-changes)
 
 ## License
 
